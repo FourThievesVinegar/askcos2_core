@@ -1,0 +1,28 @@
+services:
+  app:
+    image: askcos2-core:dev
+    hostname: app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "9100:9100"
+    command:
+      - python app.py
+
+  rabbit:
+    image: rabbitmq:3.11-alpine
+    hostname: rabbitmq
+    restart: always
+    expose:
+      - "${RABBITMQ_PORT}"
+
+  redis:
+    image: redis:7.0-alpine
+    hostname: redis
+    env_file:
+      - .env
+    restart: always
+    expose:
+      - "${REDIS_PORT}"
+    command: redis-server --port ${REDIS_PORT}
