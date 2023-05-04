@@ -35,17 +35,16 @@ task_track_started = True
 # Prefetching fewer tasks gives queue more opportunity to reorder by priority
 worker_prefetch_multiplier = 1
 
-# FIXME: temporary hardcode
-model_config = {
-    "atom_map_indigo": {},
-    "atom_map_rxnmapper": {}
-}
-
 # Modules to be imported by each worker
-imports = [f"wrappers.{model_name}" for model_name in model_config]
+imports = ["askcos2_celery.tasks"]
 
 # Task routes (to make sure workers are task-specific)
 # Key is pattern matched against task name to determine queue
-task_routes = {f"wrappers.{model_name}.*": {"queue": "model_name"}
-               for model_name in model_config}
-task_routes["wrappers.base.base_task"] = {"queue": "generic"}
+task_routes = {"askcos2_celery.tasks.base_task": {"queue": "generic"}}
+
+for model_name, to_start in model_config["models_to_start"].items():
+    if to_start:
+        task_routes[f"askcos2_celery.tasks.{model_name}*"] = {"queue": model_name}
+
+print(f"celery_imports: {imports}")
+print(f"celery_task_routes: {task_routes}")
