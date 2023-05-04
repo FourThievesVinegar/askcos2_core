@@ -5,12 +5,11 @@ services:
     restart: always
     env_file:
       - .env
+    command: bash -l -c "python app.py"
     ports:
       - "9100:9100"
-    command:
-      - python app.py
 
-  rabbit:
+  rabbitmq:
     image: rabbitmq:3.11-alpine
     hostname: rabbitmq
     restart: always
@@ -25,4 +24,19 @@ services:
     restart: always
     expose:
       - "${REDIS_PORT}"
+    volumes:
+      - "redisdata:/data"
     command: redis-server --port ${REDIS_PORT}
+
+  generic_worker:
+    image: askcos2-core:dev
+    restart: always
+    env_file:
+      - .env
+    command: bash -l -c "celery -A askcos2_celery worker -c 1 -Q generic -n generic_worker@%h --pool=gevent"
+    depends_on:
+      - rabbitmq
+      - redis
+
+volumes:
+  redisdata:
