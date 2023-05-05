@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI
 from wrappers.registry import get_wrapper_registry
+
 wrapper_registry = get_wrapper_registry()
 
 app = FastAPI()
