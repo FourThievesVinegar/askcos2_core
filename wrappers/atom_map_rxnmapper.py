@@ -25,18 +25,8 @@ class AtomMapRXNMapperOutput(BaseModel):
 )
 class AtomMapRXNMapperWrapper(BaseWrapper):
     """Wrapper class for IBM RXNMapper"""
-    DEFAULT_PREDICTION_URL = "http://atom_map_rxnmapper:9918/"
+    DEFAULT_PREDICTION_URL = "http://atom_map_rxnmapper_service:9918/rxnmapper"
     prefixes = ["atom_map/rxnmapper"]
-    methods_to_bind = {
-        "get_config": ["GET"],
-        "get_doc": ["GET"],
-        "call_sync": ["POST"],
-        "call_async": ["POST"],
-        "retrieve": ["GET"]
-    }
-
-    def __init__(self, config: dict):
-        super().__init__(config)
 
     def call_sync(self, input: AtomMapRXNMapperInput) -> AtomMapRXNMapperOutput:
         return super().call_sync(input=input)

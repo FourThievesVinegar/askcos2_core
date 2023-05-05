@@ -8,7 +8,9 @@ class AtomMapIndigoInput(BaseModel):
 
 
 class AtomMapIndigoOutput(BaseModel):
-    mapped_smiles: list[str]
+    error: str
+    status: str
+    results: list[str]
 
 
 @register_wrapper(
@@ -18,18 +20,8 @@ class AtomMapIndigoOutput(BaseModel):
 )
 class AtomMapIndigoWrapper(BaseWrapper):
     """Wrapper class for Indigo Atom Mapper"""
-    DEFAULT_PREDICTION_URL = "http://atom_map_indigo:9919/"
+    DEFAULT_PREDICTION_URL = "http://atom_map_indigo_service:9919/indigo_mapper"
     prefixes = ["atom_map/indigo"]
-    methods_to_bind = {
-        "get_config": ["GET"],
-        "get_doc": ["GET"],
-        "call_sync": ["POST"],
-        "call_async": ["POST"],
-        "retrieve": ["GET"]
-    }
-
-    def __init__(self, config: dict):
-        super().__init__(config)
 
     def call_sync(self, input: AtomMapIndigoInput) -> AtomMapIndigoOutput:
         return super().call_sync(input=input)
