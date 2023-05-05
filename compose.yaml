@@ -3,9 +3,8 @@ services:
     image: askcos2-core:dev
     hostname: app
     restart: always
-    env_file:
-      - .env
-    command: bash -l -c "python app.py"
+    env_file: .env
+    command: python app.py
     ports:
       - "9100:9100"
 
@@ -19,8 +18,7 @@ services:
   redis:
     image: redis:7.0-alpine
     hostname: redis
-    env_file:
-      - .env
+    env_file: .env
     restart: always
     expose:
       - "${REDIS_PORT}"
@@ -28,15 +26,32 @@ services:
       - "redisdata:/data"
     command: redis-server --port ${REDIS_PORT}
 
-  generic_worker:
+  generic_celery_worker:
     image: askcos2-core:dev
     restart: always
-    env_file:
-      - .env
-    command: bash -l -c "celery -A askcos2_celery worker -c 1 -Q generic -n generic_worker@%h --pool=gevent"
+    env_file: .env
+    command: sh scripts/start_celery_worker.sh 100 generic generic_worker
     depends_on:
       - rabbitmq
       - redis
+
+  custom_celery_worker:
+    image: askcos2-core:dev
+    restart: always
+    env_file: .env
+    command: sh scripts/start_celery_worker.sh ${CELERY_CONCURRENCY} ${CELERY_QUEUE} ${CELERY_WORKER}
+    depends_on:
+      - rabbitmq
+      - redis
+
+  backend_service:
+    image: ${BACKEND_IMAGE}
+    hostname: ${BACKEND_HOSTNAME}
+    restart: always
+    env_file: .env
+    expose:
+      - "${BACKEND_PORT}"
+    command: ${BACKEND_START_COMMAND}
 
 volumes:
   redisdata:

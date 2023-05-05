@@ -5,11 +5,34 @@ model_config = {
     },
 
     "atom_map_indigo": {
-        "timeout": 3
+        "custom_prediction_url": "http://molgpu01.mit.edu:9918/rxnmapper",
+        "timeout": 3,
+        "model": {},
+        "deployment": {
+            "remote_image": "",
+            "ports_to_expose": [],
+            "start_command": ""
+        },
+        "celery": {
+            "n_workers": 0,
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
     },
 
     "atom_map_rxnmapper": {
         "custom_prediction_url": "http://molgpu01.mit.edu:9918/rxnmapper",
-        "timeout": 3
+        "timeout": 3,
+        "model": {},
+        "deployment": {
+            "remote_image": "",
+            "ports_to_expose": [],
+            "start_command": ""
+        },
+        "celery": {
+            "n_workers": 0,
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
     }
 }
