@@ -11,7 +11,7 @@ possible.
 
 ## Contributing a new module
 
-The core requirement is a `deploy.yaml` file in your repo which specifies at least two commands, one for building the Docker image (GPU and/or CPU) and the other for starting the prediction service in Docker. This file will be read during the deployment process to start your prediction service, and also used as a reference by the ASKCOS team for adding needed infrastructural support for your module.
+[//]: # (The core requirement is a `deploy.yaml` file in your repo which specifies at least two commands, one for building the Docker image &#40;GPU and/or CPU&#41; and the other for starting the prediction service in Docker. This file will be read during the deployment process to start your prediction service, and also used as a reference by the ASKCOS team for adding needed infrastructural support for your module.)
 
 ### Step 1: wrap your prediction code as a microservice
 
