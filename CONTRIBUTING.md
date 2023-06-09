@@ -51,12 +51,12 @@ after which the containerized microservice should be runnable with a single comm
 ```
 docker run --rm -p 9601:9601 -t ${ASKCOS_REGISTRY}/your_module:1.0-cpu
 ```
-Or in the case of lengthier command, organize it into a start script similar to the `scripts/serve_cpu_in_docker.sh` for <a href="https://gitlab.com/mlpds_mit/askcosv2/forward_predictor/augmented_transformer/-/blob/main/scripts/serve_cpu_in_docker.sh">augmented_transformer</a>, which can then be run by
+Or in the case of lengthier command, organize it into a start script similar to <a href="https://gitlab.com/mlpds_mit/askcosv2/forward_predictor/augmented_transformer/-/blob/main/scripts/serve_cpu_in_docker.sh">`scripts/serve_cpu_in_docker.sh`</a> for augmented_transformer, which can then be run by
 ```
 sh scripts/serve_cpu_in_docker.sh
 ```
 
-### Step 3: prepare `deploy.yaml`
+### Step 3 (optional): prepare `deployment.yaml`
 <span style="color:red">TODO</span>
 
 
@@ -64,7 +64,7 @@ sh scripts/serve_cpu_in_docker.sh
 Once Steps 1-3 have been completed, contact the ASKCOS team (mlpds_support@mit.edu) to initiate the integration of your service into ASKCOSv2. What follows would mostly be bookkeeping, such as adding wrapper that calls your service at the API gateway (in `askcos2_core`). Since we may be shifting data (to our cloud storage), reassigning ports, and adding additional supports (e.g., singularity and async task management), we would prefer to handle these hassles for you.
 
 ## Contributing a new model for an existing module, or contributing new data (e.g., reactions, buyables).
-Contact the ASKCOS team directly (mlpds_support@mit.edu).
+Please contact the ASKCOS team directly (mlpds_support@mit.edu).
 
 ## Issues
 
