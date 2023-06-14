@@ -1,6 +1,6 @@
 services:
   app:
-    image: askcos2-core:dev
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     hostname: app
     restart: always
     env_file: .env
@@ -27,31 +27,22 @@ services:
     command: redis-server --port ${REDIS_PORT}
 
   generic_celery_worker:
-    image: askcos2-core:dev
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
     env_file: .env
-    command: sh scripts/start_celery_worker.sh 100 generic generic_worker
+    command: bash scripts/start_celery_worker.sh 100 generic generic_worker
     depends_on:
       - rabbitmq
       - redis
 
   custom_celery_worker:
-    image: askcos2-core:dev
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
     env_file: .env
     command: sh scripts/start_celery_worker.sh ${CELERY_CONCURRENCY} ${CELERY_QUEUE} ${CELERY_WORKER}
     depends_on:
       - rabbitmq
       - redis
-
-  backend_service:
-    image: ${BACKEND_IMAGE}
-    hostname: ${BACKEND_HOSTNAME}
-    restart: always
-    env_file: .env
-    expose:
-      - "${BACKEND_PORT}"
-    command: ${BACKEND_START_COMMAND}
 
 volumes:
   redisdata:

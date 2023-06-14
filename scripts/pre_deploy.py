@@ -4,8 +4,11 @@ import inspect
 import os
 import shutil
 import subprocess
+import sys
 import yaml
 from datetime import datetime
+
+sys.path.append("")         # critical for importlib to work
 
 
 def get_parser():
@@ -40,7 +43,7 @@ def run_and_printchar(args, cwd="."):
                 speed = splited[7]
                 remaining = splited[8]
                 print(f"Downloaded {percentage} with {speed} per second "
-                      f"and {remaining} left.")
+                      f"and {remaining} left.", flush=True, end="\r")
         elif line == os.linesep:
             started = True
 
@@ -50,19 +53,6 @@ def main():
         "Please ensure the askcos2_core is under the directory ASKCOSv2."
 
     args, _ = get_parser().parse_known_args()
-    cwd = os.getcwd()
-
-    # set up the deployment directory
-    os.makedirs("./deployment", exist_ok=True)
-    dt = datetime.strftime(datetime.now(), "%y%m%d-%H%Mh")
-    deployment_dir = f"./deployment/deployment_{dt}"
-
-    os.makedirs(deployment_dir, exist_ok=True)
-    if os.path.exists("./deployment/deployment_latest"):
-        os.remove("./deployment/deployment_latest")
-    os.symlink(deployment_dir, "./deployment/deployment_latest")
-
-    # import module config and save a copy in the deployment
     if args.config.endswith(".py"):
         m = args.config[:-3]
         m = m.replace("/", ".")
@@ -70,6 +60,18 @@ def main():
         module_config = getattr(m, "module_config")
     else:
         raise ValueError(f"Only .py configs are supported!")
+    # module_config = validate(module_config) # TODO
+
+    # set up the deployment directory
+    cwd = os.getcwd()
+    os.makedirs("./deployment", exist_ok=True)
+    dt = datetime.strftime(datetime.now(), "%y%m%d-%H%Mh")
+    deployment_dir = f"./deployment/deployment_{dt}"
+
+    os.makedirs(deployment_dir, exist_ok=True)
+    if os.path.exists("./deployment/deployment_latest"):
+        os.remove("./deployment/deployment_latest")
+    os.symlink(os.path.basename(deployment_dir), "./deployment/deployment_latest")
     shutil.copy2(args.config, deployment_dir)
 
     cmds_get_images = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
@@ -84,6 +86,7 @@ def main():
         output_dir = repo.split("askcosv2/")[-1][:-4]
         output_dir = f"../{output_dir}"
 
+        is_newly_cloned = False
         if os.path.exists(output_dir):
             print(f"{output_dir} already exists, skipping cloning.")
         else:
@@ -91,6 +94,7 @@ def main():
             print(f"Cloning {repo} into {output_dir}")
             command = ["git", "clone", repo, output_dir]
             run_and_printchar(command)
+            is_newly_cloned = True
 
         # load deployment config per repo, if specified
         # FIXME: this assumes "deployment.yaml" does exist, which should be the case
@@ -104,13 +108,14 @@ def main():
             deployment_config = yaml.safe_load(f)
 
         # download module data, if any
-        try:
-            download_command = deployment_config["commands"]["download"]
-        except KeyError:
-            print(f"No download command found for {module}, skipping")
-        else:
-            print(f"Download command found, downloading data for {module}")
-            run_and_printchar(download_command.split(), cwd=output_dir)
+        if is_newly_cloned:
+            try:
+                download_command = deployment_config["commands"]["download"]
+            except KeyError:
+                print(f"No download command found for {module}, skipping")
+            else:
+                print(f"Download command found, downloading data for {module}")
+                run_and_printchar(download_command.split(), cwd=output_dir)
 
         # prepare commands for getting the images
         runtime = module_config["global"]["container_runtime"]
@@ -123,7 +128,9 @@ def main():
         if module_config["global"]["image_policy"] == "build_all":
             cmd = str(deployment_config[runtime][device]["build"])
             cmds = [
-                f"cd ../{output_dir}\n",
+                f"echo building image for module: {module}, "
+                f"runtime: {runtime}, device: {device}\n",
+                f"cd {output_dir}\n",
                 f"{cmd}\n",
                 f"cd {cwd}\n",
                 "\n"
@@ -135,7 +142,9 @@ def main():
         # prepare commands for starting and stopping services
         cmd = str(deployment_config[runtime][device]["start"])
         cmds = [
-            f"cd ../{output_dir}\n",
+            f"echo starting service for module: {module}, "
+            f"runtime: {runtime}, device: {device}\n",
+            f"cd {output_dir}\n",
             f"{cmd}\n",
             f"cd {cwd}\n",
             "\n"
@@ -144,25 +153,26 @@ def main():
 
         cmd = str(deployment_config["commands"][f"stop-{runtime}"])
         cmds = [
-            f"cd ../{output_dir}\n",
+            f"echo stopping service for module: {module}, runtime: {runtime}\n",
+            f"cd {output_dir}\n",
             f"{cmd}\n",
             f"cd {cwd}\n",
             "\n"
         ]
         cmds_stop_services.extend(cmds)
 
-    # write all commands to the deployment directory
+    print(f"Writing deployment commands into {deployment_dir}")
     ofn = os.path.join(deployment_dir, "get_images.sh")
     with open(ofn, "w") as of:
         of.writelines(cmds_get_images)
 
     ofn = os.path.join(deployment_dir, "start_services.sh")
     with open(ofn, "w") as of:
-        of.writelines(cmds_get_images)
+        of.writelines(cmds_start_services)
 
     ofn = os.path.join(deployment_dir, "stop_services.sh")
     with open(ofn, "w") as of:
-        of.writelines(cmds_get_images)
+        of.writelines(cmds_stop_services)
 
 
 if __name__ == "__main__":
