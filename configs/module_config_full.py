@@ -3,11 +3,11 @@ module_config = {
         "atom_map_indigo": False,
         "atom_map_rxnmapper": False,
         "forward_augmented_transformer": True,
-        "general_selectivity": True
+        "general_selectivity": False
     },
 
     "global": {
-        "runtime": "docker",
+        "container_runtime": "docker",
         "image_policy": "build_all",
         "enable_gpu": True
     },
@@ -49,7 +49,12 @@ module_config = {
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
-            "ports_to_expose": [9510]
+            "ports_to_expose": [9510, 9511, 9512],
+            "default_prediction_url": "http://0.0.0.0:9510/predictions",
+            "custom_prediction_url": "",
+            "available_models": [
+                "USPTO_480k_mix"
+            ]
         },
         "celery": {
             "queue_name": "generic",
