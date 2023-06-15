@@ -52,6 +52,7 @@ module_config = {
             "ports_to_expose": [9510, 9511, 9512],
             "default_prediction_url": "http://0.0.0.0:9510/predictions",
             "custom_prediction_url": "",
+            "timeout": 3,
             "available_models": [
                 "USPTO_480k_mix"
             ]

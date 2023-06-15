@@ -1,8 +1,8 @@
 docker:
   cpu:
-    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0-cpu
-    build: docker build -f Dockerfile -t ${ASKCOS_REGISTRY}/askcos2_core:2.0-cpu .
-    start: docker compose -d up app generic_celery_worker
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    build: docker build -f Dockerfile -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 .
+    start: docker compose -f compose.yaml up -d app generic_celery_worker
 
 singularity:
   cpu:
@@ -11,5 +11,5 @@ singularity:
     start: sh scripts/start_app_in_singularity.sh
 
 commands:
-  stop-docker: docker compose down
+  stop-docker: docker compose -f compose.yaml down
   stop-singularity: singularity instance stop askcos2_core

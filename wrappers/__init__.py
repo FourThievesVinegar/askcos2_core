@@ -1,3 +1,4 @@
+import glob
 import importlib
 import os
 from pydantic import BaseModel
@@ -21,9 +22,9 @@ def register_wrapper(
             (...)
 
     Args:
-        name (str): the name of the model
-        input_class (class of type[BaseModel]): the input class of the model
-        output_class (class of type[BaseModel]): the output class of the model
+        name (str): the name of the module
+        input_class (class of type[BaseModel]): the input class of the module
+        output_class (class of type[BaseModel]): the output class of the module
     """
 
     def register_wrapper_cls(cls):
@@ -40,16 +41,21 @@ def register_wrapper(
 
 
 def import_wrappers():
-    wrappers_dir = os.path.dirname(__file__)
-    for file in os.listdir(wrappers_dir):
+    fl = glob.glob(os.path.join("wrappers", "*.py"))
+    fl.extend(glob.glob(os.path.join("wrappers", "*", "*.py")))
+    fl.extend(glob.glob(os.path.join("wrappers", "*", "*", "*.py")))
+
+    for file in fl:
+        basename = os.path.basename(file)
         if (
-            not file.startswith("_")
-            and not file.startswith(".")
-            and file not in ["base.py", "registry.py"]
-            and (file.endswith(".py"))
+            not basename.startswith("_")
+            and not basename.startswith(".")
+            and (basename.endswith(".py"))
+            and basename not in ["base.py", "registry.py", "controller.py"]
         ):
             wrapper_name = file[:file.find(".py")]
-            importlib.import_module(f"wrappers.{wrapper_name}")
+            wrapper_name = wrapper_name.replace("/", ".")
+            importlib.import_module(wrapper_name)
 
 
 # Automatically import any Python files in the wrappers/ directory,

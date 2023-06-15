@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class BaseWrapper:
-    DEFAULT_PREDICTION_URL: str = None
     input_class: type[BaseModel]
     output_class: type[BaseModel]
 
@@ -20,11 +19,11 @@ class BaseWrapper:
 
     def __init__(self, config: dict):
         self.config = config
-        self.prediction_url = config.get(
-            "custom_prediction_url",
-            self.DEFAULT_PREDICTION_URL
-        )
-        self.config["prediction_url"] = self.prediction_url
+        self.prediction_url = config["deployment"].get("custom_prediction_url", "")
+        if not self.prediction_url:
+            self.prediction_url = config["deployment"]["default_prediction_url"]
+
+        self.config["prediction_url_in_use"] = self.prediction_url
         self.session_sync = requests.Session()
 
     def get_config(self) -> dict:
@@ -37,7 +36,7 @@ class BaseWrapper:
         response = self.session_sync.post(
             self.prediction_url,
             json=input.dict(),
-            timeout=self.config["timeout"]
+            timeout=self.config["deployment"]["timeout"]
         )
         output = response.json()
         output = self.output_class(**output)

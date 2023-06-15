@@ -1,4 +1,4 @@
-from configs.model_config_full import model_config
+from configs.module_config_full import module_config
 
 # Default serializers
 task_serializer = "json"
@@ -42,9 +42,9 @@ imports = ["askcos2_celery.tasks"]
 # Key is pattern matched against task name to determine queue
 task_routes = {"askcos2_celery.tasks.base_task": {"queue": "generic"}}
 
-for model_name, to_start in model_config["models_to_start"].items():
+for module, to_start in module_config["models_to_start"].items():
     if to_start:
-        task_routes[f"askcos2_celery.tasks.{model_name}*"] = {"queue": model_name}
+        task_routes[f"askcos2_celery.tasks.{module}*"] = {"queue": module}
 
 print(f"celery_imports: {imports}")
 print(f"celery_task_routes: {task_routes}")

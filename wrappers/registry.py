@@ -17,7 +17,7 @@ def get_wrapper_registry():
     """Get global wrapper registry."""
     global _wrapper_registry
     if _wrapper_registry is None:
-        default_path = "configs.model_config_full"
+        default_path = "configs.module_config_full"
         config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
         _wrapper_registry = WrapperRegistry(config_path=config_path)
         print(f"Loaded model configuration file from {config_path}")
@@ -27,22 +27,21 @@ def get_wrapper_registry():
 
 class WrapperRegistry:
     def __init__(self, config_path: str):
-        config_module = importlib.import_module(config_path)
-        model_config = config_module.model_config
-        self.model_config = model_config
+        module_config = importlib.import_module(config_path).module_config
+        self.module_config = module_config
 
         self._wrappers = {}
-        for model_name, to_start in model_config["models_to_start"].items():
+        for module, to_start in module_config["modules_to_start"].items():
             if to_start:
-                wrapper_class = WRAPPER_CLASSES[model_name]
-                wrapper_config = model_config[model_name]
-                self._wrappers[model_name] = wrapper_class(wrapper_config)
+                wrapper_class = WRAPPER_CLASSES[module]
+                wrapper_config = module_config[module]
+                self._wrappers[module] = wrapper_class(wrapper_config)
 
     def get_backend_status(self) -> dict[str, BackendStatus]:
         status = {}
-        for model_name, to_start in self.model_config["models_to_start"].items():
+        for module, to_start in self.module_config["models_to_start"].items():
             backend_status = {"to_start": to_start}
-            wrapper = self.get_wrapper(model_name=model_name)
+            wrapper = self.get_wrapper(module=module)
             if wrapper is None:
                 backend_status["started"] = False
                 backend_status["backend_url"] = None
@@ -52,12 +51,12 @@ class WrapperRegistry:
             else:
                 backend_status["started"] = True
                 backend_status["backend_url"] = wrapper.prediction_url
-            status[model_name] = BackendStatus(**backend_status)
+            status[module] = BackendStatus(**backend_status)
 
         return status
 
-    def get_wrapper(self, model_name: str):
-        return self._wrappers.get(model_name, None)
+    def get_wrapper(self, module: str):
+        return self._wrappers.get(module, None)
 
     def __iter__(self):
         return iter(self._wrappers.values())
