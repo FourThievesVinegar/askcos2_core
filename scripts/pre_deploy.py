@@ -74,6 +74,10 @@ def main():
     os.symlink(os.path.basename(deployment_dir), "./deployment/deployment_latest")
     shutil.copy2(args.config, deployment_dir)
 
+    runtime = module_config["global"]["container_runtime"]
+    enable_gpu = module_config["global"]["enable_gpu"]
+    image_policy = module_config["global"]["image_policy"]
+
     cmds_get_images = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
     cmds_start_services = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
     cmds_stop_services = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
@@ -118,14 +122,12 @@ def main():
                 run_and_printchar(download_command.split(), cwd=output_dir)
 
         # prepare commands for getting the images
-        runtime = module_config["global"]["container_runtime"]
-        if module_config["global"]["enable_gpu"] and \
-                module_config[module]["deployment"].get("use_gpu"):
+        if enable_gpu and module_config[module]["deployment"].get("use_gpu"):
             device = "gpu"
         else:
             device = "cpu"
 
-        if module_config["global"]["image_policy"] == "build_all":
+        if image_policy == "build_all":
             cmd = str(deployment_config[runtime][device]["build"])
             cmds = [
                 f"echo building image for module: {module}, "
@@ -149,6 +151,15 @@ def main():
             f"cd {cwd}\n",
             "\n"
         ]
+        if runtime == "docker":     # TODO: custom celery worker
+            try:
+                celery_queue = module_config[module]["celery"]["queue_name"]
+            except KeyError:
+                pass
+            else:
+                if not celery_queue == "generic":
+                    raise NotImplementedError
+
         cmds_start_services.extend(cmds)
 
         cmd = str(deployment_config["commands"][f"stop-{runtime}"])
@@ -160,6 +171,39 @@ def main():
             "\n"
         ]
         cmds_stop_services.extend(cmds)
+
+    # extend with commands for app and celery
+    with open("deployment.yaml", "r") as f:
+        core_deployment_config = yaml.safe_load(f)
+
+    if image_policy == "build_all":
+        cmd = str(core_deployment_config[runtime]["cpu"]["build"])
+        cmds = [
+            f"echo building image for askcos2_core, runtime: {runtime}\n",
+            f"{cmd}\n",
+            "\n"
+        ]
+        cmds_get_images.extend(cmds)
+    else:
+        raise NotImplementedError
+
+    cmd = str(core_deployment_config[runtime]["cpu"]["start"])
+    cmds = [
+        f"echo starting askcos2_core app and generic_celery_worker, "
+        f"runtime: {runtime}\n",
+        f"{cmd}\n",
+        "\n"
+    ]
+    cmds_start_services.extend(cmds)
+
+    cmd = str(core_deployment_config["commands"][f"stop-{runtime}"])
+    cmds = [
+        f"echo stopping askcos2_core app and any celery workers, "
+        f"runtime: {runtime}\n",
+        f"{cmd}\n",
+        "\n"
+    ]
+    cmds_stop_services.extend(cmds)
 
     print(f"Writing deployment commands into {deployment_dir}")
     ofn = os.path.join(deployment_dir, "get_images.sh")
