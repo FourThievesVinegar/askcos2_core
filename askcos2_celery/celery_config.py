@@ -42,7 +42,7 @@ imports = ["askcos2_celery.tasks"]
 # Key is pattern matched against task name to determine queue
 task_routes = {"askcos2_celery.tasks.base_task": {"queue": "generic"}}
 
-for module, to_start in module_config["models_to_start"].items():
+for module, to_start in module_config["modules_to_start"].items():
     if to_start:
         task_routes[f"askcos2_celery.tasks.{module}*"] = {"queue": module}
 

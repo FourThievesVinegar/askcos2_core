@@ -36,7 +36,7 @@ class ForwardATWrapper(BaseWrapper):
             timeout=self.config["deployment"]["timeout"]
         )
         output = response.json()
-        output = ForwardATOutput(**output)
+        output = ForwardATOutput(__root__=output)
 
         return output
 

@@ -5,23 +5,22 @@ services:
     restart: always
     env_file: .env
     command: python app.py
-    ports:
-      - "9100:9100"
+    network_mode: host
 
   rabbitmq:
     image: rabbitmq:3.11-alpine
     hostname: rabbitmq
     restart: always
-    expose:
-      - "${RABBITMQ_PORT}"
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
 
   redis:
     image: redis:7.0-alpine
     hostname: redis
     env_file: .env
     restart: always
-    expose:
-      - "${REDIS_PORT}"
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
       - "redisdata:/data"
     command: redis-server --port ${REDIS_PORT}
@@ -30,6 +29,7 @@ services:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
     env_file: .env
+    network_mode: host
     command: bash scripts/start_celery_worker.sh 100 generic generic_worker
     depends_on:
       - rabbitmq

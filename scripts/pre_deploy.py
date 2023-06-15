@@ -81,6 +81,16 @@ def main():
     cmds_get_images = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
     cmds_start_services = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
     cmds_stop_services = ["#!/bin/bash\n", "\n", "source .env\n", "\n"]
+
+    if runtime == "docker":
+        cmds = [
+            "echo Starting db services\n",
+            "docker compose -f compose.yaml up -d rabbitmq redis\n",
+            "sleep 5\n"
+            "\n"
+        ]
+        cmds_start_services.extend(cmds)
+
     for module, to_start in module_config["modules_to_start"].items():
         if not to_start:
             continue
@@ -105,7 +115,7 @@ def main():
         try:
             config_file = module_config[module]["deployment"]["deployment_config"]
         except KeyError:
-            raise ValueError(f"deployment_config not specified for {module}")
+            raise ValueError(f"Deployment_config not specified for {module}")
 
         config_file = os.path.join(output_dir, config_file)
         with open(config_file, "r") as f:
@@ -130,7 +140,7 @@ def main():
         if image_policy == "build_all":
             cmd = str(deployment_config[runtime][device]["build"])
             cmds = [
-                f"echo building image for module: {module}, "
+                f"echo Building image for module: {module}, "
                 f"runtime: {runtime}, device: {device}\n",
                 f"cd {output_dir}\n",
                 f"{cmd}\n",
@@ -144,7 +154,7 @@ def main():
         # prepare commands for starting and stopping services
         cmd = str(deployment_config[runtime][device]["start"])
         cmds = [
-            f"echo starting service for module: {module}, "
+            f"echo Starting service for module: {module}, "
             f"runtime: {runtime}, device: {device}\n",
             f"cd {output_dir}\n",
             f"{cmd}\n",
@@ -164,7 +174,7 @@ def main():
 
         cmd = str(deployment_config["commands"][f"stop-{runtime}"])
         cmds = [
-            f"echo stopping service for module: {module}, runtime: {runtime}\n",
+            f"echo Stopping service for module: {module}, runtime: {runtime}\n",
             f"cd {output_dir}\n",
             f"{cmd}\n",
             f"cd {cwd}\n",
@@ -179,7 +189,7 @@ def main():
     if image_policy == "build_all":
         cmd = str(core_deployment_config[runtime]["cpu"]["build"])
         cmds = [
-            f"echo building image for askcos2_core, runtime: {runtime}\n",
+            f"echo Building image for askcos2_core, runtime: {runtime}\n",
             f"{cmd}\n",
             "\n"
         ]
@@ -189,7 +199,7 @@ def main():
 
     cmd = str(core_deployment_config[runtime]["cpu"]["start"])
     cmds = [
-        f"echo starting askcos2_core app and generic_celery_worker, "
+        f"echo Starting services for db, askcos2_core app and generic_celery_worker, "
         f"runtime: {runtime}\n",
         f"{cmd}\n",
         "\n"
@@ -198,7 +208,7 @@ def main():
 
     cmd = str(core_deployment_config["commands"][f"stop-{runtime}"])
     cmds = [
-        f"echo stopping askcos2_core app and any celery workers, "
+        f"echo Stopping services for db, askcos2_core app and any celery workers, "
         f"runtime: {runtime}\n",
         f"{cmd}\n",
         "\n"
