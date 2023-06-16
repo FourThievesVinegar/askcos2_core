@@ -17,7 +17,7 @@ class SiteSelectivityResult(BaseModel):
 class SiteSelectivityOutput(BaseModel):
     error: str
     status: str
-    results: list[SiteSelectivityResult]
+    results: list[list[SiteSelectivityResult]]
 
 
 @register_wrapper(
