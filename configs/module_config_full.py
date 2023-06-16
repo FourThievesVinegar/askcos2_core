@@ -4,7 +4,8 @@ module_config = {
         "atom_map_rxnmapper": False,
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
-        "general_selectivity": False
+        "general_selectivity": False,
+        "site_selectivity": True
     },
 
     "global": {
@@ -94,5 +95,24 @@ module_config = {
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
-    }
+    },
+
+    "site_selectivity": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/site_selectivity.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9601],
+            "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
 }
