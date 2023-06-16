@@ -2,6 +2,7 @@ module_config = {
     "modules_to_start": {
         "atom_map_indigo": False,
         "atom_map_rxnmapper": False,
+        "fast_filter": True,
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
         "general_selectivity": False,
@@ -41,6 +42,26 @@ module_config = {
         },
         "celery": {
             "n_workers": 0,
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "fast_filter": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/fast_filter.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9611],
+            "default_prediction_url": "http://0.0.0.0:9611",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "default",
+                "with_threshold"
+            ]
+        },
+        "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
@@ -114,5 +135,5 @@ module_config = {
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
-    },
+    }
 }
