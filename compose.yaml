@@ -1,0 +1,48 @@
+services:
+  app:
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    hostname: app
+    restart: always
+    env_file: .env
+    command: python app.py
+    network_mode: host
+
+  rabbitmq:
+    image: rabbitmq:3.11-alpine
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+
+  redis:
+    image: redis:7.0-alpine
+    hostname: redis
+    env_file: .env
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - "redisdata:/data"
+    command: redis-server --port ${REDIS_PORT}
+
+  generic_celery_worker:
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    restart: always
+    env_file: .env
+    network_mode: host
+    command: bash scripts/start_celery_worker.sh 100 generic generic_worker
+    depends_on:
+      - rabbitmq
+      - redis
+
+  custom_celery_worker:
+    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    restart: always
+    env_file: .env
+    command: sh scripts/start_celery_worker.sh ${CELERY_CONCURRENCY} ${CELERY_QUEUE} ${CELERY_WORKER}
+    depends_on:
+      - rabbitmq
+      - redis
+
+volumes:
+  redisdata:
