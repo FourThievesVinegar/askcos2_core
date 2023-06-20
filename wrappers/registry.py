@@ -1,0 +1,62 @@
+import importlib
+import os
+import requests
+from pydantic import BaseModel
+from wrappers import WRAPPER_CLASSES
+
+_wrapper_registry = None
+
+
+class BackendStatus(BaseModel):
+    to_start: bool
+    started: bool
+    backend_url: str | None
+
+
+def get_wrapper_registry():
+    """Get global wrapper registry."""
+    global _wrapper_registry
+    if _wrapper_registry is None:
+        default_path = "configs.module_config_full"
+        config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
+        _wrapper_registry = WrapperRegistry(config_path=config_path)
+        print(f"Loaded model configuration file from {config_path}")
+
+    return _wrapper_registry
+
+
+class WrapperRegistry:
+    def __init__(self, config_path: str):
+        module_config = importlib.import_module(config_path).module_config
+        self.module_config = module_config
+
+        self._wrappers = {}
+        for module, to_start in module_config["modules_to_start"].items():
+            if to_start:
+                wrapper_class = WRAPPER_CLASSES[module]
+                wrapper_config = module_config[module]
+                self._wrappers[module] = wrapper_class(wrapper_config)
+
+    def get_backend_status(self) -> dict[str, BackendStatus]:
+        status = {}
+        for module, to_start in self.module_config["models_to_start"].items():
+            backend_status = {"to_start": to_start}
+            wrapper = self.get_wrapper(module=module)
+            if wrapper is None:
+                backend_status["started"] = False
+                backend_status["backend_url"] = None
+            elif requests.get(wrapper.prediction_url).status_code == 404:
+                backend_status["started"] = False
+                backend_status["backend_url"] = None
+            else:
+                backend_status["started"] = True
+                backend_status["backend_url"] = wrapper.prediction_url
+            status[module] = BackendStatus(**backend_status)
+
+        return status
+
+    def get_wrapper(self, module: str):
+        return self._wrappers.get(module, None)
+
+    def __iter__(self):
+        return iter(self._wrappers.values())
