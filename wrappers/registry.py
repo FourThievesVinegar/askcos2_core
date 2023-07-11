@@ -33,9 +33,14 @@ class WrapperRegistry:
         self._wrappers = {}
         for module, to_start in module_config["modules_to_start"].items():
             if to_start:
-                wrapper_class = WRAPPER_CLASSES[module]
                 wrapper_config = module_config[module]
-                self._wrappers[module] = wrapper_class(wrapper_config)
+                if "wrapper_names" in wrapper_config:       # for multiple endpoints
+                    for name in wrapper_config["wrapper_names"]:
+                        wrapper_class = WRAPPER_CLASSES[name]
+                        self._wrappers[name] = wrapper_class(wrapper_config)
+                else:                                       # default to module name
+                    wrapper_class = WRAPPER_CLASSES[module]
+                    self._wrappers[module] = wrapper_class(wrapper_config)
 
     def get_backend_status(self) -> dict[str, BackendStatus]:
         status = {}

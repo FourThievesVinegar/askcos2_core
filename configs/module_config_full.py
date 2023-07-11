@@ -56,11 +56,12 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9611",
             "custom_prediction_url": "",
             "timeout": 3,
-            "available_models": [
-                "default",
-                "with_threshold"
-            ]
+            "available_models": []
         },
+        "wrapper_names": [
+            "fast_filter",
+            "fast_filter_with_threshold"
+        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
