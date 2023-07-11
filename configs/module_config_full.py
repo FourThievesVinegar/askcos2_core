@@ -6,6 +6,7 @@ module_config = {
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
         "general_selectivity": False,
+        "retro_template_relevance": True,
         "site_selectivity": True
     },
 
@@ -112,6 +113,25 @@ module_config = {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
             "ports_to_expose": [9641]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "retro_template_relevance": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/template_relevance.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9410, 9411, 9412],
+            "default_prediction_url": "http://0.0.0.0:9410/predictions",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "placeholder"
+            ]
         },
         "celery": {
             "queue_name": "generic",
