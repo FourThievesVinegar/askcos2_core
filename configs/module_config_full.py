@@ -146,7 +146,7 @@ module_config = {
             "ports_to_expose": [9621],
             "default_prediction_url": "http://0.0.0.0:9621/reaction_class",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_models": [
                 "default"
             ]

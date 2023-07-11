@@ -9,7 +9,7 @@ class ReactionClassificationInput(BaseModel):
 
 class ReactionClassificationResult(BaseModel):
     rank: float
-    reaction_num: float
+    reaction_num: str
     reaction_name: str
     reaction_classnum: float
     reaction_classname: str
@@ -21,7 +21,7 @@ class ReactionClassificationResult(BaseModel):
 class ReactionClassificationOutput(BaseModel):
     error: str
     status: str
-    results: list[list[ReactionClassificationResult]]
+    results: list[ReactionClassificationResult]
 
 
 @register_wrapper(
@@ -33,9 +33,7 @@ class ReactionClassificationWrapper(BaseWrapper):
     """Wrapper class for Reaction Classification"""
     prefixes = ["reaction_classification"]
 
-    def call_sync(self, input: ReactionClassificationInput) -> ReactionClassificationInput:
-        self.prediction_url = f"{self.prediction_url}/reaction_class"
-
+    def call_sync(self, input: ReactionClassificationInput) -> ReactionClassificationOutput:
         return super().call_sync(input=input)
 
     async def call_async(self, input: ReactionClassificationInput, priority: int = 0) -> str:
