@@ -7,7 +7,8 @@ module_config = {
         "forward_graph2smiles": True,
         "general_selectivity": False,
         "retro_template_relevance": True,
-        "site_selectivity": True
+        "site_selectivity": True,
+        "reaction_classification": True
     },
 
     "global": {
@@ -148,6 +149,25 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
             "custom_prediction_url": "",
             "timeout": 3,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "reaction_classification": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/reaction_classification.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9621],
+            "default_prediction_url": "http://0.0.0.0:9621/reaction_class",
+            "custom_prediction_url": "",
+            "timeout": 10,
             "available_models": [
                 "default"
             ]
