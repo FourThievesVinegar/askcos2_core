@@ -8,7 +8,8 @@ module_config = {
         "general_selectivity": False,
         "retro_template_relevance": True,
         "site_selectivity": True,
-        "reaction_classification": True
+        "reaction_classification": True,
+        "context_recommender": True
     },
 
     "global": {
@@ -172,6 +173,34 @@ module_config = {
                 "default"
             ]
         },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "context_recommender": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/context_recommender.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [8000],
+            "default_prediction_url": "http://0.0.0.0:8000",
+            "custom_prediction_url": "",
+            "timeout": 20,
+            "available_models": [
+                "default"
+            ]
+        },
+        "wrapper_names": [
+            # "context_recommender",
+            "context_recommender_cleaned",
+            "context_recommender_uncleaned",
+            "context_recommender_fp",
+            "context_recommender_graph",
+            "context_recommender_pr_fp",
+            "context_recommender_pr_graph"
+        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
