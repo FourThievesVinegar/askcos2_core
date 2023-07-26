@@ -28,7 +28,7 @@ class ContextRecommenderOutput(BaseModel):
     output_class=ContextRecommenderOutput
 )
 class ContextRecommenderWrapper(BaseWrapper):
-    """Wrapper class for Reaction Classification"""
+    """Wrapper class for Context Recommender uncleaned output"""
     prefixes = ["context_recommender/v1/condition_uncleaned"]
 
     def call_sync(self, input: ContextRecommenderInput):

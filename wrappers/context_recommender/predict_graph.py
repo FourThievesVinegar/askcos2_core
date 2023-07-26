@@ -23,17 +23,17 @@ class ContextRecommenderOutput(BaseModel):
 
 # FP model condition
 @register_wrapper(
-    name="context_recommender_pr_graph", # So this must be "context_recommender", not context_recommender_fp? But why? (Aaron Chen)
+    name="context_recommender_pr_graph",
     input_class=ContextRecommenderInput,
     output_class=ContextRecommenderOutput
 )
 class ContextRecommenderWrapper(BaseWrapper):
-    """Wrapper class for Reaction Classification"""
-    prefixes = ["context_recommender/v2/predict/FP"]
+    """Wrapper class for Context Recommender Predict GRAPH"""
+    prefixes = ["context_recommender/v2/predict/GRAPH"]
 
     def call_sync(self, input: ContextRecommenderInput):
         response = self.session_sync.post(
-            f"{self.prediction_url}/api/v2/predict/FP",
+            f"{self.prediction_url}/api/v2/predict/GRAPH",
             json=input.dict(),
             timeout=self.config["deployment"]["timeout"]
         )

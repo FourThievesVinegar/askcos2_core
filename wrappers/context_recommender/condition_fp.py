@@ -22,12 +22,12 @@ class ContextRecommenderOutput(BaseModel):
 
 # FP model condition
 @register_wrapper(
-    name="context_recommender_fp", # So this must be "context_recommender", not context_recommender_fp? But why? (Aaron Chen)
+    name="context_recommender_fp",
     input_class=ContextRecommenderInput,
     output_class=ContextRecommenderOutput
 )
 class ContextRecommenderWrapper(BaseWrapper):
-    """Wrapper class for Reaction Classification"""
+    """Wrapper class for Context Recommender Condition FP"""
     prefixes = ["context_recommender/v2/condition/FP"]
 
     def call_sync(self, input: ContextRecommenderInput):
