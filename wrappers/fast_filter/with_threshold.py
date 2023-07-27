@@ -30,7 +30,8 @@ class FastFilterWThresholdWrapper(BaseWrapper):
 
     def call_sync(self, input: FastFilterWThresholdInput
                   ) -> FastFilterWThresholdOutput:
-        self.prediction_url = f"{self.prediction_url}/filter_with_threshold"
+        if not self.prediction_url.endswith("filter_with_threshold"):
+            self.prediction_url = f"{self.prediction_url}/filter_with_threshold"
 
         return super().call_sync(input=input)
 

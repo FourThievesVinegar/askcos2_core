@@ -44,7 +44,8 @@ class WrapperRegistry:
 
     def get_backend_status(self) -> dict[str, BackendStatus]:
         status = {}
-        for module, to_start in self.module_config["models_to_start"].items():
+        for module, to_start in self.module_config["modules_to_start"].items():
+        # for module, to_start in self.module_config["models_to_start"].items():
             backend_status = {"to_start": to_start}
             wrapper = self.get_wrapper(module=module)
             if wrapper is None:
