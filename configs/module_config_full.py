@@ -184,8 +184,8 @@ module_config = {
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
-            "ports_to_expose": [8000],
-            "default_prediction_url": "http://0.0.0.0:8000",
+            "ports_to_expose": [9901],
+            "default_prediction_url": "http://0.0.0.0:9901",
             "custom_prediction_url": "",
             "timeout": 20,
             "available_models": [
@@ -193,7 +193,6 @@ module_config = {
             ]
         },
         "wrapper_names": [
-            # "context_recommender",
             "context_recommender_cleaned",
             "context_recommender_uncleaned",
             "context_recommender_fp",

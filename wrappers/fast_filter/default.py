@@ -37,7 +37,8 @@ class FastFilterWrapper(BaseWrapper):
 
     def call_sync(self, input: FastFilterInput) -> FastFilterOutput:
         if not self.prediction_url.endswith("fast_filter_evaluate"):
-            self.prediction_url = f"{self.prediction_url}/fast_filter_evaluate" # this creates an infinite stacking loop if no if statement
+            self.prediction_url = f"{self.prediction_url}/fast_filter_evaluate"
+            # this creates an infinite stacking loop w/o if statement
 
         return super().call_sync(input=input)
 
