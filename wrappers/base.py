@@ -1,11 +1,20 @@
 import requests
 from celery.result import AsyncResult
 from pydantic import BaseModel
+from typing import Literal
+
+
+class BaseResponse(BaseModel):
+    status_code: int
+    message: str
+    result_format: Literal["json", "base64"]
+    result: str | list | dict
 
 
 class BaseWrapper:
     input_class: type[BaseModel]
     output_class: type[BaseModel]
+    response_class: type[BaseResponse]
 
     name: str = "base"
     prefixes: list[str] = None
@@ -32,7 +41,7 @@ class BaseWrapper:
     def get_doc(self) -> str:
         return self.__doc__
 
-    def call_sync(self, input: BaseModel) -> BaseModel:
+    def call_raw(self, input: BaseModel) -> BaseModel:
         response = self.session_sync.post(
             self.prediction_url,
             json=input.dict(),
@@ -43,6 +52,12 @@ class BaseWrapper:
 
         return output
 
+    def call_sync(self, input: BaseModel) -> BaseResponse:
+        output = self.call_raw(input=input)
+        response = self.convert_output_to_response(output)
+
+        return response
+
     async def call_async(self, input: BaseModel, priority: int = 0) -> str:
         from askcos2_celery.tasks import base_task
         async_result = base_task.apply_async(
@@ -51,9 +66,21 @@ class BaseWrapper:
 
         return task_id
 
-    async def retrieve(self, task_id: str) -> BaseModel | None:
+    async def retrieve(self, task_id: str) -> BaseResponse | None:
         result = AsyncResult(task_id)
-        output = result.result
-        output = self.output_class(**output)
+        response = result.result
+        response = self.response_class(**response)
 
-        return output
+        return response
+
+    @staticmethod
+    def convert_output_to_response(output: BaseModel) -> BaseResponse:
+        response = {
+            "status_code": 200,
+            "message": "",
+            "result_format": "json",
+            "result": output.results
+        }
+        response = BaseResponse(**response)
+
+        return response

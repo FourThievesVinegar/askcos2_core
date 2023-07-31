@@ -9,6 +9,6 @@ def base_task(module: str, input: dict) -> dict:
 
     # Reconstruct Input object from, and convert Output object to dict
     input = wrapper.input_class(**input)
-    output = wrapper.call_sync(input).dict()
+    response = wrapper.call_sync(input).dict()
 
-    return output
+    return response
