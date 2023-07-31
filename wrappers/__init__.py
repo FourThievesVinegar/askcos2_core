@@ -7,7 +7,11 @@ WRAPPER_CLASSES: dict[str, type] = {}
 
 
 def register_wrapper(
-        name: str, input_class: type[BaseModel], output_class: type[BaseModel]):
+        name: str,
+        input_class: type[BaseModel],
+        output_class: type[BaseModel],
+        response_class: type[BaseModel]
+):
     """
     New wrapper types can be added to askcos2_core with the
     :func:`register_wrapper` function decorator.
@@ -16,7 +20,8 @@ def register_wrapper(
         @register_model(
             name='atom_map_indigo',
             input_class=AtomMapIndigoInput,
-            output_class=AtomMapIndigoOutput
+            output_class=AtomMapIndigoOutput,
+            response_class=AtomMapIndigoResponse
         )
         class AtomMapIndigoWrapper(BaseWrapper):
             (...)
@@ -25,12 +30,15 @@ def register_wrapper(
         name (str): the name of the module
         input_class (class of type[BaseModel]): the input class of the module
         output_class (class of type[BaseModel]): the output class of the module
+        response_class (class of type[BaseModel]): the response class of the module,
+            which should have inherited from wrappers.base.BaseResponse
     """
 
     def register_wrapper_cls(cls):
         cls.name = name
         cls.input_class = input_class
         cls.output_class = output_class
+        cls.response_class = response_class
 
         if name not in WRAPPER_CLASSES:
             WRAPPER_CLASSES[name] = cls

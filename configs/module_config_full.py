@@ -19,32 +19,51 @@ module_config = {
     },
 
     "atom_map_indigo": {
-        "custom_prediction_url": "http://molgpu01.mit.edu:9918/rxnmapper",
-        "timeout": 3,
-        "model": {},
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/indigo.git",
         "deployment": {
-            "remote_image": "",
-            "ports_to_expose": [],
-            "start_command": ""
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9661],
+            "default_prediction_url": "http://0.0.0.0:9661/indigo_mapper",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
         },
         "celery": {
-            "n_workers": 0,
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
     },
 
     "atom_map_rxnmapper": {
-        "custom_prediction_url": "http://molgpu01.mit.edu:9918/rxnmapper",
-        "timeout": 3,
-        "model": {},
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/rxnmapper.git",
         "deployment": {
-            "remote_image": "",
-            "ports_to_expose": [],
-            "start_command": ""
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9671],
+            "default_prediction_url": "http://0.0.0.0:9671/ibm_rxnmapper",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
         },
         "celery": {
-            "n_workers": 0,
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "atom_map_wln": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/wln.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9651],
+            "default_prediction_url": "http://0.0.0.0:9651/wln_mapper",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
+        },
+        "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
