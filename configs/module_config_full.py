@@ -1,15 +1,16 @@
 module_config = {
     "modules_to_start": {
-        "atom_map_indigo": False,
-        "atom_map_rxnmapper": False,
+        "atom_map_indigo": True,
+        "atom_map_rxnmapper": True,
+        "atom_map_wln": True,
+        "context_recommender": True,
         "fast_filter": True,
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
         "general_selectivity": False,
-        "retro_template_relevance": True,
-        "site_selectivity": True,
         "reaction_classification": True,
-        "context_recommender": True
+        "retro_template_relevance": True,
+        "site_selectivity": True
     },
 
     "global": {
@@ -63,6 +64,33 @@ module_config = {
             "timeout": 3,
             "available_models": []
         },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "context_recommender": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/context_recommender.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9901],
+            "default_prediction_url": "http://0.0.0.0:9901",
+            "custom_prediction_url": "",
+            "timeout": 20,
+            "available_models": [
+                "default"
+            ]
+        },
+        "wrapper_names": [
+            "context_recommender_cleaned",
+            "context_recommender_uncleaned",
+            "context_recommender_fp",
+            "context_recommender_graph",
+            "context_recommender_pr_fp",
+            "context_recommender_pr_graph"
+        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
@@ -141,6 +169,25 @@ module_config = {
         }
     },
 
+    "reaction_classification": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/reaction_classification.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9621],
+            "default_prediction_url": "http://0.0.0.0:9621/reaction_class",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
     "retro_template_relevance": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/template_relevance.git",
         "deployment": {
@@ -173,52 +220,6 @@ module_config = {
                 "default"
             ]
         },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
-    },
-
-    "reaction_classification": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/reaction_classification.git",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "use_gpu": False,
-            "ports_to_expose": [9621],
-            "default_prediction_url": "http://0.0.0.0:9621/reaction_class",
-            "custom_prediction_url": "",
-            "timeout": 10,
-            "available_models": [
-                "default"
-            ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
-    },
-
-    "context_recommender": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/context_recommender.git",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "use_gpu": False,
-            "ports_to_expose": [9901],
-            "default_prediction_url": "http://0.0.0.0:9901",
-            "custom_prediction_url": "",
-            "timeout": 20,
-            "available_models": [
-                "default"
-            ]
-        },
-        "wrapper_names": [
-            "context_recommender_cleaned",
-            "context_recommender_uncleaned",
-            "context_recommender_fp",
-            "context_recommender_graph",
-            "context_recommender_pr_fp",
-            "context_recommender_pr_graph"
-        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
