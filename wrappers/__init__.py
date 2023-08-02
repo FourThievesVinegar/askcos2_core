@@ -7,10 +7,10 @@ WRAPPER_CLASSES: dict[str, type] = {}
 
 
 def register_wrapper(
-        name: str,
-        input_class: type[BaseModel],
-        output_class: type[BaseModel],
-        response_class: type[BaseModel]
+    name: str,
+    input_class: type[BaseModel],
+    output_class: type[BaseModel],
+    response_class: type[BaseModel]
 ):
     """
     New wrapper types can be added to askcos2_core with the
@@ -59,7 +59,7 @@ def import_wrappers():
             not basename.startswith("_")
             and not basename.startswith(".")
             and (basename.endswith(".py"))
-            and basename not in ["base.py", "registry.py", "controller.py"]
+            and basename not in ["base.py", "registry.py"]
         ):
             wrapper_name = file[:file.find(".py")]
             wrapper_name = wrapper_name.replace("/", ".")

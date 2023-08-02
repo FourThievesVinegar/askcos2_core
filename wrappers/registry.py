@@ -42,6 +42,21 @@ class WrapperRegistry:
                     wrapper_class = WRAPPER_CLASSES[module]
                     self._wrappers[module] = wrapper_class(wrapper_config)
 
+                if module.startswith("atom_map") and \
+                        "atom_map_controller" not in self._wrappers:
+                    controller_class = WRAPPER_CLASSES["atom_map_controller"]
+                    self._wrappers["atom_map_controller"] = controller_class()
+
+                # if module.startswith("forward") and \
+                #         "forward_controller" not in self._wrappers:
+                #     controller_class = WRAPPER_CLASSES["forward_controller"]
+                #     self._wrappers["forward_controller"] = controller_class
+                #
+                # if module.startswith("retro") and \
+                #         "retro_controller" not in self._wrappers:
+                #     controller_class = WRAPPER_CLASSES["retro_controller"]
+                #     self._wrappers["retro_controller"] = controller_class
+
     def get_backend_status(self) -> dict[str, BackendStatus]:
         status = {}
         for module, to_start in self.module_config["modules_to_start"].items():
