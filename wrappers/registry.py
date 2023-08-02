@@ -45,7 +45,7 @@ class WrapperRegistry:
                 if module.startswith("atom_map") and \
                         "atom_map_controller" not in self._wrappers:
                     controller_class = WRAPPER_CLASSES["atom_map_controller"]
-                    self._wrappers["atom_map_controller"] = controller_class
+                    self._wrappers["atom_map_controller"] = controller_class()
 
                 # if module.startswith("forward") and \
                 #         "forward_controller" not in self._wrappers:
