@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class ReactionClassificationInput(BaseModel):
     smiles: list[str]
+    num_results: int = 10
 
 
 class ReactionClassificationResult(BaseModel):

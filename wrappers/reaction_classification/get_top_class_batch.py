@@ -5,6 +5,8 @@ from pydantic import BaseModel
 
 class GetTopClassBatchInput(BaseModel):
     smiles: list[str]
+    level: int = 2
+    threshold: float = 0.2
 
 
 class GetTopClassBatchOutput(BaseModel):
