@@ -55,7 +55,6 @@ class FastFilterWThresholdWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.results[0]
         }
         response = FastFilterWThresholdResponse(**response)

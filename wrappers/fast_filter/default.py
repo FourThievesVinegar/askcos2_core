@@ -61,7 +61,6 @@ class FastFilterWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.results[0][0][0]
         }
         response = FastFilterResponse(**response)

@@ -1,14 +1,12 @@
 import requests
 from celery.result import AsyncResult
 from pydantic import BaseModel
-from typing import Literal
 
 
 class BaseResponse(BaseModel):
     status_code: int
     message: str
-    result_format: Literal["json", "base64"]
-    result: str | list | dict
+    result: str | int | float | list | dict
 
 
 class BaseWrapper:
@@ -78,7 +76,6 @@ class BaseWrapper:
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.results
         }
         response = BaseResponse(**response)

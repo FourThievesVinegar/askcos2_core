@@ -65,7 +65,6 @@ class RetroTemplRelWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.__root__
         }
         response = RetroTemplRelResponse(**response)
