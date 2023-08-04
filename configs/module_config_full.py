@@ -175,13 +175,17 @@ module_config = {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
             "ports_to_expose": [9621],
-            "default_prediction_url": "http://0.0.0.0:9621/reaction_class",
+            "default_prediction_url": "http://0.0.0.0:9621",
             "custom_prediction_url": "",
             "timeout": 10,
             "available_models": [
                 "default"
             ]
         },
+        "wrapper_names": [
+            "reaction_classification",
+            "get_top_class_batch"
+        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
