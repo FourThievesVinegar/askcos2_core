@@ -80,7 +80,6 @@ class AtomMapController(BaseWrapper):
     ) -> AtomMapResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
-        result_format = wrapper_response.result_format
         if backend in ["indigo", "wln"]:
             # list[str] -> list[str]
             result = wrapper_response.result
@@ -93,7 +92,6 @@ class AtomMapController(BaseWrapper):
         response = {
             "status_code": status_code,
             "message": message,
-            "result_format": result_format,
             "result": result
         }
         response = AtomMapResponse(**response)

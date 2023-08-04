@@ -45,7 +45,6 @@ class AtomMapWLNWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.results
         }
         response = AtomMapWLNResponse(**response)

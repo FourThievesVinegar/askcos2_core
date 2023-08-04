@@ -63,7 +63,6 @@ class ForwardATWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result_format": "json",
             "result": output.__root__
         }
         response = ForwardATResponse(**response)
