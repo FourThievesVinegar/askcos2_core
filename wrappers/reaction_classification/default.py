@@ -38,9 +38,21 @@ class ReactionClassificationWrapper(BaseWrapper):
     """Wrapper class for Reaction Classification"""
     prefixes = ["reaction_classification"]
 
+    def call_raw(self, input: ReactionClassificationInput
+                 ) -> ReactionClassificationOutput:
+        response = self.session_sync.post(
+            f"{self.prediction_url}/reaction_class",
+            json=input.dict(),
+            timeout=self.config["deployment"]["timeout"]
+        )
+        output = response.json()
+        output = ReactionClassificationOutput(**output)
+
+        return output
+
     def call_sync(self, input: ReactionClassificationInput
                   ) -> ReactionClassificationResponse:
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
