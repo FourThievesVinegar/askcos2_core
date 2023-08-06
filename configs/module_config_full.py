@@ -70,6 +70,25 @@ module_config = {
         }
     },
 
+    "cluster": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/cluster.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9801],
+            "default_prediction_url": "http://0.0.0.0:9801/cluster",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
     "context_recommender": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/context_recommender.git",
         "deployment": {
