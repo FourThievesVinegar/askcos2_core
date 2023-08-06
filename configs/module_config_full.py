@@ -3,6 +3,7 @@ module_config = {
         "atom_map_indigo": True,
         "atom_map_rxnmapper": True,
         "atom_map_wln": True,
+        "cluster": True,
         "context_recommender": True,
         "fast_filter": True,
         "forward_augmented_transformer": True,
