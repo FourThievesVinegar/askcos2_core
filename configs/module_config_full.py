@@ -3,6 +3,7 @@ module_config = {
         "atom_map_indigo": True,
         "atom_map_rxnmapper": True,
         "atom_map_wln": True,
+        "cluster": True,
         "context_recommender": True,
         "fast_filter": True,
         "forward_augmented_transformer": True,
@@ -63,6 +64,25 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_models": []
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "cluster": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/cluster.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9801],
+            "default_prediction_url": "http://0.0.0.0:9801/cluster",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "default"
+            ]
         },
         "celery": {
             "queue_name": "generic",
