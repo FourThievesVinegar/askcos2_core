@@ -34,25 +34,8 @@ class DescriptorResponse(BaseResponse):
 class DescriptorWrapper(BaseWrapper):
     """Wrapper class for Descriptors"""
     prefixes = ["descriptors"]
-
-    # def call_raw(self, input: DescriptorInput) -> DescriptorOutput:
-    #     response = self.session_sync.post(
-    #         self.prediction_url,
-    #         json=input.dict(),
-    #         timeout=self.config["deployment"]["timeout"]
-    #     )
-    #     output = response.json()
-    #     print('-----------------------------------------')
-    #     print(output)
-    #
-    #     return output
-
-    # def call_sync(self, input: DescriptorInput) -> DescriptorResponse:
     def call_sync(self, input: DescriptorInput):
         output = super().call_raw(input=input)
-        # response = self.convert_output_to_response(output)
-        print('-----------------------------------------')
-        print(output)
         response = self.convert_output_to_response(output)
 
         return response
