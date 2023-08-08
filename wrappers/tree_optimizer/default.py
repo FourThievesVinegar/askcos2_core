@@ -2,7 +2,7 @@ from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 from pydantic import BaseModel
 import json
-from typing import List, Dict
+# from typing import List, Dict
 
 class TreeOptimizerInput(BaseModel):
     targets: list
@@ -20,7 +20,7 @@ class TreeOptimizerOutput(BaseModel):
 
 
 class TreeOptimizerResponse(BaseResponse):
-    result: List[TreeOptimizerResult]
+    result: list[TreeOptimizerResult]
 
 @register_wrapper(
     name="tree_optimizer",
