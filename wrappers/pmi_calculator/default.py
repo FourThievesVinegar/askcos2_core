@@ -29,16 +29,11 @@ class PmiCalculatorWrapper(BaseWrapper):
     prefixes = ["pmi_calculator"]
 
     def call_sync(self, input: PmiCalculatorInput) -> PmiCalculatorResponse:
-        # print('+++++++++++++++++++++++++++++')
-        # print('output')
-        # print(super().call_sync(input=input))
         output = super().call_raw(input=input)
         response = self.convert_output_to_response(output)
-        # return super().call_sync(input=input)
         return response
 
     async def call_async(self, input: PmiCalculatorInput, priority: int = 0) -> str:
-        # Edied by Aaron Chen
         return await super().call_async(input=input, priority=priority)
 
     async def retrieve(self, task_id: str) -> PmiCalculatorResponse | None:
