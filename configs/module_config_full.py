@@ -13,7 +13,12 @@ module_config = {
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
         "retro_graph2smiles": True,
-        "site_selectivity": True
+        "site_selectivity": True,
+        "descriptors": True,
+        "impurity_predictor": True,
+        "pathway_ranker": True,
+        "pmi_calculator": True,
+        "tree_optimizer": True
     },
 
     "global": {
@@ -119,6 +124,23 @@ module_config = {
         }
     },
 
+    "descriptors": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/descriptors.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9631],
+            "default_prediction_url": "http://0.0.0.0:9631/descriptor",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
     "fast_filter": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/fast_filter.git",
         "deployment": {
@@ -183,7 +205,75 @@ module_config = {
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
-            "ports_to_expose": [9641]
+            "ports_to_expose": [9641],
+            "default_prediction_url": "http://0.0.0.0:9641",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_models": [
+                "default"
+            ]
+        },
+        "wrapper_names": [
+            "general_selectivity",
+            "general_selectivity_qm_predictor",
+            "general_selectivity_qm_no_reagent",
+        ],
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "impurity_predictor": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/impurity_predictor.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9691],
+            "default_prediction_url": "http://0.0.0.0:9691/impurity",
+            "custom_prediction_url": "",
+            "timeout": 20,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "pathway_ranker": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/pathway_ranker.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9681],
+            "default_prediction_url": "http://0.0.0.0:9681/pathway_ranker",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "pmi_calculator": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/pmi_calculator.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9701],
+            "default_prediction_url": "http://0.0.0.0:9701/pmi_calculator",
+            "custom_prediction_url": "",
+            "timeout": 120,
+            "available_models": [
+                "default"
+            ]
         },
         "celery": {
             "queue_name": "generic",
@@ -280,6 +370,25 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
             "custom_prediction_url": "",
             "timeout": 3,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "tree_optimizer": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_optimizer.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9711],
+            "default_prediction_url": "http://0.0.0.0:9711/tree_optimizer",
+            "custom_prediction_url": "",
+            "timeout": 40,
             "available_models": [
                 "default"
             ]
