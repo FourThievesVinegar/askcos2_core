@@ -11,6 +11,8 @@ module_config = {
         "general_selectivity": False,
         "reaction_classification": True,
         "retro_template_relevance": True,
+        "retro_augmented_transformer": True,
+        "retro_graph2smiles": True,
         "site_selectivity": True
     },
 
@@ -219,6 +221,44 @@ module_config = {
             "use_gpu": False,
             "ports_to_expose": [9410, 9411, 9412],
             "default_prediction_url": "http://0.0.0.0:9410/predictions",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "placeholder"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "retro_augmented_transformer": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/augmented_transformer.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": True,
+            "ports_to_expose": [9420, 9421, 9422],
+            "default_prediction_url": "http://0.0.0.0:9420/predictions",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "placeholder"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "retro_graph2smiles": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/graph2smiles.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": True,
+            "ports_to_expose": [9430, 9431, 9432],
+            "default_prediction_url": "http://0.0.0.0:9430/predictions",
             "custom_prediction_url": "",
             "timeout": 3,
             "available_models": [
