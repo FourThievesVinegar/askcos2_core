@@ -1,10 +1,8 @@
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-import json
-import requests
 from typing import List, Dict
+
 
 class PathwayRankerInput(BaseModel):
     tree: List[Dict]
@@ -15,13 +13,16 @@ class PathwayRankerResult(BaseModel):
     encoded_trees: list
     clusters: list
 
+
 class PathwayRankerOutput(BaseModel):
     error: str
     status: str
     results: list[PathwayRankerResult]
 
+
 class PathwayRankerResponse(BaseResponse):
     result: List[PathwayRankerResult]
+
 
 @register_wrapper(
     name="pathway_ranker",
@@ -30,8 +31,9 @@ class PathwayRankerResponse(BaseResponse):
     response_class=PathwayRankerResponse
 )
 class PathwayRankerWrapper(BaseWrapper):
-    """Wrapper class for Pathway Ranker"""
+    """Wrapper class for tree-LSTM based pathway ranker"""
     prefixes = ["pathway_ranker"]
+
     def call_sync(self, input: PathwayRankerInput) -> PathwayRankerResponse:
         output = super().call_raw(input=input)
         response = self.convert_output_to_response(output)
