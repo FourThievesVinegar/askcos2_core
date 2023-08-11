@@ -3,10 +3,11 @@ from wrappers.base import BaseResponse, BaseWrapper
 from pydantic import BaseModel
 
 
-class DescriptorInput(BaseModel):
+class DescriptorsInput(BaseModel):
     smiles: str
 
-class DescriptorResult(BaseModel):
+
+class DescriptorsResult(BaseModel):
     smiles: str
     partial_charge: list[float]
     fukui_neu: list[float]
@@ -16,46 +17,46 @@ class DescriptorResult(BaseModel):
     bond_length: list[float]
 
 
-class DescriptorOutput(BaseModel):
+class DescriptorsOutput(BaseModel):
     error: str
     status: str
-    results: list[DescriptorResult]
+    results: list[DescriptorsResult]
 
-class DescriptorResponse(BaseResponse):
-    result: DescriptorResult
+
+class DescriptorsResponse(BaseResponse):
+    result: DescriptorsResult
 
 
 @register_wrapper(
     name="descriptors",
-    input_class=DescriptorInput,
-    output_class=DescriptorOutput,
-    response_class=DescriptorResponse
+    input_class=DescriptorsInput,
+    output_class=DescriptorsOutput,
+    response_class=DescriptorsResponse
 )
 class DescriptorWrapper(BaseWrapper):
     """Wrapper class for Descriptors"""
     prefixes = ["descriptors"]
-    def call_sync(self, input: DescriptorInput):
+
+    def call_sync(self, input: DescriptorsInput) -> DescriptorsResponse:
         output = super().call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
-    async def call_async(self, input: DescriptorInput, priority: int = 0) -> str:
+    async def call_async(self, input: DescriptorsInput, priority: int = 0) -> str:
         return await super().call_async(input=input, priority=priority)
 
-    async def retrieve(self, task_id: str) -> DescriptorResponse | None:
+    async def retrieve(self, task_id: str) -> DescriptorsResponse | None:
         return await super().retrieve(task_id=task_id)
 
     @staticmethod
-    def convert_output_to_response(output: DescriptorOutput
-                                   ) -> DescriptorResponse:
+    def convert_output_to_response(output: DescriptorsOutput
+                                   ) -> DescriptorsResponse:
         response = {
             "status_code": 200,
             "message": "",
             "result": output.results[0]
         }
-        if response["result"]:
-            response = DescriptorResponse(**response)
-            return response
-        else:
-            return None
+        response = DescriptorsResponse(**response)
+
+        return response
