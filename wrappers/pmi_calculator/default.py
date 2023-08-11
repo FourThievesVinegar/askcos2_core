@@ -3,20 +3,20 @@ from wrappers.base import BaseWrapper, BaseResponse
 from pydantic import BaseModel
 from typing import List, Dict
 
+
 class PmiCalculatorInput(BaseModel):
     tree: List[Dict]
 
 
-class PmiCalculatorResult(BaseModel):
-    __root__: list[float]
-
 class PmiCalculatorOutput(BaseModel):
     error: str
     status: str
-    results: list[PmiCalculatorResult]
+    results: list[list[float]]
+
 
 class PmiCalculatorResponse(BaseResponse):
-    result: list[PmiCalculatorResult]
+    result: list[float]
+
 
 @register_wrapper(
     name="pmi_calculator",
@@ -45,7 +45,7 @@ class PmiCalculatorWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result": output.results
+            "result": output.results[0]
         }
         response = PmiCalculatorResponse(**response)
 
