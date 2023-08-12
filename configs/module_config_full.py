@@ -6,6 +6,7 @@ module_config = {
         "cluster": True,
         "context_recommender": True,
         "descriptors": True,
+        "evaluate_reactions": True,
         "fast_filter": True,
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
@@ -133,6 +134,23 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9631/descriptors",
             "custom_prediction_url": "",
             "timeout": 3,
+            "available_models": []
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "evaluate_reactions": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/evaluate_reactions.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9721],
+            "default_prediction_url": "http://0.0.0.0:9721/evaluate_reactions",
+            "custom_prediction_url": "",
+            "timeout": 10,
             "available_models": []
         },
         "celery": {
