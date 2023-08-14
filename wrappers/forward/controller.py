@@ -33,8 +33,8 @@ class ForwardResponse(BaseResponse):
     output_class=ForwardOutput,
     response_class=ForwardResponse
 )
-class AtomMapController(BaseWrapper):
-    """Atom Map Controller"""
+class ForwardController(BaseWrapper):
+    """Forward Controller"""
     prefixes = ["forward/controller", "forward"]
     backend_wrapper_names = {
         "augmented_transformer": "forward_augmented_transformer",
@@ -109,8 +109,11 @@ class AtomMapController(BaseWrapper):
             result = []
             for result_per_smi in wrapper_response.result:
                 result.append(
-                    [{"outcome": raw_result.outcome.smiles, "score": raw_result.score}
-                     for raw_result in result_per_smi]
+                    [{
+                        "outcome": raw_result.outcome.smiles,
+                        "score": raw_result.score,
+                        "prob": raw_result.prob
+                    } for raw_result in result_per_smi]
                 )
         else:
             raise ValueError(f"Unsupported atom map backend: {backend}!")

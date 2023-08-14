@@ -1,28 +1,55 @@
+from pydantic import BaseModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
-from pydantic import BaseModel
-from typing import List, Dict
 
 
 class ImpurityPredictorInput(BaseModel):
+    predictor_backend: Literal[
+        "augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
+    predictor_model_name: str = "pistachio"
+    inspector: str = "Reaxys inspector"
+    atom_map_backend: Literal["indigo", "rxnmapper", "wln"]
+    topn_outcome: int = 3
+    insp_threshold: float = 0.2
+    check_mapping: bool = True
+
     rct_smi: str
-    prd_smi: str
-    sol_smi: str
-    rea_smi: str
+    prd_smi: str = ""
+    sol_smi: str = ""
+    rea_smi: str = ""
+
+
+class ForwardResult(BaseModel):
+    outcome: str
+    score: float
+
+
+class ImpurityResult(BaseModel):
+    no: int
+    prd_smiles: str
+    prd_mw: float
+    rct_rea_sol: list[dict]
+    insp_scores: list[float]
+    avg_insp_score: float
+    similarity_to_major: float
+    modes: list[int]
 
 
 class ImpurityPredictorResult(BaseModel):
-    predict_expand: list[Dict]
+    predict_expand: list[ImpurityResult]
+    predict_normal: list[ForwardResult]
 
 
 class ImpurityPredictorOutput(BaseModel):
     error: str
     status: str
-    results: list[ImpurityPredictorResult]
+    results: ImpurityPredictorResult
 
 
 class ImpurityPredictorResponse(BaseResponse):
-    result: List[ImpurityPredictorResult]
+    result: ImpurityPredictorResult
+
 
 @register_wrapper(
     name="impurity_predictor",

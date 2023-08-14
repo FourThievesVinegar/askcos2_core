@@ -11,6 +11,7 @@ module_config = {
         "forward_graph2smiles": True,
         "forward_wldn5": True,
         "general_selectivity": True,
+        "impurity_predictor": True,
         "pathway_ranker": True,
         "pmi_calculator": True,
         "reaction_classification": True,
@@ -18,7 +19,6 @@ module_config = {
         "retro_augmented_transformer": True,
         "retro_graph2smiles": True,
         "site_selectivity": True,
-        "impurity_predictor": True,
         "tree_optimizer": True
     },
 
@@ -253,7 +253,7 @@ module_config = {
             "ports_to_expose": [9691],
             "default_prediction_url": "http://0.0.0.0:9691/impurity",
             "custom_prediction_url": "",
-            "timeout": 20,
+            "timeout": 60,
             "available_models": [
                 "default"
             ]
