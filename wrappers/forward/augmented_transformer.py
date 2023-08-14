@@ -1,6 +1,6 @@
+from pydantic import BaseModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
 class ForwardATInput(BaseModel):

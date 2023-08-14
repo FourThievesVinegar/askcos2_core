@@ -9,15 +9,16 @@ module_config = {
         "fast_filter": True,
         "forward_augmented_transformer": True,
         "forward_graph2smiles": True,
+        "forward_wldn5": True,
         "general_selectivity": True,
+        "pathway_ranker": True,
+        "pmi_calculator": True,
         "reaction_classification": True,
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
         "retro_graph2smiles": True,
         "site_selectivity": True,
         "impurity_predictor": True,
-        "pathway_ranker": True,
-        "pmi_calculator": True,
         "tree_optimizer": True
     },
 
@@ -192,6 +193,26 @@ module_config = {
             "timeout": 3,
             "available_models": [
                 "USPTO_480k_mix"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "forward_wldn5": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/forward_predictor/wldn5.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9501],
+            "default_prediction_url": "http://0.0.0.0:9501/wldn5_predict",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "uspto_500k",
+                "pistachio"
             ]
         },
         "celery": {
