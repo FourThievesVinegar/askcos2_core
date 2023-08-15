@@ -18,6 +18,7 @@ module_config = {
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
         "retro_graph2smiles": True,
+        "scscore": True,
         "site_selectivity": True,
         "tree_optimizer": True
     },
@@ -374,6 +375,25 @@ module_config = {
             "timeout": 3,
             "available_models": [
                 "placeholder"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "scscore": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/scscore.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9741],
+            "default_prediction_url": "http://0.0.0.0:9741/scscore",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": [
+                "default"
             ]
         },
         "celery": {
