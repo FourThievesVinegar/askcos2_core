@@ -150,11 +150,15 @@ module_config = {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
             "ports_to_expose": [9721],
-            "default_prediction_url": "http://0.0.0.0:9721/evaluate_reactions",
+            "default_prediction_url": "http://0.0.0.0:9721",
             "custom_prediction_url": "",
             "timeout": 10,
             "available_models": []
         },
+        "wrapper_names": [
+            "evaluate_context",
+            "evaluate_reaction"
+        ],
         "celery": {
             "queue_name": "generic",
             "worker_name": "generic_worker"
@@ -447,7 +451,7 @@ module_config = {
             "ports_to_expose": [9711],
             "default_prediction_url": "http://0.0.0.0:9711/tree_optimizer",
             "custom_prediction_url": "",
-            "timeout": 40,
+            "timeout": 600,
             "available_models": [
                 "default"
             ]
