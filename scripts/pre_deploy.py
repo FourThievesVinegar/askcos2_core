@@ -85,7 +85,7 @@ def main():
     if runtime == "docker":
         cmds = [
             "echo Starting db services\n",
-            "docker compose -f compose.yaml up -d rabbitmq redis\n",
+            "docker compose -f compose.yaml up -d rabbitmq redis mongo\n",
             "sleep 5\n"
             "\n"
         ]
@@ -198,7 +198,7 @@ def main():
 
     cmd = str(core_deployment_config[runtime]["cpu"]["start"])
     cmds = [
-        f"echo Starting services for db, askcos2_core app and generic_celery_worker, "
+        f"echo Starting services for askcos2_core app and generic_celery_worker, "
         f"runtime: {runtime}\n",
         f"{cmd}\n",
         "\n"

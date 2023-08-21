@@ -1,4 +1,6 @@
-FROM continuumio/miniconda3:22.11.1-alpine
+FROM continuumio/miniconda3:23.3.1-0
+
+RUN apt update && apt -y install gcc g++ make
 
 COPY env.yaml /tmp/env.yaml
 
