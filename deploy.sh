@@ -195,23 +195,23 @@ set-db-defaults() {
 run-mongo-js() {
   # arg 1 is js command
   docker compose -f compose.yaml exec -T mongo \
-    bash -c 'mongo --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin ${MONGO_HOST}/askcos --quiet --eval '"'$1'"
+    bash -c 'mongosh --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin ${MONGO_HOST}/askcos --quiet --eval '"'$1'"
 }
 
 mongoimport() {
   # arg 1 is collection name
   # arg 2 is file path
   # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
-  docker compose -f compose.yaml exec -T "$3" app \
-    bash -c 'gunzip -c '"$2"' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '"$1"' --type json --jsonArray '${DB_DROP}
+  docker compose -f compose.yaml exec -T $3 mongo \
+    bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8'${DB_DROP}
 }
 
 mongoexport() {
   # arg 1 is collection name
   # arg 2 is file path
   # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
-  docker compose -f compose.yaml exec -T "$3" app \
-    bash -c 'mongoexport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '"$1"' --type json --jsonArray | gzip > '"$2"
+  docker compose -f compose.yaml exec -T $3 mongo \
+    bash -c 'mongoexport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray | gzip > '$2
 }
 
 index-db() {
@@ -252,16 +252,16 @@ seed-db() {
     return
   fi
 
-  echo "Starting app and mongo containers for seeding db"
-  docker compose -f compose.yaml up -d app mongo
+  echo "Starting the mongo container for seeding db"
+  docker compose -f compose.yaml up -d mongo
 
   echo "Seeding mongo database..."
   DATA_DIR="/usr/local/askcos-data/db"
 
   if [ "$BUYABLES" = "default" ]; then
-    echo "Loading default buyables data in background..."
+    echo "Loading default buyables data..."
     buyables_file="${DATA_DIR}/buyables/buyables.json.gz"
-    mongoimport buyables "$buyables_file" -d
+    mongoimport buyables "$buyables_file"
   elif [ -f "$BUYABLES" ]; then
     echo "Loading buyables data from $BUYABLES in background..."
     buyables_file="${DATA_DIR}/buyables/$(basename "$BUYABLES")"
@@ -270,13 +270,13 @@ seed-db() {
   fi
 
   if [ "$CHEMICALS" = "default" ]; then
-    echo "Loading default chemicals data in background..."
+    echo "Loading default chemicals data..."
     chemicals_file="${DATA_DIR}/historian/chemicals.json.gz"
-    mongoimport chemicals "$chemicals_file" -d
+    mongoimport chemicals "$chemicals_file"
     chemicals_file="${DATA_DIR}/historian/historian.pistachio.json.gz"
-    DB_DROP="" mongoimport chemicals "$chemicals_file" -d
+    DB_DROP="" mongoimport chemicals "$chemicals_file"
     chemicals_file="${DATA_DIR}/historian/historian.bkms_metabolic.json.gz"
-    DB_DROP="" mongoimport chemicals "$chemicals_file" -d
+    DB_DROP="" mongoimport chemicals "$chemicals_file"
   elif [ "$CHEMICALS" = "pistachio" ]; then
     echo "Loading pistachio chemicals data in background..."
     chemicals_file="${DATA_DIR}/historian/historian.pistachio.json.gz"
@@ -293,16 +293,16 @@ seed-db() {
   fi
 
   if [ "$REACTIONS" = "default" ]; then
-    echo "Loading default reactions data in background..."
-    reactions_file="${DATA_DIR}/historian/reactions.pistachio.min.json.gz"
-    mongoimport reactions "$reactions_file" -d
+    echo "Loading default reactions data..."
+    reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
+    mongoimport reactions "$reactions_file"
     reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
-    DB_DROP="" mongoimport reactions "$reactions_file" -d
+    DB_DROP="" mongoimport reactions "$reactions_file"
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
-    DB_DROP="" mongoimport reactions "$reactions_file" -d
+    DB_DROP="" mongoimport reactions "$reactions_file"
   elif [ "$REACTIONS" = "pistachio" ]; then
     echo "Loading pistachio reactions data in background..."
-    reactions_file="${DATA_DIR}/historian/reactions.pistachio.min.json.gz"
+    reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
     mongoimport reactions "$reactions_file" -d
   elif [ "$REACTIONS" = "cas" ]; then
     echo "Loading cas reactions data in background..."
@@ -374,9 +374,9 @@ seed-db() {
   fi
 
   index-db
-  echo "Seeding complete. Stopping app and mongo services.."
-  docker compose -f compose.yaml stop app mongo
-  echo "App and mongo services stopped."
+  echo "Seeding db completed."
+  count-mongo-docs
+  docker compose -f compose.yaml rm -sf mongo
   echo
 }
 

@@ -4,3 +4,4 @@
 deployment/
 data/
 *.sif
+.env

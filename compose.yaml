@@ -22,6 +22,7 @@ services:
       - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
       - "mongo_data:/data/db"
+      - "./data/db:/usr/local/askcos-data/db"
     command: --wiredTigerCacheSizeGB 1.5
 
   rabbitmq:
