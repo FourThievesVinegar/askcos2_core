@@ -4,7 +4,8 @@ from bson import Binary, ObjectId
 from configs import db_config
 from pymongo import errors, MongoClient
 from pymongo.collection import ReturnDocument
-from rdkit import AllChem, Chem
+from rdkit import Chem
+from rdkit.Chem import AllChem
 from typing import Any
 from utils import register_util
 from utils.similarity_search_utils import sim_search, sim_search_aggregate
@@ -15,10 +16,10 @@ class Pricer:
     """Util class for Pricer, to be used as a controller (over Mongo/FilePricer"""
     prefixes = ["pricer"]
     methods_to_bind: dict[str, list[str]] = {
-        "lookup_smiles": ["GET"],
-        "lookup_smiles_list": ["GET"],
-        "lookup_smarts": ["GET"],
-        "search": ["GET"],
+        "lookup_smiles": ["POST"],
+        "lookup_smiles_list": ["POST"],
+        "lookup_smarts": ["POST"],
+        "search": ["POST"],
         "list_sources": ["GET"],
         "list_properties": ["GET"],
         "get": ["GET"],
