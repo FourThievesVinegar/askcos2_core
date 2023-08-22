@@ -300,7 +300,7 @@ class Pricer:
         """
 
         assert isinstance(self._pricer, MongoPricer), \
-            f"update() is only implemented for MongoPricer"
+            f"delete() is only implemented for MongoPricer"
 
         delete_result = self.collection.delete_one({"_id": ObjectId(_id)})
 
@@ -310,6 +310,10 @@ class Pricer:
         """
         Add a new entry to the database.
         """
+
+        assert isinstance(self._pricer, MongoPricer), \
+            f"add() is only implemented for MongoPricer"
+
         result = {"doc": None, "updated": False, "error": None}
         query = {
             "smiles": new_doc["smiles"],
@@ -339,6 +343,10 @@ class Pricer:
         """
         Add a list of new entries to the database.
         """
+
+        assert isinstance(self._pricer, MongoPricer), \
+            f"add_many() is only implemented for MongoPricer"
+
         result = {
             "error": None,
             "inserted": [],

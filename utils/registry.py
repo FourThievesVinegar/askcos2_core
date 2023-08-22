@@ -23,7 +23,7 @@ class UtilRegistry:
         self.module_config = module_config
 
         self._utils = {
-            util_name: util_class(module_config[util_name])
+            util_name: util_class(util_config=module_config[util_name])
             for util_name, util_class in UTIL_CLASSES.items()
         }
 

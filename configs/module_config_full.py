@@ -465,7 +465,9 @@ module_config = {
     # utils
     "historian": {
         "engine": "db",
-        "file": ""
+        "database": "askcos",
+        "collection": "chemicals",
+        "files": []
     },
 
     "pricer": {
