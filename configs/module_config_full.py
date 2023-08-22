@@ -460,5 +460,19 @@ module_config = {
             "queue_name": "generic",
             "worker_name": "generic_worker"
         }
+    },
+
+    # utils
+    "historian": {
+        "engine": "db",
+        "file": ""
+    },
+
+    "pricer": {
+        "engine": "db",
+        "database": "askcos",
+        "collection": "buyables",
+        "file": "",
+        "precompute_mols": False
     }
 }
