@@ -3,22 +3,43 @@ services:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     hostname: app
     restart: always
-    env_file: .env
-    command: python app.py
+    env_file:
+      - .env
     network_mode: host
+    volumes:
+      - "./data/db:/usr/local/askcos-data/db"
+    command: python app.py
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6.0.9-jammy
+    hostname: mongo
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - "mongo_data:/data/db"
+      - "./data/db:/usr/local/askcos-data/db"
+    command: --wiredTigerCacheSizeGB 1.5
 
   rabbitmq:
     image: rabbitmq:3.11-alpine
     hostname: rabbitmq
     restart: always
+    env_file:
+      - .env
     ports:
       - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
 
   redis:
     image: redis:7.0-alpine
     hostname: redis
-    env_file: .env
     restart: always
+    env_file:
+      - .env
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
@@ -28,9 +49,10 @@ services:
   generic_celery_worker:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
-    env_file: .env
+    env_file:
+      - .env
     network_mode: host
-    command: bash scripts/start_celery_worker.sh 100 generic generic_worker
+    command: bash scripts/start_celery_worker.sh 10 generic generic_worker
     depends_on:
       - rabbitmq
       - redis
@@ -38,7 +60,9 @@ services:
   custom_celery_worker:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
-    env_file: .env
+    env_file:
+      - .env
+    network_mode: host
     command: sh scripts/start_celery_worker.sh ${CELERY_CONCURRENCY} ${CELERY_QUEUE} ${CELERY_WORKER}
     depends_on:
       - rabbitmq
@@ -46,3 +70,4 @@ services:
 
 volumes:
   redisdata:
+  mongo_data:

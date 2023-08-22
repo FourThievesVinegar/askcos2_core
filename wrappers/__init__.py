@@ -17,7 +17,7 @@ def register_wrapper(
     :func:`register_wrapper` function decorator.
 
     For example::
-        @register_model(
+        @register_wrapper(
             name='atom_map_indigo',
             input_class=AtomMapIndigoInput,
             output_class=AtomMapIndigoOutput,
