@@ -50,7 +50,7 @@ class UserController:
         try:
             self.client.server_info()
         except errors.ServerSelectionTimeoutError:
-            raise ValueError("Cannot connect to mongodb to load prices")
+            raise ValueError("Cannot connect to mongodb to load user data")
         else:
             self.collection = self.client[database][collection]
             self.db = self.client[database]
@@ -62,8 +62,8 @@ class UserController:
 
         return user
 
-    def _get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]
-                          ) -> User:
+    def get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]
+                         ) -> User:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
@@ -120,7 +120,7 @@ class UserController:
         is_superuser: bool = False,
         token: Annotated[str, Depends(oauth2_scheme)] = None
     ) -> Response:
-        user = self._get_current_user(token)
+        user = self.get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -146,7 +146,7 @@ class UserController:
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
-        user = self._get_current_user(token)
+        user = self.get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -162,7 +162,7 @@ class UserController:
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
-        user = self._get_current_user(token)
+        user = self.get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -181,7 +181,7 @@ class UserController:
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
-        user = self._get_current_user(token)
+        user = self.get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -197,7 +197,7 @@ class UserController:
 
     def get_all_users(self, token: Annotated[str, Depends(oauth2_scheme)]
                       ) -> list[User]:
-        user = self._get_current_user(token)
+        user = self.get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -463,6 +463,18 @@ module_config = {
     },
 
     # utils
+    "banned_chemicals": {
+        "engine": "db",
+        "database": "askcos",
+        "collection": "banned_chemicals"
+    },
+
+    "banned_reactions": {
+        "engine": "db",
+        "database": "askcos",
+        "collection": "banned_reactions"
+    },
+
     "historian": {
         "engine": "db",
         "database": "askcos",
@@ -482,5 +494,5 @@ module_config = {
         "engine": "db",
         "database": "askcos",
         "collection": "users"
-    },
+    }
 }
