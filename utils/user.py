@@ -1,5 +1,5 @@
 from configs import db_config
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Response, status
 from jose import JWTError, jwt
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
@@ -32,6 +32,7 @@ class UserController:
         "delete": ["DELETE"],
         "enable": ["GET"],
         "disable": ["GET"],
+        "get_all_users": ["GET"]
     }
 
     def __init__(self, util_config: dict[str, Any]):
@@ -61,8 +62,8 @@ class UserController:
 
         return user
 
-    async def _get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]
-                                ) -> User:
+    def _get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]
+                          ) -> User:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
@@ -87,7 +88,7 @@ class UserController:
         full_name: str = None,
         disabled: bool = False,
         is_superuser: bool = False
-    ) -> None:
+    ) -> Response:
         if self.collection.find_one({"username": username}):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -107,7 +108,9 @@ class UserController:
         User(**doc)         # data validation, if any
         self.collection.insert_one(doc)
 
-    async def update(
+        return Response(content=f"Successfully register user: {username}!")
+
+    def update(
         self,
         username: str,
         password: str,
@@ -116,8 +119,8 @@ class UserController:
         disabled: bool = False,
         is_superuser: bool = False,
         token: Annotated[str, Depends(oauth2_scheme)] = None
-    ) -> None:
-        user = await self._get_current_user(token)
+    ) -> Response:
+        user = self._get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -136,12 +139,14 @@ class UserController:
             }}
         )
 
-    async def delete(
+        return Response(content=f"Successfully update records for {username}!")
+
+    def delete(
         self,
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
-    ) -> None:
-        user = await self._get_current_user(token)
+    ) -> Response:
+        user = self._get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -150,12 +155,14 @@ class UserController:
             )
         self.collection.delete_one({"username": username})
 
-    async def enable(
+        return Response(content=f"Successfully delete user: {username}!")
+
+    def enable(
         self,
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
-    ) -> None:
-        user = await self._get_current_user(token)
+    ) -> Response:
+        user = self._get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -167,12 +174,14 @@ class UserController:
             {"$set": {"disabled": False}}
         )
 
-    async def disable(
+        return Response(content=f"Successfully enable user: {username}!")
+
+    def disable(
         self,
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
-    ) -> None:
-        user = await self._get_current_user(token)
+    ) -> Response:
+        user = self._get_current_user(token)
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -183,3 +192,19 @@ class UserController:
             {"username": username},
             {"$set": {"disabled": True}}
         )
+
+        return Response(content=f"Successfully disable user: {username}!")
+
+    def get_all_users(self, token: Annotated[str, Depends(oauth2_scheme)]
+                      ) -> list[User]:
+        user = self._get_current_user(token)
+        if not user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="get_all_users operation only permitted by superusers",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        users = self.collection.find()
+        users = [User(**u) for u in users]
+
+        return users
