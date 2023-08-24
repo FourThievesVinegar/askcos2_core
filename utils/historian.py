@@ -210,7 +210,7 @@ class MongoHistorian:
         try:
             self.client.server_info()
         except errors.ServerSelectionTimeoutError:
-            raise ValueError("Cannot connect to mongodb to load prices")
+            raise ValueError("Cannot connect to mongodb to load historian")
         else:
             self.collection = self.client[database][collection]
             self.db = self.client[database]
