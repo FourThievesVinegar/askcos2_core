@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI
+from utils import oauth2
 from utils.registry import get_util_registry
 from wrappers.registry import get_wrapper_registry
 
@@ -12,6 +13,12 @@ router.add_api_route(
     path="/get_backend_status",
     endpoint=wrapper_registry.get_backend_status,
     methods=["GET"]
+)
+router.add_api_route(
+    path="/token",
+    endpoint=oauth2.login_for_access_token,
+    methods=["POST"],
+    response_model=oauth2.Token
 )
 app.include_router(router)
 

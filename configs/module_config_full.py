@@ -476,5 +476,11 @@ module_config = {
         "collection": "buyables",
         "file": "",
         "precompute_mols": False
-    }
+    },
+
+    "user_controller": {
+        "engine": "db",
+        "database": "askcos",
+        "collection": "users"
+    },
 }

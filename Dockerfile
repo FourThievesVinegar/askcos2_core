@@ -12,9 +12,12 @@ RUN pip install \
     fastapi==0.95.1 \
     gevent==22.10.2 \
     pandas==1.5.3 \
+    "passlib[bcrypt]"==1.7.4 \
     protobuf==3.19.0 \
     pydantic==1.10.12 \
     pymongo==4.4.1 \
+    "python-jose[cryptography]"==3.3.0 \
+    python-multipart==0.0.6 \
     redis==4.3.6 \
     requests==2.31.0 \
     tqdm==4.66.1 \
