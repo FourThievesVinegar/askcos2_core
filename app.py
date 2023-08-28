@@ -39,8 +39,13 @@ for util in util_registry:
         router = APIRouter(prefix=f"/api/{prefix}")
         # Bind specified util.method to urls /{util.prefixes}/method_name
         for method_name, bind_types in util.methods_to_bind.items():
+            if method_name == "__call__":
+                path = "/"
+            else:
+                path = f"/{method_name}"
+
             router.add_api_route(
-                path=f"/{method_name}",
+                path=path,
                 endpoint=getattr(util, method_name),
                 methods=bind_types
             )

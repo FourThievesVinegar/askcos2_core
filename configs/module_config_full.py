@@ -475,6 +475,8 @@ module_config = {
         "collection": "banned_reactions"
     },
 
+    "draw": {},
+
     "historian": {
         "engine": "db",
         "database": "askcos",
