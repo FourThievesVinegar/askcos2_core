@@ -1,12 +1,21 @@
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 from pydantic import BaseModel
-from typing import Any
+from typing import Any, Literal
+
+
+class AttributeFilter(BaseModel):
+    name: str
+    logic: Literal[">", ">=", "<", "<=", "=="]
+    value: int | float
 
 
 class RetroTemplRelInput(BaseModel):
     model_name: str
     smiles: list[str]
+    max_num_templates: int = 1000
+    max_cum_prob: float = 0.999
+    attribute_filter: list[AttributeFilter] = []
 
 
 class RetroTemplRelResult(BaseModel):

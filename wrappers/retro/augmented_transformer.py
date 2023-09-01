@@ -9,7 +9,7 @@ class RetroATInput(BaseModel):
 
 
 class RetroATResult(BaseModel):
-    products: list[str]
+    reactants: list[str]
     scores: list[float]
 
 

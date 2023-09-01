@@ -84,7 +84,7 @@ class ForwardController(BaseWrapper):
                 contexts=None
             )
         else:
-            raise ValueError(f"Unsupported atom map backend: {backend}!")
+            raise ValueError(f"Unsupported forward backend: {backend}!")
 
         return wrapper_input
 
@@ -116,7 +116,7 @@ class ForwardController(BaseWrapper):
                     } for raw_result in result_per_smi]
                 )
         else:
-            raise ValueError(f"Unsupported atom map backend: {backend}!")
+            raise ValueError(f"Unsupported forward backend: {backend}!")
 
         response = {
             "status_code": status_code,
