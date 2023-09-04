@@ -1,7 +1,7 @@
 export VERSION ?= dev
 export TAG ?= $(VERSION)
 
-.PHONY: pre-deploy deploy update start stop clean restart
+.PHONY: pre-deploy deploy update start stop clean restart test test-wrappers test-adapters
 
 pre-deploy:
 	bash deploy.sh pre-deploy -v $(TAG)
@@ -23,3 +23,11 @@ clean:
 
 restart:
 	bash deploy.sh restart
+
+test: | test-adapters test-wrappers
+
+test-adapters:
+	pytest tests/adapters
+
+test-wrappers:
+	pytest tests/wrappers

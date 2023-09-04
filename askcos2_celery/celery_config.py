@@ -40,7 +40,10 @@ imports = ["askcos2_celery.tasks"]
 
 # Task routes (to make sure workers are task-specific)
 # Key is pattern matched against task name to determine queue
-task_routes = {"askcos2_celery.tasks.base_task": {"queue": "generic"}}
+task_routes = {
+    "askcos2_celery.tasks.base_task": {"queue": "generic"},
+    "askcos2_celery.tasks.legacy_task": {"queue": "generic"}
+}
 
 for module, to_start in module_config["modules_to_start"].items():
     if to_start:
