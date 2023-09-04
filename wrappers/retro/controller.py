@@ -33,7 +33,7 @@ class RetroOutput(BaseModel):
 
 class RetroResult(BaseModel):
     outcome: str
-    score: float
+    model_score: float
     template: dict[str, Any] | None
 
 
@@ -117,7 +117,7 @@ class RetroController(BaseWrapper):
             result = []
             for result_per_smi in wrapper_response.result:
                 result.append(
-                    [{"outcome": outcome, "score": score} for outcome, score
+                    [{"outcome": outcome, "model_score": score} for outcome, score
                      in zip(result_per_smi.reactants, result_per_smi.scores)]
                 )
         elif backend == "template_relevance":
@@ -125,7 +125,7 @@ class RetroController(BaseWrapper):
             result = []
             for result_per_smi in wrapper_response.result:
                 result.append(
-                    [{"outcome": outcome, "score": score, "template": template}
+                    [{"outcome": outcome, "model_score": score, "template": template}
                      for outcome, score, template in zip(
                         result_per_smi.reactants,
                         result_per_smi.scores,
