@@ -381,7 +381,7 @@ seed-db() {
   echo
 }
 
-generate-deployment-scripts() {
+generate-deployment-scripts-in-docker() {
   if [ -z "${ASKCOS_REGISTRY}" ]; then
     export ASKCOS_REGISTRY=registry.gitlab.com/mlpds_mit/askcosv2
   fi
@@ -396,6 +396,9 @@ generate-deployment-scripts() {
     python scripts/pre_deploy.py
 }
 
+generate-deployment-scripts() {
+  python scripts/pre_deploy.py
+}
 
 get-backend-images() {
   echo "Getting images using the script from the latest deployment directory"
