@@ -63,7 +63,7 @@ def main():
     # module_config = validate(module_config) # TODO
 
     # set up the deployment directory
-    cwd = os.getcwd()
+    cwd = os.environ.get("ASKCOS2_CORE_DIR", os.getcwd())
     os.makedirs("./deployment", exist_ok=True)
     dt = datetime.strftime(datetime.now(), "%y%m%d-%H%Mh")
     deployment_dir = f"./deployment/deployment_{dt}"
