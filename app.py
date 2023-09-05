@@ -1,9 +1,11 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI
+from adapters.registry import get_adapter_registry
 from utils import oauth2
 from utils.registry import get_util_registry
 from wrappers.registry import get_wrapper_registry
 
+adapter_registry = get_adapter_registry()
 util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
 
@@ -33,6 +35,20 @@ for wrapper in wrapper_registry:
                 methods=bind_types
             )
         app.include_router(router)
+
+for adapter in adapter_registry:
+    # Adapter should have a single prefix, by design
+    router = APIRouter(prefix=f"/api/{adapter.prefix}")
+    if adapter.name in ["v1_celery_task"]:
+        path = "/{task_id}"
+    else:
+        path = "/"
+    router.add_api_route(
+        path=path,
+        endpoint=adapter.__call__,
+        methods=adapter.methods
+    )
+    app.include_router(router)
 
 for util in util_registry:
     for prefix in util.prefixes:

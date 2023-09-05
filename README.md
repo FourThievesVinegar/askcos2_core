@@ -65,3 +65,9 @@ For more advanced deployment with K8s and/or helm, please refer to the repo `ask
 ## Sample API usage
 
 The backend microservices are managed centrally through the FastAPI app, running at http://0.0.0.0:9100 by default. To use any endpoint, you can first look at the API definition at http://0.0.0.0:9100/docs. You should mostly be making the synchronous call, unless you are interacting with the frontend. The POST requests with desired data format defined in docs should be sent to the `call_sync` endpoint, for example, to http://0.0.0.0:9100/site_selectivity/call_sync.
+
+## Unit Test
+With the services started, run
+```
+V2_HOST=0.0.0.0 make test
+```

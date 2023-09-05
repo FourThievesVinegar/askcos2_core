@@ -381,6 +381,25 @@ seed-db() {
   echo
 }
 
+generate-deployment-scripts-in-docker() {
+  if [ -z "${ASKCOS_REGISTRY}" ]; then
+    export ASKCOS_REGISTRY=registry.gitlab.com/mlpds_mit/askcosv2
+  fi
+
+  echo "Building image for askcos2_core, runtime: docker"
+  docker build -f Dockerfile -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 .
+
+  docker run --rm \
+    -e ASKCOS2_CORE_DIR="$PWD" \
+    -v "${PWD%/*}":/ASKCOSv2 \
+    -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 \
+    python scripts/pre_deploy.py
+}
+
+generate-deployment-scripts() {
+  python scripts/pre_deploy.py
+}
+
 get-backend-images() {
   echo "Getting images using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/get_images.sh"
@@ -544,7 +563,7 @@ else
         ;;
       pre-deploy)
         diff-env
-        python scripts/pre_deploy.py
+        generate-deployment-scripts
         get-backend-images
         download-backend-data
         set-db-defaults
@@ -553,7 +572,7 @@ else
       deploy)
         # Normal first deployment, do everything (pre-deploy + start-backend-services)
         diff-env
-        python scripts/pre_deploy.py
+        generate-deployment-scripts
         get-backend-images
         download-backend-data
         set-db-defaults
@@ -563,7 +582,7 @@ else
       update)
         # Update an existing configuration, database seeding is not performed
         diff-env
-        python scripts/pre_deploy.py
+        generate-deployment-scripts
         get-backend-images
         start-backend-services
         post-update-message
