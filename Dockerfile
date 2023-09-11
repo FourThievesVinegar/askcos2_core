@@ -23,6 +23,7 @@ RUN pip install \
     pyyaml==6.0.1 \
     redis==4.3.6 \
     requests==2.31.0 \
+    scipy==1.7.3 \
     svgutils==0.3.4 \
     tqdm==4.66.1 \
     uvicorn==0.21.1

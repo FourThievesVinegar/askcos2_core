@@ -42,6 +42,7 @@ imports = ["askcos2_celery.tasks"]
 # Key is pattern matched against task name to determine queue
 task_routes = {
     "askcos2_celery.tasks.base_task": {"queue": "generic"},
+    "askcos2_celery.tasks.task_with_token": {"queue": "generic"},
     "askcos2_celery.tasks.legacy_task": {"queue": "generic"}
 }
 

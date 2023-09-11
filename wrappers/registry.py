@@ -51,11 +51,11 @@ class WrapperRegistry:
                         "forward_controller" not in self._wrappers:
                     controller_class = WRAPPER_CLASSES["forward_controller"]
                     self._wrappers["forward_controller"] = controller_class()
-                #
-                # if module.startswith("retro") and \
-                #         "retro_controller" not in self._wrappers:
-                #     controller_class = WRAPPER_CLASSES["retro_controller"]
-                #     self._wrappers["retro_controller"] = controller_class
+
+                elif module.startswith("retro") and \
+                        "retro_controller" not in self._wrappers:
+                    controller_class = WRAPPER_CLASSES["retro_controller"]
+                    self._wrappers["retro_controller"] = controller_class()
 
     def get_backend_status(self) -> dict[str, BackendStatus]:
         status = {}

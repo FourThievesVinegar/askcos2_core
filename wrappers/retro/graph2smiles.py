@@ -9,7 +9,7 @@ class RetroG2SInput(BaseModel):
 
 
 class RetroG2SResult(BaseModel):
-    products: list[str]
+    reactants: list[str]
     scores: list[float]
 
 
