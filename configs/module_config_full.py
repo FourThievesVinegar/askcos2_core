@@ -21,7 +21,8 @@ module_config = {
         "retro_graph2smiles": True,
         "scscore": True,
         "site_selectivity": True,
-        "tree_optimizer": True
+        "tree_optimizer": True,
+        "tree_search_expand_one": True
     },
 
     "global": {
@@ -89,7 +90,7 @@ module_config = {
             "ports_to_expose": [9801],
             "default_prediction_url": "http://0.0.0.0:9801/cluster",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 30,
             "available_models": [
                 "default"
             ]
@@ -452,6 +453,25 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9711/tree_optimizer",
             "custom_prediction_url": "",
             "timeout": 600,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "tree_search_expand_one": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/expand_one.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9301],
+            "default_prediction_url": "http://0.0.0.0:9301/get_outcomes",
+            "custom_prediction_url": "",
+            "timeout": 30,
             "available_models": [
                 "default"
             ]
