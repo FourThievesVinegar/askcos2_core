@@ -1,6 +1,7 @@
 import uvicorn
-from fastapi import APIRouter, FastAPI
 from adapters.registry import get_adapter_registry
+from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from utils import oauth2
 from utils.registry import get_util_registry
 from wrappers.registry import get_wrapper_registry
@@ -10,6 +11,14 @@ util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 router = APIRouter(prefix="/api/admin")
 router.add_api_route(
     path="/get_backend_status",
