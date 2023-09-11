@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from scipy.special import softmax
 from typing import Any, Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
@@ -34,6 +35,7 @@ class RetroOutput(BaseModel):
 class RetroResult(BaseModel):
     outcome: str
     model_score: float
+    normalized_model_score: float
     template: dict[str, Any] | None
 
 
@@ -116,17 +118,30 @@ class RetroController(BaseWrapper):
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:
+                normalized_scores = softmax(result_per_smi.scores)
                 result.append(
-                    [{"outcome": outcome, "model_score": score} for outcome, score
-                     in zip(result_per_smi.reactants, result_per_smi.scores)]
+                    [{
+                        "outcome": outcome,
+                        "model_score": score,
+                        "normalized_model_score": float(normalized_score)
+                    } for outcome, score, normalized_score in zip(
+                        result_per_smi.reactants,
+                        result_per_smi.scores,
+                        normalized_scores
+                    )]
                 )
         elif backend == "template_relevance":
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:
+                # denominator = sum(result_per_smi.scores)  # we can re-normalize here?
                 result.append(
-                    [{"outcome": outcome, "model_score": score, "template": template}
-                     for outcome, score, template in zip(
+                    [{
+                        "outcome": outcome,
+                        "model_score": score,
+                        "normalized_model_score": score,
+                        "template": template
+                    } for outcome, score, template in zip(
                         result_per_smi.reactants,
                         result_per_smi.scores,
                         result_per_smi.templates
