@@ -21,7 +21,7 @@ services:
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
-      - "mongo_data:/data/db"
+      - "askcosv2_mongo_data:/data/db"
       - "./data/db:/usr/local/askcos-data/db"
     command: --wiredTigerCacheSizeGB 1.5
 
@@ -43,7 +43,7 @@ services:
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"
     volumes:
-      - "redisdata:/data"
+      - "askcosv2_redisdata:/data"
     command: redis-server --port ${REDIS_PORT}
 
   generic_celery_worker:
@@ -69,5 +69,5 @@ services:
       - redis
 
 volumes:
-  redisdata:
-  mongo_data:
+  askcosv2_redisdata:
+  askcosv2_mongo_data:
