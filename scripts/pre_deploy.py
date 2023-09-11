@@ -52,6 +52,9 @@ def main():
     assert os.path.basename(os.path.abspath("..")) == "ASKCOSv2", \
         "Please ensure the askcos2_core is under the directory ASKCOSv2."
 
+    if not os.path.exists(".env"):
+        shutil.copy2(src=".env.example", dst=".env")
+
     args, _ = get_parser().parse_known_args()
     if args.config.endswith(".py"):
         m = args.config[:-3]
