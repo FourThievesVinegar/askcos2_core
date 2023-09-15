@@ -33,7 +33,7 @@ class ExpandOneInput(BaseModel):
     use_fast_filter: bool = True
     fast_filter_threshold: float = 0.75
     retro_rerank_backend: str = "relevance_heuristic"
-    cluster_precursors: bool = True
+    cluster_precursors: bool = False
     cluster_setting: ClusterSetting = ClusterSetting()
     extract_template: bool = False
     return_reacting_atoms: bool = True
@@ -103,6 +103,14 @@ class BlacklistedReactions(BaseModel):
 class ExpandOneWrapper(BaseWrapper):
     """Wrapper class for clustering reactions"""
     prefixes = ["tree_search/expand_one"]
+    methods_to_bind: dict[str, list[str]] = {
+        "get_config": ["GET"],
+        "get_doc": ["GET"],
+        "call_sync": ["POST"],
+        "call_sync_without_token": ["POST"],
+        "call_async": ["POST"],
+        "retrieve": ["GET"]
+    }
 
     def call_sync(
         self,
@@ -130,6 +138,22 @@ class ExpandOneWrapper(BaseWrapper):
         user_banned_reactions = [entry.smiles for entry in user_banned_reactions
                                  if entry.active]
         input.banned_reactions.extend(user_banned_reactions)
+
+        # actual backend call
+        output = self.call_raw(input=input)
+        response = self.convert_output_to_response(output)
+
+        return response
+
+    def call_sync_without_token(self, input: ExpandOneInput) -> ExpandOneResponse:
+        """Special method to be called by other tree searchers"""
+        # banned_chemicals handling, does not require login token
+        if not input.banned_chemicals:
+            input.banned_chemicals = []
+
+        # banned_chemicals handling, does not require login token
+        if not input.banned_reactions:
+            input.banned_reactions = []
 
         # actual backend call
         output = self.call_raw(input=input)

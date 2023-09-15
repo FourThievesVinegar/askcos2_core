@@ -1,11 +1,15 @@
-from wrappers import register_wrapper
-from wrappers.base import BaseWrapper, BaseResponse
 from pydantic import BaseModel
 from typing import List, Dict
+from wrappers import register_wrapper
+from wrappers.base import BaseWrapper, BaseResponse
 
 
 class PathwayRankerInput(BaseModel):
     tree: List[Dict]
+    clustering: bool = False
+    cluster_method: str = "hdbscan"
+    min_samples: int = 5
+    min_cluster_size: int = 5
 
 
 class PathwayRankerResult(BaseModel):
@@ -21,7 +25,7 @@ class PathwayRankerOutput(BaseModel):
 
 
 class PathwayRankerResponse(BaseResponse):
-    result: List[PathwayRankerResult]
+    result: PathwayRankerResult
 
 
 @register_wrapper(
@@ -52,7 +56,7 @@ class PathwayRankerWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result": output.results
+            "result": output.results[0]
         }
         response = PathwayRankerResponse(**response)
 
