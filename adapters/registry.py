@@ -12,7 +12,7 @@ def get_adapter_registry():
         default_path = "configs.module_config_full"
         config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
         _adapter_registry = AdapterRegistry(config_path=config_path)
-        print(f"Loaded model configuration file from {config_path}")
+        print(f"Loaded adapter configuration from {config_path}")
 
     return _adapter_registry
 

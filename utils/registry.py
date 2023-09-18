@@ -12,7 +12,7 @@ def get_util_registry():
         default_path = "configs.module_config_full"
         config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
         _util_registry = UtilRegistry(config_path=config_path)
-        print(f"Loaded module configuration file from {config_path}")
+        print(f"Loaded util configuration from {config_path}")
 
     return _util_registry
 

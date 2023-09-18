@@ -1,6 +1,6 @@
+from pydantic import BaseModel, Field
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
 class RetroG2SInput(BaseModel):
@@ -9,7 +9,7 @@ class RetroG2SInput(BaseModel):
 
 
 class RetroG2SResult(BaseModel):
-    reactants: list[str]
+    reactants: list[str] = Field(alias="products")
     scores: list[float]
 
 
@@ -34,9 +34,6 @@ class RetroG2SWrapper(BaseWrapper):
     def call_raw(self, input: RetroG2SInput) -> RetroG2SOutput:
         input_as_dict = input.dict()
         model_name = input_as_dict["model_name"]
-
-        print(f"{self.prediction_url}/{model_name}")
-        print(input_as_dict)
 
         response = self.session_sync.post(
             f"{self.prediction_url}/{model_name}",

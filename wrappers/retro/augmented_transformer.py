@@ -1,6 +1,6 @@
+from pydantic import BaseModel, Field
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
 class RetroATInput(BaseModel):
@@ -9,7 +9,7 @@ class RetroATInput(BaseModel):
 
 
 class RetroATResult(BaseModel):
-    reactants: list[str]
+    reactants: list[str] = Field(alias="products")
     scores: list[float]
 
 

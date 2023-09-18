@@ -20,7 +20,7 @@ def get_wrapper_registry():
         default_path = "configs.module_config_full"
         config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
         _wrapper_registry = WrapperRegistry(config_path=config_path)
-        print(f"Loaded model configuration file from {config_path}")
+        print(f"Loaded wrapper configuration from {config_path}")
 
     return _wrapper_registry
 
