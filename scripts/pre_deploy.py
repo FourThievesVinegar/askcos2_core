@@ -106,6 +106,8 @@ def main():
         is_newly_cloned = False
         if os.path.exists(output_dir):
             print(f"{output_dir} already exists, skipping cloning.")
+            command = ["git", "pull"]
+            run_and_printchar(command, cwd=output_dir)
         else:
             os.makedirs(output_dir)
             print(f"Cloning {repo} into {output_dir}")
