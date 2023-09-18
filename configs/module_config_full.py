@@ -22,7 +22,8 @@ module_config = {
         "scscore": True,
         "site_selectivity": True,
         "tree_optimizer": True,
-        "tree_search_expand_one": True
+        "tree_search_expand_one": True,
+        "tree_search_mcts": True
     },
 
     "global": {
@@ -372,7 +373,7 @@ module_config = {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/augmented_transformer.git",
         "deployment": {
             "deployment_config": "deployment.yaml",
-            "use_gpu": True,
+            "use_gpu": False,
             "ports_to_expose": [9420, 9421, 9422],
             "default_prediction_url": "http://0.0.0.0:9420/predictions",
             "custom_prediction_url": "",
@@ -391,7 +392,7 @@ module_config = {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/graph2smiles.git",
         "deployment": {
             "deployment_config": "deployment.yaml",
-            "use_gpu": True,
+            "use_gpu": False,
             "ports_to_expose": [9430, 9431, 9432],
             "default_prediction_url": "http://0.0.0.0:9430/predictions",
             "custom_prediction_url": "",
@@ -472,6 +473,25 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9301/get_outcomes",
             "custom_prediction_url": "",
             "timeout": 30,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "tree_search_mcts": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/mcts.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9311],
+            "default_prediction_url": "http://0.0.0.0:9311/get_buyable_paths",
+            "custom_prediction_url": "",
+            "timeout": 120,
             "available_models": [
                 "default"
             ]

@@ -101,7 +101,7 @@ class BlacklistedReactions(BaseModel):
     response_class=ExpandOneResponse
 )
 class ExpandOneWrapper(BaseWrapper):
-    """Wrapper class for clustering reactions"""
+    """Wrapper class for ones tep expansion"""
     prefixes = ["tree_search/expand_one"]
     methods_to_bind: dict[str, list[str]] = {
         "get_config": ["GET"],
