@@ -39,7 +39,10 @@ for wrapper in wrapper_registry:
         # Bind specified wrapper.method to urls /{wrapper.prefixes}/method_name
         for method_name, bind_types in wrapper.methods_to_bind.items():
             # Only include the first prefix, and methods call_sync/async in the schema
-            include_in_schema = i == 0 and method_name in ["call_sync", "call_async"]
+            include_in_schema = (
+                i == 0 and method_name in
+                ["call_sync", "call_async", "call_sync_without_token"]
+            )
             router.add_api_route(
                 path=f"/{method_name}",
                 endpoint=getattr(wrapper, method_name),
