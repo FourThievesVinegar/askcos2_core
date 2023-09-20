@@ -1,9 +1,11 @@
+import uuid
 from datetime import datetime
 from fastapi import Depends
 from pydantic import BaseModel, constr, Field
 from typing import Annotated, Any, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
+from utils.tree_search_results import TreeSearchSavedResults
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
@@ -13,7 +15,7 @@ class RetroBackendOption(BaseModel):
     retro_model_name: str = "reaxys"
     max_num_templates: int = 100
     max_cum_prob: float = 0.995
-    attribute_filter: list[dict[str, Any]] = []
+    attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ClusterSetting(BaseModel):
@@ -29,8 +31,8 @@ class ExpandOneOptions(BaseModel):
     # aliasing to v1 fields
     template_max_count: int = Field(default=100, alias="template_count")
     template_max_cum_prob: int = Field(default=0.995, alias="max_cum_template_prob")
-    banned_chemicals: list[str] = Field(default=[], alias="forbidden_molecules")
-    banned_reactions: list[str] = Field(default=[], alias="known_bad_reactions")
+    banned_chemicals: list[str] = Field(default_factory=list, alias="forbidden_molecules")
+    banned_reactions: list[str] = Field(default_factory=list, alias="known_bad_reactions")
 
     retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
     use_fast_filter: bool = True
@@ -88,6 +90,8 @@ class MCTSInput(BaseModel):
     expand_one_options: ExpandOneOptions = ExpandOneOptions()
     build_tree_options: BuildTreeOptions = BuildTreeOptions()
     enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
+    run_async: bool = False
+    result_id: str = str(uuid.uuid4())
 
 
 class MCTSResult(BaseModel):
@@ -111,7 +115,7 @@ class BlacklistedEntry(BaseModel):
     id: str = ""
     user: str
     description: constr(max_length=1000) = None
-    created: datetime = datetime.now()
+    created: datetime = Field(default_factory=datetime.now)
     dt: constr(max_length=200) = None
     smiles: constr(max_length=5000)
     active: bool = True
@@ -170,9 +174,41 @@ class MCTSWrapper(BaseWrapper):
                                  if entry.active]
         input.expand_one_options.banned_reactions.extend(user_banned_reactions)
 
-        # actual backend call
-        output = self.call_raw(input=input)
-        response = self.convert_output_to_response(output)
+        results_controller = get_util_registry().get_util(
+            module="tree_search_results_controller"
+        )
+
+        if input.run_async:
+            results_controller.update_result_state(
+                result_id=input.result_id,
+                state="started",
+                token=token
+            )
+        try:
+            # actual backend call
+            output = self.call_raw(input=input)
+            response = self.convert_output_to_response(output)
+            result_doc = response.result
+        except Exception:
+            if input.run_async:
+                results_controller.update_result_state(
+                    result_id=input.result_id,
+                    state="failed",
+                    token=token
+                )
+            raise
+
+        if input.run_async:
+            results_controller.update_result_state(
+                result_id=input.result_id,
+                state="completed",
+                token=token
+            )
+            results_controller.save_results(
+                result_id=input.result_id,
+                result=result_doc,
+                token=token
+            )
 
         return response
 
@@ -198,6 +234,29 @@ class MCTSWrapper(BaseWrapper):
         token: Annotated[str, Depends(oauth2_scheme)],
         priority: int = 0
     ) -> str:
+        user_controller = get_util_registry().get_util(module="user_controller")
+        user = user_controller.get_current_user(token)
+
+        input.run_async = True
+        input.result_id = str(uuid.uuid4())
+        # Note that we can't use task_id as the result_id,
+        # as it needs to be known beforehand
+        saved_results = TreeSearchSavedResults(
+            user=user.username,
+            created=datetime.now(),
+            modified=datetime.now(),
+            result_id=input.result_id,
+            result_state="pending",
+            result_type="tree_builder",
+            result=None,
+            settings=input,
+            shared_with=[user.username]
+        )
+        results_controller = get_util_registry().get_util(
+            module="tree_search_results_controller"
+        )
+        results_controller.create(result=saved_results, token=token)
+
         from askcos2_celery.tasks import task_with_token
         async_result = task_with_token.apply_async(
             args=(self.name, input.dict(), token), priority=priority)
