@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import Depends
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, Field
 from typing import Annotated, Any, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
@@ -13,7 +13,7 @@ class RetroBackendOption(BaseModel):
     retro_model_name: str = "reaxys"
     max_num_templates: int = 100
     max_cum_prob: float = 0.995
-    attribute_filter: list[dict[str, Any]] = []
+    attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ClusterSetting(BaseModel):
@@ -80,7 +80,7 @@ class BlacklistedEntry(BaseModel):
     id: str = ""
     user: str
     description: constr(max_length=1000) = None
-    created: datetime = datetime.now()
+    created: datetime = Field(default_factory=datetime.now)
     dt: constr(max_length=200) = None
     smiles: constr(max_length=5000)
     active: bool = True

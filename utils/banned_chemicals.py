@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import Depends, Response
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, Field
 from typing import Annotated
 from utils import register_util
 from utils.base import BaseBanlistController
@@ -15,7 +15,7 @@ class BlacklistedChemical(BaseModel):
     id: str = ""
     user: str
     description: constr(max_length=1000) = None
-    created: datetime = datetime.now()
+    created: datetime = Field(default_factory=datetime.now)
     dt: constr(max_length=200) = None
     smiles: constr(max_length=5000)
     active: bool = True
