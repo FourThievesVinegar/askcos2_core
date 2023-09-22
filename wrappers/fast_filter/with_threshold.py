@@ -37,7 +37,7 @@ class FastFilterWThresholdWrapper(BaseWrapper):
                   ) -> FastFilterWThresholdResponse:
         if not self.prediction_url.endswith("filter_with_threshold"):
             self.prediction_url = f"{self.prediction_url}/filter_with_threshold"
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response

@@ -34,7 +34,7 @@ class TreeOptimizerWrapper(BaseWrapper):
 
     def call_sync(self, input: TreeOptimizerInput
                   ) -> TreeOptimizerResponse:
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response

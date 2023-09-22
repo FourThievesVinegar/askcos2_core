@@ -28,7 +28,7 @@ class AtomMapWLNWrapper(BaseWrapper):
     prefixes = ["atom_map/wln"]
 
     def call_sync(self, input: AtomMapWLNInput) -> AtomMapWLNResponse:
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response

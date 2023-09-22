@@ -44,7 +44,7 @@ class FastFilterWrapper(BaseWrapper):
         if not self.prediction_url.endswith("fast_filter_evaluate"):
             self.prediction_url = f"{self.prediction_url}/fast_filter_evaluate"
             # this creates an infinite stacking loop w/o if statement
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
