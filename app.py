@@ -70,7 +70,10 @@ for util in util_registry:
         router = APIRouter(prefix=f"/api/{prefix}")
         # Bind specified util.method to urls /{util.prefixes}/method_name
         for method_name, bind_types in util.methods_to_bind.items():
-            if method_name == "__call__":
+            if util.name in ["draw"]:
+                # hardcode for some util for legacy convention
+                path = "/"
+            elif method_name == "__call__":
                 path = "/"
             else:
                 path = f"/{method_name}"

@@ -1,7 +1,7 @@
 import json
-from fastapi import HTTPException, Request, Response
+from fastapi import Depends, Response
 from pydantic import BaseModel
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from utils import register_util
 from utils.draw_impl import (
     molecule_smiles_to_image,
@@ -13,19 +13,19 @@ from utils.image_annotation import generate_annotated_image
 
 class DrawerInput(BaseModel):
     smiles: str
-    input_type: Literal["chemical", "reaction", "template"] | None = None
-    svg: bool | None = None
-    transparent: bool | None = None
-    draw_map: bool | None = None
-    highlight: bool | None = None
-    reacting_atoms: list | None = None
-    reference: str | None = None
-    align: bool | None = None
-    annotate: bool | None = None
-    ppg: float | None = None
-    as_reactant: int | None = None
-    as_product: int | None = None
-    size: float | None = None
+    input_type: Literal["", "chemical", "reaction", "template"] = None
+    svg: bool = True
+    transparent: bool = False
+    draw_map: bool = False
+    highlight: bool = False
+    reacting_atoms: list[float] = None
+    reference: str = None
+    align: bool = False
+    annotate: bool = False
+    ppg: float = 0.0
+    as_reactant: int = 0
+    as_product: int = 0
+    size: float = None
 
 
 @register_util(name="draw")
@@ -68,23 +68,20 @@ class Drawer:
     """
     prefixes = ["draw"]
     methods_to_bind: dict[str, list[str]] = {
-        "__call__": ["GET", "POST"]
+        "get": ["GET"],
+        "post": ["POST"]
     }
 
     def __init__(self, util_config: dict[str, Any]):
         pass
 
-    def __call__(self, request: Request) -> Response:
-        if request.method == "GET":
-            data = dict(request.query_params)
-        elif request.method == "POST":
-            data = request.json()
-        else:
-            raise HTTPException(405, f"Unsupported method: {request.method}")
+    @staticmethod
+    def get(query_params: Annotated[DrawerInput, Depends()]) -> Response:
+        return draw(query_params.dict())
 
-        DrawerInput(**data)         # merely validate the data
-
-        return draw(data)
+    @staticmethod
+    def post(data: DrawerInput) -> Response:
+        return draw(data.dict())
 
 
 def draw(data: dict) -> Response:
