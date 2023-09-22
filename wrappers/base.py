@@ -1,6 +1,9 @@
 import requests
 from celery.result import AsyncResult
+from configs import db_config
+from datetime import date
 from pydantic import BaseModel
+from pymongo import errors, MongoClient
 
 
 class BaseResponse(BaseModel):
@@ -23,6 +26,20 @@ class BaseWrapper:
         "call_async": ["POST"],
         "retrieve": ["GET"]
     }
+    methods_to_log: list[str] = [
+        "call_raw",
+        "call_sync"
+    ]
+
+    logs_client = MongoClient(serverSelectionTimeoutMS=1000, **db_config.MONGO)
+    try:
+        logs_client.server_info()
+    except errors.ServerSelectionTimeoutError:
+        print("Cannot connect to mongodb for api logging")
+        pass
+    else:
+        logs_db = logs_client["logs"]
+        logs_collection = logs_client["logs"]["api_calls"]
 
     def __init__(self, config: dict):
         self.config = config
@@ -81,3 +98,19 @@ class BaseWrapper:
         response = BaseResponse(**response)
 
         return response
+
+    def __getattribute__(self, item: str):
+        # Hook for logging function (thus API) calls
+        _methods_to_log = super().__getattribute__("methods_to_log")
+        if item in _methods_to_log:
+            _collection = super().__getattribute__("logs_collection")
+            _wrapper_name = super().__getattribute__("name")
+            query = {"method": f"{_wrapper_name}.{item}"}
+            dt = date.today().strftime("%y%m%d")
+            _collection.update_one(
+                query,
+                {"$inc": {f"count.{dt}": 1}},
+                upsert=True
+            )
+
+        return super().__getattribute__(item)

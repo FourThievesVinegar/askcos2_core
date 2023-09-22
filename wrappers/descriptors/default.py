@@ -38,7 +38,7 @@ class DescriptorWrapper(BaseWrapper):
     prefixes = ["descriptors"]
 
     def call_sync(self, input: DescriptorsInput) -> DescriptorsResponse:
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
