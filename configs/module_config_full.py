@@ -23,13 +23,15 @@ module_config = {
         "site_selectivity": True,
         "tree_optimizer": True,
         "tree_search_expand_one": True,
-        "tree_search_mcts": True
+        "tree_search_mcts": True,
+        "legacy_descriptors": True,
+        "legacy_solubility": True
     },
 
     "global": {
         "container_runtime": "docker",
         "image_policy": "build_all",
-        "enable_gpu": True
+        "enable_gpu": False
     },
 
     "atom_map_indigo": {
@@ -502,6 +504,42 @@ module_config = {
         }
     },
 
+    "legacy_descriptors": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/legacy_descriptors.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "image_policy": "pull",
+            "use_gpu": False,
+            "ports_to_expose": [9632],
+            "default_prediction_url": "http://0.0.0.0:9632/predictions",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
+    "legacy_solubility": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/legacy_solubility.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "image_policy": "pull",
+            "use_gpu": False,
+            "ports_to_expose": [9732],
+            "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
+            "custom_prediction_url": "",
+            "timeout": 3,
+            "available_models": []
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
+    },
+
     # utils
     "banned_chemicals": {
         "engine": "db",
@@ -514,6 +552,8 @@ module_config = {
         "database": "askcos",
         "collection": "banned_reactions"
     },
+
+    "celery_task": {},
 
     "draw": {},
 
@@ -530,6 +570,11 @@ module_config = {
         "collection": "buyables",
         "file": "",
         "precompute_mols": False
+    },
+
+    "tree_search_results_controller": {
+        "database": "results",
+        "collection": "results"
     },
 
     "user_controller": {

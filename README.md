@@ -6,6 +6,11 @@ The core FastAPI app (a.k.a. the API gateway) for ASKCOSv2. The functional modul
 
 In the general sense, the ASKCOSv2 backend consists of the API gateway and the microservices that serve the functional modules. We therefore need to set up the microservices for those modules, before we can call them via the API gateway.
 
+### Requirements:
+`docker` >= version 20. See <a href="https://docs.docker.com/engine/install/">Install docker</a>. This would come with `docker compose`, which some modules rely on. Note that ARM-based Mac is currently not supported.
+
+`pyyaml` (pip installable) and `make`.
+
 ### Option 1: the easy way
 We have made use of Makefile and the deployment script to make deployment with the default config easy. First make sure that `askcos2_core` is under a folder named `ASKCOSv2`. Then while in `askcos2_core`,
 ```

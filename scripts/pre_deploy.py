@@ -142,15 +142,29 @@ def main():
             device = "cpu"
 
         if image_policy == "build_all":
-            cmd = str(deployment_config[runtime][device]["build"])
-            cmds = [
-                f"echo Building image for module: {module}, "
-                f"runtime: {runtime}, device: {device}\n",
-                f"cd {output_dir}\n",
-                f"{cmd}\n",
-                f"cd {cwd}\n",
-                "\n"
-            ]
+            if module in ["legacy_descriptors", "legacy_solubility"]:
+                # only two legacy black-box images remaining
+                # Hardcoded, DO NOT CHANGE
+                cmd = str(deployment_config[runtime][device]["image"])
+                cmd = f"docker pull {cmd}"
+                cmds = [
+                    f"echo Pulling image for module: {module}, "
+                    f"runtime: {runtime}, device: {device}\n",
+                    f"cd {output_dir}\n",
+                    f"{cmd}\n",
+                    f"cd {cwd}\n",
+                    "\n"
+                ]
+            else:
+                cmd = str(deployment_config[runtime][device]["build"])
+                cmds = [
+                    f"echo Building image for module: {module}, "
+                    f"runtime: {runtime}, device: {device}\n",
+                    f"cd {output_dir}\n",
+                    f"{cmd}\n",
+                    f"cd {cwd}\n",
+                    "\n"
+                ]
             cmds_get_images.extend(cmds)
         else:
             raise NotImplementedError
