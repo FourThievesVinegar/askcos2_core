@@ -92,8 +92,8 @@ class LegacySolubilityResult(BaseModel):
     s_298: str | float | None = Field(alias="S298 [mg/mL]")
 
 
-class LegacySolubilityResponse(BaseResponse):
-    result: list[LegacySolubilityResult]
+class LegacySolubilityResponse(BaseModel):
+    __root__: list[LegacySolubilityResult]
 
 
 @register_wrapper(
@@ -139,12 +139,6 @@ class LegacySolubilityWrapper(BaseWrapper):
         keys, value_lists = zip(*output.dict(by_alias=True).items())
         results = [dict(zip(keys, values)) for values in zip(*value_lists)]
         results = postprocess_solubility_results(results)
-
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": results
-        }
-        response = LegacySolubilityResponse(**response)
+        response = LegacySolubilityResponse(__root__=results)
 
         return response

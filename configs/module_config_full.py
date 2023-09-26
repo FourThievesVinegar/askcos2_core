@@ -511,7 +511,7 @@ module_config = {
             "image_policy": "pull",
             "use_gpu": False,
             "ports_to_expose": [9632],
-            "default_prediction_url": "http://0.0.0.0:9632/predictions",
+            "default_prediction_url": "http://0.0.0.0:9632/predictions/descriptors",
             "custom_prediction_url": "",
             "timeout": 3,
             "available_models": []
