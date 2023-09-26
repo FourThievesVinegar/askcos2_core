@@ -362,7 +362,12 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_models": [
-                "placeholder"
+                "bkms_metabolic",
+                "cas",
+                "pistachio",
+                "pistachio_ringbreaker",
+                "reaxys",
+                "reaxys_biocatalysis"
             ]
         },
         "celery": {
