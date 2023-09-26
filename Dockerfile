@@ -9,12 +9,16 @@ RUN apt update && apt -y install git gcc g++ make
 RUN micromamba install -y python=3.10.12 pip=23.2.1 rdkit=2023.03.3 -c conda-forge
 RUN pip install \
     celery==5.2.7 \
+    epam.indigo==1.4.3 \
     fastapi==0.95.1 \
+    hdbscan==0.8.33 \
     gevent==22.10.2 \
+    networkx==2.6.3 \
     pandas==1.5.3 \
     "passlib[bcrypt]"==1.7.4 \
     pillow==9.5.0 \
     protobuf==3.19.0 \
+    pulp==2.6.0 \
     pydantic==1.10.12 \
     pymongo==4.4.1 \
     pytest==7.4.1 \
@@ -23,6 +27,7 @@ RUN pip install \
     pyyaml==6.0.1 \
     redis==4.3.6 \
     requests==2.31.0 \
+    scikit-learn==1.0.2 \
     scipy==1.7.3 \
     svgutils==0.3.4 \
     tqdm==4.66.1 \

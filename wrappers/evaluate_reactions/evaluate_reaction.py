@@ -47,7 +47,7 @@ class EvaluateReactionResponse(BaseResponse):
 )
 class EvaluateContextWrapper(BaseWrapper):
     """Wrapper class for evaluating context"""
-    prefixes = ["evaluate_context"]
+    prefixes = ["evaluate_reaction"]
 
     def call_raw(self, input: EvaluateReactionInput) -> EvaluateReactionOutput:
         response = self.session_sync.post(
