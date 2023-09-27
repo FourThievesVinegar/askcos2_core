@@ -15,19 +15,20 @@ from utils.similarity_search_utils import sim_search, sim_search_aggregate
 class Pricer:
     """Util class for Pricer, to be used as a controller (over Mongo/FilePricer"""
     prefixes = ["pricer"]
-    methods_to_bind: dict[str, list[str]] = {
-        "lookup_smiles": ["POST"],
-        "lookup_smiles_list": ["POST"],
-        "lookup_smarts": ["POST"],
-        "search": ["POST"],
-        "list_sources": ["GET"],
-        "list_properties": ["GET"],
-        "get": ["GET"],
-        "add": ["POST"],
-        "add_many": ["POST"],
-        "update": ["POST"],
-        "delete": ["DELETE"]
-    }
+    methods_to_bind: dict[str, list[str]] = {}
+    # methods_to_bind: dict[str, list[str]] = {
+    #     "lookup_smiles": ["POST"],
+    #     "lookup_smiles_list": ["POST"],
+    #     "lookup_smarts": ["POST"],
+    #     "search": ["POST"],
+    #     "list_sources": ["GET"],
+    #     "list_properties": ["GET"],
+    #     "get": ["GET"],
+    #     "add": ["POST"],
+    #     "add_many": ["POST"],
+    #     "update": ["POST"],
+    #     "delete": ["DELETE"]
+    # }
 
     def __init__(self, util_config: dict[str, Any]):
         engine = util_config["engine"]
