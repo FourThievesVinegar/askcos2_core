@@ -56,6 +56,27 @@ class BaseWrapper:
     def get_doc(self) -> str:
         return self.__doc__
 
+    def is_ready(self) -> bool:
+        resp = self.session_sync.get(self.prediction_url)
+        status_code = resp.status_code
+        if status_code != 404:
+            return True
+
+        try:
+            # 404 can also be root endpoint not found rather than unavailable service
+            # Right now we only need to check FastAPI (via "detail")
+            # or torchserve (via "message")
+            resp = resp.json()
+            ready = (
+                resp.get("detail") == "Not Found" or
+                resp.get("message") ==
+                "Requested resource is not found, please refer to API document."
+            )
+        except:
+            ready = False
+
+        return ready
+
     def call_raw(self, input: BaseModel) -> BaseModel:
         response = self.session_sync.post(
             self.prediction_url,
