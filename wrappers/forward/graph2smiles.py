@@ -52,7 +52,12 @@ class ForwardG2SWrapper(BaseWrapper):
         return response
 
     async def call_async(self, input: ForwardG2SInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+        from askcos2_celery.tasks import forward_task
+        async_result = forward_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> ForwardG2SResponse | None:
         return await super().retrieve(task_id=task_id)

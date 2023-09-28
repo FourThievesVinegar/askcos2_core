@@ -40,7 +40,12 @@ class TreeOptimizerWrapper(BaseWrapper):
         return response
 
     async def call_async(self, input: TreeOptimizerInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+        from askcos2_celery.tasks import tree_optimizer_task
+        async_result = tree_optimizer_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> TreeOptimizerResponse | None:
         return await super().retrieve(task_id=task_id)

@@ -54,7 +54,12 @@ class GeneralSelectivityQMGNNWrapper(BaseWrapper):
 
     async def call_async(self, input: GeneralSelectivityInput, priority: int = 0
                          ) -> str:
-        return await super().call_async(input=input, priority=priority)
+        from askcos2_celery.tasks import general_selectivity_task
+        async_result = general_selectivity_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> GeneralSelectivityResponse | None:
         return await super().retrieve(task_id=task_id)
