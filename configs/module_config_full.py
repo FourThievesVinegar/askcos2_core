@@ -45,10 +45,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -63,10 +59,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -81,10 +73,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -100,10 +88,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 30,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -126,11 +110,7 @@ module_config = {
             "context_recommender_graph",
             "context_recommender_pr_fp",
             "context_recommender_pr_graph"
-        ],
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
+        ]
     },
 
     "descriptors": {
@@ -144,10 +124,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -166,11 +142,7 @@ module_config = {
         "wrapper_names": [
             "evaluate_context",
             "evaluate_reaction"
-        ],
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
+        ]
     },
 
     "fast_filter": {
@@ -189,11 +161,7 @@ module_config = {
         "wrapper_names": [
             "fast_filter",
             "fast_filter_with_threshold"
-        ],
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
+        ]
     },
 
     "forward_augmented_transformer": {
@@ -209,10 +177,6 @@ module_config = {
             "available_model_names": [
                 "USPTO_480k_mix"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -229,10 +193,6 @@ module_config = {
             "available_model_names": [
                 "USPTO_480k_mix"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -250,10 +210,6 @@ module_config = {
                 "uspto_500k",
                 "pistachio"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -274,11 +230,7 @@ module_config = {
             "general_selectivity_gnn",
             "general_selectivity_qm_gnn",
             "general_selectivity_qm_gnn_no_reagent",
-        ],
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
+        ]
     },
 
     "impurity_predictor": {
@@ -294,10 +246,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 60,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -312,10 +260,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -330,10 +274,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 120,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -352,11 +292,7 @@ module_config = {
         "wrapper_names": [
             "reaction_classification",
             "get_top_class_batch"
-        ],
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
-        }
+        ]
     },
 
     "retro_template_relevance": {
@@ -378,10 +314,6 @@ module_config = {
                 "reaxys",
                 "reaxys_biocatalysis"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -399,10 +331,6 @@ module_config = {
             "available_model_names": [
                 "USPTO_480_mix"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -420,10 +348,6 @@ module_config = {
             "available_model_names": [
                 "USPTO_480_mix"
             ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -438,10 +362,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -456,10 +376,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -474,10 +390,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 600,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -492,10 +404,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 30,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -511,10 +419,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 120,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -530,10 +434,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 
@@ -549,10 +449,6 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 3,
             "available_model_names": []
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
         }
     },
 

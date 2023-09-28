@@ -46,24 +46,13 @@ services:
       - "askcosv2_redisdata:/data"
     command: redis-server --port ${REDIS_PORT}
 
-  generic_celery_worker:
+  celery_workers:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     restart: always
     env_file:
       - .env
     network_mode: host
-    command: bash scripts/start_celery_worker.sh 10 generic generic_worker
-    depends_on:
-      - rabbitmq
-      - redis
-
-  custom_celery_worker:
-    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
-    restart: always
-    env_file:
-      - .env
-    network_mode: host
-    command: sh scripts/start_celery_worker.sh ${CELERY_CONCURRENCY} ${CELERY_QUEUE} ${CELERY_WORKER}
+    command: sh scripts/start_celery_workers.sh
     depends_on:
       - rabbitmq
       - redis

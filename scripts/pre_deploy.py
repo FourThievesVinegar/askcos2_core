@@ -179,14 +179,6 @@ def main():
             f"cd {cwd}\n",
             "\n"
         ]
-        if runtime == "docker":     # TODO: custom celery worker
-            try:
-                celery_queue = module_config[module]["celery"]["queue_name"]
-            except KeyError:
-                pass
-            else:
-                if not celery_queue == "generic":
-                    raise NotImplementedError
 
         cmds_start_services.extend(cmds)
 
@@ -217,7 +209,7 @@ def main():
 
     cmd = str(core_deployment_config[runtime]["cpu"]["start"])
     cmds = [
-        f"echo Starting services for askcos2_core app and generic_celery_worker, "
+        f"echo Starting services for askcos2_core app and celery_workers, "
         f"runtime: {runtime}\n",
         f"{cmd}\n",
         "\n"
