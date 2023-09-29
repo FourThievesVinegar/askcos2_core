@@ -1,7 +1,16 @@
 from wrappers import register_wrapper
-from wrappers.general_selectivity.gnn import GeneralSelectivityInput as GnnGeneralSelectivityInput, GeneralSelectivityResponse as GnnGeneralSelectivityResponse
-from wrappers.general_selectivity.qm_gnn import GeneralSelectivityInput as QmGnnGeneralSelectivityInput, GeneralSelectivityResponse as QmGnnGeneralSelectivityResponse
-from wrappers.general_selectivity.qm_gnn_no_reagent import GeneralSelectivityInput as NoReagentGeneralSelectivityInput, GeneralSelectivityResponse as NoReagentGeneralSelectivityResponse
+from wrappers.general_selectivity.gnn import (
+    GeneralSelectivityInput as GnnGeneralSelectivityInput,
+    GeneralSelectivityResponse as GnnGeneralSelectivityResponse
+)
+from wrappers.general_selectivity.qm_gnn import (
+    GeneralSelectivityInput as QmGnnGeneralSelectivityInput,
+    GeneralSelectivityResponse as QmGnnGeneralSelectivityResponse
+)
+from wrappers.general_selectivity.qm_gnn_no_reagent import (
+    GeneralSelectivityInput as NoReagentGeneralSelectivityInput,
+    GeneralSelectivityResponse as NoReagentGeneralSelectivityResponse
+)
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.registry import get_wrapper_registry
 from pydantic import BaseModel
@@ -20,10 +29,12 @@ class GeneralSelectivityInput(BaseModel):
 class GeneralSelectivityOutput(BaseModel):
     placeholder: str
 
+
 class GeneralSelectivityResult(BaseModel):
     smiles: str
     prob: float
     rank: int
+
 
 class GeneralSelectivityResponse(BaseResponse):
     result: list[GeneralSelectivityResult]
@@ -59,8 +70,14 @@ class GeneralSelectivityController(BaseWrapper):
 
         return response
 
-    async def call_async(self, input: GeneralSelectivityInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+    async def call_async(self, input: GeneralSelectivityInput, priority: int = 0
+                         ) -> str:
+        from askcos2_celery.tasks import general_selectivity_task
+        async_result = general_selectivity_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> GeneralSelectivityResponse | None:
         return await super().retrieve(task_id=task_id)
@@ -68,13 +85,32 @@ class GeneralSelectivityController(BaseWrapper):
     @staticmethod
     def convert_input(
         input: GeneralSelectivityInput, backend: str
-    ) -> GnnGeneralSelectivityInput | QmGnnGeneralSelectivityInput | NoReagentGeneralSelectivityInput:
+    ) -> (GnnGeneralSelectivityInput | QmGnnGeneralSelectivityInput |
+          NoReagentGeneralSelectivityInput):
         if backend == "gnn":
-            wrapper_input = GnnGeneralSelectivityInput(smiles=input.smiles, atom_map_backend=input.atom_map_backend, mapped=input.mapped, all_outcomes=input.all_outcomes, no_map_reagents=input.no_map_reagents)
+            wrapper_input = GnnGeneralSelectivityInput(
+                smiles=input.smiles,
+                atom_map_backend=input.atom_map_backend,
+                mapped=input.mapped,
+                all_outcomes=input.all_outcomes,
+                no_map_reagents=input.no_map_reagents
+            )
         elif backend == "qm_gnn":
-            wrapper_input = QmGnnGeneralSelectivityInput(smiles=input.smiles, atom_map_backend=input.atom_map_backend, mapped=input.mapped, all_outcomes=input.all_outcomes, no_map_reagents=input.no_map_reagents)
+            wrapper_input = QmGnnGeneralSelectivityInput(
+                smiles=input.smiles,
+                atom_map_backend=input.atom_map_backend,
+                mapped=input.mapped,
+                all_outcomes=input.all_outcomes,
+                no_map_reagents=input.no_map_reagents
+            )
         elif backend == "qm_gnn_no_reagent":
-            wrapper_input = NoReagentGeneralSelectivityInput(smiles=input.smiles, atom_map_backend=input.atom_map_backend, mapped=input.mapped, all_outcomes=input.all_outcomes, no_map_reagents=input.no_map_reagents)
+            wrapper_input = NoReagentGeneralSelectivityInput(
+                smiles=input.smiles,
+                atom_map_backend=input.atom_map_backend,
+                mapped=input.mapped,
+                all_outcomes=input.all_outcomes,
+                no_map_reagents=input.no_map_reagents
+            )
         else:
             raise ValueError(f"Unsupported atom map backend: {backend}!")
 
@@ -83,8 +119,9 @@ class GeneralSelectivityController(BaseWrapper):
     @staticmethod
     def convert_response(
         wrapper_response:
-            GnnGeneralSelectivityResponse | QmGnnGeneralSelectivityResponse | NoReagentGeneralSelectivityResponse,
-            backend: str
+            GnnGeneralSelectivityResponse | QmGnnGeneralSelectivityResponse |
+            NoReagentGeneralSelectivityResponse,
+        backend: str
     ) -> GnnGeneralSelectivityResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
