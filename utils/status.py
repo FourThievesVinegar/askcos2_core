@@ -1,3 +1,4 @@
+import json
 from askcos2_celery.celery import app, READABLE_NAMES
 from configs import db_config
 from fastapi import Response
@@ -144,7 +145,7 @@ class StatusDatabase:
     def __init__(self, util_config: dict[str, Any] = None):
         pass
 
-    def get(self) -> StatusCeleryResponse | Response:
+    def get(self) -> Response:
         """Handle GET requests for celery status."""
         resp = {}
         status = {}
@@ -189,9 +190,14 @@ class StatusDatabase:
                 )
 
         resp["queues"] = sorted(status_list, key=lambda x: x["name"])
-        resp = StatusCeleryResponse(**resp)
+        # merely validate response
+        StatusCeleryResponse(**resp)
 
-        return resp
+        return Response(
+            content=json.dumps(resp),
+            status_code=200,
+            media_type="application/json"
+        )
 
     @staticmethod
     def get_message_count(queue: str) -> int:
