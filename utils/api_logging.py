@@ -1,11 +1,11 @@
 from configs import db_config
 from fastapi import Depends, HTTPException, Response, status
+from pydantic import BaseModel
+from pymongo import errors, MongoClient
 from typing import Annotated, Any
 from utils import register_util
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
-from pydantic import BaseModel
-from pymongo import errors, MongoClient
 
 
 class APILog(BaseModel):

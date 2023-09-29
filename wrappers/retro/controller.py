@@ -1,6 +1,9 @@
+import json
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from scipy.special import softmax
 from typing import Any, Literal
+from utils.registry import get_util_registry
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.retro.augmented_transformer import RetroATInput, RetroATResponse
@@ -62,14 +65,22 @@ class RetroController(BaseWrapper):
         pass        # TODO: proper inheritance
 
     def call_sync(self, input: RetroInput) -> RetroResponse:
-        module = self.backend_wrapper_names[input.backend]
-        wrapper = get_wrapper_registry().get_wrapper(module=module)
+        cache_controller = get_util_registry().get_util(module="cache_controller")
+        try:
+            response = cache_controller.get(module_name=self.name, input=input)
+            if isinstance(response, dict):
+                response = RetroResponse(**response)
+        except KeyError:
+            module = self.backend_wrapper_names[input.backend]
+            wrapper = get_wrapper_registry().get_wrapper(module=module)
 
-        wrapper_input = self.convert_input(
-            input=input, backend=input.backend)
-        wrapper_response = wrapper.call_sync(wrapper_input)
-        response = self.convert_response(
-            wrapper_response=wrapper_response, backend=input.backend)
+            wrapper_input = self.convert_input(
+                input=input, backend=input.backend)
+            wrapper_response = wrapper.call_sync(wrapper_input)
+            response = self.convert_response(
+                wrapper_response=wrapper_response, backend=input.backend)
+
+            cache_controller.add(module_name=self.name, input=input, response=response)
 
         return response
 
