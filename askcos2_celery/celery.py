@@ -3,7 +3,30 @@ from celery import Celery
 
 # Define readable names for celery workers for status reporting
 READABLE_NAMES = {
-    "generic_worker": "Generic Worker"
+    "generic_worker":
+        "Generic Worker (ML Router equivalent)",
+    "context_recommender_worker":
+        "Context Recommender Worker for V1 and V2",
+    "evaluate_reactions_worker":
+        "Evaluate Reactions Worker",
+    "forward_worker":
+        "Forward Predictor Worker",
+    "general_selectivity_worker":
+        "General Selectivity Worker",
+    "impurity_predictor_worker":
+        "Impurity Prediction Worker",
+    "pathway_ranker_worker":
+        "Pathway Ranker Worker",
+    "retro_worker":
+        "One-Step Retrosynthesis Worker",
+    "site_selectivity_worker":
+        "Site Selectivity Worker",
+    "tree_analysis_worker":
+        "Tree Analysis Worker",
+    "tree_search_expand_one_worker":
+        "IPP One-Step Expansion Worker",
+    "tree_search_mcts_worker":
+        "MCTS Worker (Tree Builder Coordinator equivalent)"
 }
 
 # Note: cannot use guest for authenticating with broker unless on localhost

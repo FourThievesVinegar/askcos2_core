@@ -1,4 +1,6 @@
+from askcos2_celery.celery import app, READABLE_NAMES
 from configs import db_config
+from fastapi import Response
 from typing import Any
 from utils import register_util
 from pydantic import BaseModel
@@ -115,3 +117,88 @@ class StatusDatabase:
             total = sum(details.values())
 
             return total, details
+
+
+class CeleryStatus(BaseModel):
+    name: str
+    queue: str
+    pending: int = 0
+    busy: int = 0
+    available: int = 0
+
+
+class StatusCeleryResponse(BaseModel):
+    queues: list[CeleryStatus]
+
+
+@register_util(name="status_celery")
+class StatusDatabase:
+    """
+    Util class for showing database status
+    """
+    prefixes = ["status/celery"]
+    methods_to_bind: dict[str, list[str]] = {
+        "get": ["GET"]
+    }
+
+    def __init__(self, util_config: dict[str, Any] = None):
+        pass
+
+    def get(self) -> StatusCeleryResponse | Response:
+        """Handle GET requests for celery status."""
+        resp = {}
+        status = {}
+        stats = app.control.inspect().stats()
+        active = app.control.inspect().active()
+
+        if not stats or not active:
+            return Response(
+                content="stats do not exist or celery not active",
+                status_code=404
+            )
+
+        for worker in stats:
+            name, server = worker.split("@")
+            if not status.get(name):
+                status[name] = {"total": 0, "busy": 0}
+            status[name]["busy"] += len(active[worker])
+            status[name]["total"] += stats[worker]["pool"]["max-concurrency"]
+
+        status_list = []
+        for key, value in status.items():
+            status_list.append(
+                {
+                    "name": READABLE_NAMES.get(key, key),
+                    "queue": key,
+                    "pending": self.get_message_count(key),
+                    "busy": value["busy"],
+                    "available": max(value["total"] - value["busy"], 0),
+                }
+            )
+
+        for key, value in READABLE_NAMES.items():
+            if key not in status:
+                status_list.append(
+                    {
+                        "name": value,
+                        "queue": key,
+                        "pending": 0,
+                        "busy": 0,
+                        "available": 0,
+                    }
+                )
+
+        resp["queues"] = sorted(status_list, key=lambda x: x["name"])
+        resp = StatusCeleryResponse(**resp)
+
+        return resp
+
+    @staticmethod
+    def get_message_count(queue: str) -> int:
+        """
+        Retrieve message count for the specified celery queue.
+        """
+        with app.connection_or_acquire() as conn:
+            output = conn.default_channel.queue_declare(queue=queue, passive=True)
+            print(output)
+            return output.message_count
