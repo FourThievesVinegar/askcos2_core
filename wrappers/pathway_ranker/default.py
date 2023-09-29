@@ -45,7 +45,12 @@ class PathwayRankerWrapper(BaseWrapper):
         return response
 
     async def call_async(self, input: PathwayRankerInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+        from askcos2_celery.tasks import pathway_ranker_task
+        async_result = pathway_ranker_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> PathwayRankerResponse | None:
         return await super().retrieve(task_id=task_id)

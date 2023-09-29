@@ -257,8 +257,8 @@ class MCTSWrapper(BaseWrapper):
         )
         results_controller.create(result=saved_results, token=token)
 
-        from askcos2_celery.tasks import task_with_token
-        async_result = task_with_token.apply_async(
+        from askcos2_celery.tasks import tree_search_mcts_task
+        async_result = tree_search_mcts_task.apply_async(
             args=(self.name, input.dict(), token), priority=priority)
         task_id = async_result.id
 

@@ -68,8 +68,14 @@ class ImpurityPredictorWrapper(BaseWrapper):
 
         return response
 
-    async def call_async(self, input: ImpurityPredictorInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+    async def call_async(self, input: ImpurityPredictorInput, priority: int = 0
+                         ) -> str:
+        from askcos2_celery.tasks import impurity_predictor_task
+        async_result = impurity_predictor_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> ImpurityPredictorResponse | None:
         return await super().retrieve(task_id=task_id)

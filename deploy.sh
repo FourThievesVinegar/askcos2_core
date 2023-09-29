@@ -10,18 +10,6 @@
 
 set -e  # exit with nonzero exit code if anything fails
 
-# Worker scales (i.e. number of celery workers)
-n_cr_network_worker=1               # Context recommender neural network worker
-n_cr_network_v2_worker=1            # Context recommender neural network v2 worker
-n_tb_coordinator_mcts=2             # Tree builder coordinator
-n_tb_coordinator_mcts_v2=2          # Tree builder v2 coordinator
-n_tb_c_worker=1                     # Tree builder chiral worker
-n_sites_worker=1                    # Site selectivity worker
-n_forward_worker=1                  # Forward evaluation worker
-n_selec_worker=1                    # General selectivity worker
-n_ml_router=1                       # ML serving router
-n_tree_analysis_worker=1            # Retrosynthesis tree analysis worker
-
 # Create environment variable files from examples if they don't exist
 if [ ! -f ".env" ]; then
   cp .env.example .env

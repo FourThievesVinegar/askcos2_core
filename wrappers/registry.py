@@ -1,6 +1,5 @@
 import importlib
 import os
-import requests
 from pydantic import BaseModel
 from wrappers import WRAPPER_CLASSES
 
@@ -8,9 +7,16 @@ _wrapper_registry = None
 
 
 class BackendStatus(BaseModel):
+    name: str
+    description: str
+    available_model_names: list[str]
     to_start: bool
-    started: bool
+    ready: bool
     backend_url: str | None
+
+
+class BackendStatusResponse(BaseModel):
+    modules: list[BackendStatus]
 
 
 def get_wrapper_registry():
@@ -57,23 +63,40 @@ class WrapperRegistry:
                     controller_class = WRAPPER_CLASSES["retro_controller"]
                     self._wrappers["retro_controller"] = controller_class()
 
-    def get_backend_status(self) -> dict[str, BackendStatus]:
-        status = {}
-        for module, to_start in self.module_config["modules_to_start"].items():
-            backend_status = {"to_start": to_start}
-            wrapper = self.get_wrapper(module=module)
-            if wrapper is None:
-                backend_status["started"] = False
-                backend_status["backend_url"] = None
-            elif requests.get(wrapper.prediction_url).status_code == 404:
-                backend_status["started"] = False
-                backend_status["backend_url"] = None
-            else:
-                backend_status["started"] = True
-                backend_status["backend_url"] = wrapper.prediction_url
-            status[module] = BackendStatus(**backend_status)
+    def get_backend_status(self) -> BackendStatusResponse:
+        status_list = []
 
-        return status
+        for module, to_start in self.module_config["modules_to_start"].items():
+            backend_url = ""
+            ready = False
+
+            if to_start:
+                wrapper_config = self.module_config[module]
+                if "wrapper_names" in wrapper_config:       # for multiple endpoints
+                    wrapper = self.get_wrapper(
+                        module=wrapper_config["wrapper_names"][0]
+                    )
+                else:
+                    wrapper = self.get_wrapper(module=module)
+                if wrapper is not None:
+                    backend_url = wrapper.config["prediction_url_in_use"]
+                    ready = wrapper.is_ready()
+
+            backend_status = {
+                "name": module,
+                "description": self.module_config[module]["description"],
+                "available_model_names":
+                    self.module_config[module]["deployment"]["available_model_names"],
+                "to_start": to_start,
+                "ready": ready,
+                "backend_url": backend_url
+            }
+            backend_status = BackendStatus(**backend_status)
+            status_list.append(backend_status)
+
+        resp = BackendStatusResponse(modules=status_list)
+
+        return resp
 
     def get_wrapper(self, module: str):
         return self._wrappers.get(module, None)

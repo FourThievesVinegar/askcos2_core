@@ -167,8 +167,8 @@ class ExpandOneWrapper(BaseWrapper):
         token: Annotated[str, Depends(oauth2_scheme)],
         priority: int = 0
     ) -> str:
-        from askcos2_celery.tasks import task_with_token
-        async_result = task_with_token.apply_async(
+        from askcos2_celery.tasks import tree_search_expand_one_task
+        async_result = tree_search_expand_one_task.apply_async(
             args=(self.name, input.dict(), token), priority=priority)
         task_id = async_result.id
 
