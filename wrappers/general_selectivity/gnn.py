@@ -7,6 +7,9 @@ from typing import Literal
 class GeneralSelectivityInput(BaseModel):
     smiles: str
     atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "wln"
+    mapped: bool = False
+    all_outcomes: bool = False
+    no_map_reagents: bool = False
 
 
 class GeneralSelectivityResult(BaseModel):
@@ -16,8 +19,8 @@ class GeneralSelectivityResult(BaseModel):
 
 
 class GeneralSelectivityOutput(BaseModel):
-    error: str
     status: str
+    error: str
     results: list[GeneralSelectivityResult]
 
 

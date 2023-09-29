@@ -58,6 +58,13 @@ class WrapperRegistry:
                     controller_class = WRAPPER_CLASSES["forward_controller"]
                     self._wrappers["forward_controller"] = controller_class()
 
+                elif module.startswith("general_selectivity") and \
+                        "general_selectivity_controller" not in self._wrappers:
+                    controller_class = \
+                        WRAPPER_CLASSES["general_selectivity_controller"]
+                    self._wrappers["general_selectivity_controller"] = \
+                        controller_class()
+
                 elif module.startswith("retro") and \
                         "retro_controller" not in self._wrappers:
                     controller_class = WRAPPER_CLASSES["retro_controller"]

@@ -58,10 +58,12 @@ for adapter in adapter_registry:
         path = "/{task_id}"
     else:
         path = "/"
+    include_in_schema = adapter.name not in ["v1_descriptors"]
     router.add_api_route(
         path=path,
         endpoint=adapter.__call__,
-        methods=adapter.methods
+        methods=adapter.methods,
+        include_in_schema=include_in_schema
     )
     app.include_router(router)
 
