@@ -12,9 +12,9 @@ class ReactionClassificationResult(BaseModel):
     rank: float
     reaction_num: str
     reaction_name: str
-    reaction_classnum: float
+    reaction_classnum: str
     reaction_classname: str
-    reaction_superclassnum: float
+    reaction_superclassnum: str
     reaction_superclassname: str
     prediction_certainty: float
 
