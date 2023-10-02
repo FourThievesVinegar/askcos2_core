@@ -1,5 +1,3 @@
-import json
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from scipy.special import softmax
 from typing import Any, Literal

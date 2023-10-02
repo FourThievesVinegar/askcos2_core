@@ -28,6 +28,7 @@ class TreeSearchSavedResults(BaseModel):
     check_date: str | None = None
     result_state: constr(max_length=64) = None
     result_type: Literal["tree_builder", "ipp"] = "tree_builder"
+    revision: int = 0
 
     public: bool = False
     shared_with: list[str] = Field(default_factory=list)
@@ -179,6 +180,7 @@ class TreeSearchResultsController:
 
         query = {
             "result_id": result_id,
+            "revision": updated_result.revision - 1,
             "$or": [
                 {"user": user.username},
                 {
@@ -188,8 +190,9 @@ class TreeSearchResultsController:
             ]
         }
         updated_result = {
-            k: v for k, v in updated_result.dict().items()
-            if k in ["result", "settings", "description", "tags", "modified"] and v
+            k: v for k, v in updated_result.dict().items() if k in [
+                "result", "settings", "description", "tags", "modified", "revision"
+            ] and v
         }
         res = self.collection.update_one(
             query,
@@ -197,7 +200,8 @@ class TreeSearchResultsController:
         )
         if not res.matched_count:
             content = {
-                "message": f"Result {result_id} not editable by user {user.username}!"
+                "message": f"Result {result_id} not editable by user {user.username},"
+                           f"or result changed since initial access!"
             }
             return Response(
                 content=json.dumps(content),
