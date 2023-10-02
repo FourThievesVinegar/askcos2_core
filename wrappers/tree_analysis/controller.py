@@ -8,6 +8,9 @@ from utils.registry import get_util_registry
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper
 from wrappers.tree_analysis.tb_pathway_ranking import _tb_pathway_ranking
+from wrappers.tree_analysis.tb_pmi_calculation import _tb_pmi_calculation
+from wrappers.tree_analysis.tb_reaction_classification \
+    import _tb_reaction_classification
 
 
 class TreeAnalysisInput(BaseModel):
@@ -18,6 +21,8 @@ class TreeAnalysisInput(BaseModel):
         "pmi_calculation",
         "count_analogs",
     ]
+
+    # PMI calculator and count_analogs option
     index: int = -1
 
     # Pathway ranking options
@@ -93,7 +98,6 @@ class TreeAnalysisController(BaseWrapper):
 
         try:
             tb_result = result["result"]
-            revision = result.get("revision")
             new_revision = result.get("revision", 0) + 1
             if tb_result.get("version") != 2:
                 output["success"] = False
@@ -126,9 +130,9 @@ class TreeAnalysisController(BaseWrapper):
                 min_cluster_size=input.cluster_min_size
             )
         elif task == "reaction_classification":
-            result, info = _tb_reaction_classification(tb_results)
+            result, info = _tb_reaction_classification(tb_result=tb_result)
         elif task == "pmi_calculation":
-            pmi_init(self, tb_results, index, revision, output)
+            result, info = _tb_pmi_calculation(tb_result=tb_result, index=input.index)
         elif task == "count_analogs":
             result, info = _tb_count_analogs(tb_results, index, min_plausibility=0.1)
         else:

@@ -1,11 +1,10 @@
+from pydantic import BaseModel
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
-from pydantic import BaseModel
-from typing import List, Dict
 
 
 class PmiCalculatorInput(BaseModel):
-    tree: List[Dict]
+    trees: list[dict]
 
 
 class PmiCalculatorOutput(BaseModel):
