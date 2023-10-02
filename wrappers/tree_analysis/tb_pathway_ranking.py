@@ -2,128 +2,11 @@ import networkx as nx
 import traceback
 from wrappers.pathway_ranker.default import PathwayRankerInput
 from wrappers.registry import get_wrapper_registry
-
-NIL_UUID = "00000000-0000-0000-0000-000000000000"
-NODE_LINK_ATTRS = {
-    "source": "from",
-    "target": "to",
-    "name": "id",
-    "key": "key",
-    "link": "edges",
-}
-# Map from keys used by tree builder graph to name used in pathways
-PATH_KEY_DICT = {
-    "smiles": "smiles",
-    "type": "type",
-    "id": "id",
-    "as_reactant": "as_reactant",
-    "as_product": "as_product",
-    "plausibility": "plausibility",
-    "forward_score": "forward_score",   # From graph optimization
-    "ppg": "ppg",           # If calling clean_json on a previously cleaned tree
-    "purchase_price": "ppg",
-    "properties": "properties",
-    "template_score": "template_score",
-    "terminal": "terminal",
-    "tforms": "tforms",
-    "tsources": "tsources",
-    "num_examples": "num_examples",
-    "necessary_reagent": "necessary_reagent",
-    "precursor_smiles": "precursor_smiles",
-    "rms_molwt": "rms_molwt",
-    "num_rings": "num_rings",
-    "scscore": "scscore",
-    "rank": "rank",
-    "class_num": "class_num",
-    "class_name": "class_name",
-}
-# List of all keys to include in output JSON
-OUTPUT_KEYS = {
-    "chemical": [
-        "smiles",
-        "id",
-        "as_reactant",
-        "as_product",
-        "ppg",
-        "properties",
-        "terminal",
-    ],
-    "reaction": [
-        "smiles",
-        "id",
-        "plausibility",
-        "forward_score",
-        "template_score",
-        "tforms",
-        "tsources",
-        "num_examples",
-        "necessary_reagent",
-        "precursor_smiles",
-        "rms_molwt",
-        "num_rings",
-        "scscore",
-        "rank",
-        "class_num",
-        "class_name",
-    ],
-}
-
-
-def clean_json(path):
-    """
-    Clean up json representation of a pathway. Accepts paths from either
-    tree builder version.
-
-    Note about chemical/reaction node identification:
-        * For treedata format, chemical nodes have an ``is_chemical`` attribute,
-          while reaction nodes have an ``is_reaction`` attribute
-        * For nodelink format, all nodes have a ``type`` attribute, whose value
-          is either ``chemical`` or ``reaction``
-
-    This distinction in the JSON schema is for historical reasons and is not
-    an official aspect of the treedata/nodelink formats.
-    """
-
-    def _add_missing_fields(_node, _type):
-        for _key in OUTPUT_KEYS[_type]:
-            if _key not in _node:
-                _node[_key] = None
-
-    if "nodes" in path:
-        # Node link format
-        nodes = []
-        for node in path["nodes"]:
-            new_node = {
-                PATH_KEY_DICT[key]: value
-                for key, value in node.items()
-                if key in PATH_KEY_DICT
-            }
-            # Set any output keys not present to None
-            _add_missing_fields(new_node, node["type"])
-            nodes.append(new_node)
-        path["nodes"] = nodes
-        output = path
-    else:
-        # Tree data format
-        output = {}
-        for key, value in path.items():
-            if key == "type":
-                if value == "chemical":
-                    output["is_chemical"] = True
-                elif value == "reaction":
-                    output["is_reaction"] = True
-            elif key == "children":
-                output["children"] = [clean_json(c) for c in value]
-            elif key in PATH_KEY_DICT:
-                output[PATH_KEY_DICT[key]] = value
-
-        # Set any output keys not present to None
-        _add_missing_fields(output, path["type"])
-
-        if "children" not in output:
-            output["children"] = []
-
-    return output
+from wrappers.tree_analysis.tree_analysis_utils import (
+    clean_json,
+    NIL_UUID,
+    NODE_LINK_ATTRS
+)
 
 
 def _tb_pathway_ranking(
@@ -184,7 +67,7 @@ def _tb_pathway_ranking(
             min_samples=min_samples,
             min_cluster_size=min_cluster_size
         )
-        results = pathway_ranker(wrapper_input).result
+        results = pathway_ranker.call_sync(wrapper_input).result
     except Exception as e:
         traceback.print_tb(e.__traceback__)
         output["success"] = False
