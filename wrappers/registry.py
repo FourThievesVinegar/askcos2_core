@@ -70,6 +70,10 @@ class WrapperRegistry:
                     controller_class = WRAPPER_CLASSES["retro_controller"]
                     self._wrappers["retro_controller"] = controller_class()
 
+        # tree analysis controller will be created always
+        controller_class = WRAPPER_CLASSES["tree_analysis_controller"]
+        self._wrappers["tree_analysis_controller"] = controller_class()
+
     def get_backend_status(self) -> BackendStatusResponse:
         status_list = []
 

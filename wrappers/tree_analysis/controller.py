@@ -72,15 +72,8 @@ class TreeAnalysisController(BaseWrapper):
         results_controller = get_util_registry().get_util(
             module="tree_search_results_controller"
         )
-        resp = results_controller.retrieve(result_id=input.result_id, token=token)
-        if resp.status_code == 404:
-            return resp
-
-        try:
-            result = json.loads(resp.body)
-        except Exception as e:
-            traceback.print_exc()
-            return resp
+        result = results_controller.retrieve(result_id=input.result_id, token=token)
+        result = result.dict()
 
         if result["result_type"] == "ipp":
             raise HTTPException(
@@ -185,5 +178,5 @@ class TreeAnalysisController(BaseWrapper):
 
         return task_id
 
-    async def retrieve(self, task_id: str) -> Response | None:
+    async def retrieve(self, task_id: str) -> Response:
         return await super().retrieve(task_id=task_id)
