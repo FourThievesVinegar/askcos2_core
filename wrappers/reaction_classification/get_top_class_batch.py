@@ -12,11 +12,11 @@ class GetTopClassBatchInput(BaseModel):
 class GetTopClassBatchOutput(BaseModel):
     error: str
     status: str
-    results: list[list[str]]
+    results: list[tuple[str, str]]
 
 
 class GetTopClassBatchResponse(BaseResponse):
-    result: list[list[str]]
+    result: list[tuple[str, str]]
 
 
 @register_wrapper(

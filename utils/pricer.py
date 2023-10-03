@@ -15,7 +15,9 @@ from utils.similarity_search_utils import sim_search, sim_search_aggregate
 class Pricer:
     """Util class for Pricer, to be used as a controller (over Mongo/FilePricer"""
     prefixes = ["pricer"]
-    methods_to_bind: dict[str, list[str]] = {}
+    methods_to_bind: dict[str, list[str]] = {
+        "lookup_smarts": ["POST"]
+    }
     # methods_to_bind: dict[str, list[str]] = {
     #     "lookup_smiles": ["POST"],
     #     "lookup_smiles_list": ["POST"],

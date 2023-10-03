@@ -1,11 +1,10 @@
 from pydantic import BaseModel
-from typing import List, Dict
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 
 
 class PathwayRankerInput(BaseModel):
-    tree: List[Dict]
+    trees: list[dict]
     clustering: bool = False
     cluster_method: str = "hdbscan"
     min_samples: int = 5

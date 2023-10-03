@@ -98,7 +98,7 @@ class MCTSResult(BaseModel):
     stats: dict[str, Any] | None
     paths: list[dict[str, Any]]
     graph: dict[str, Any] | None
-    version: int | None
+    version: int | None = 2
 
 
 class MCTSOutput(BaseModel):
