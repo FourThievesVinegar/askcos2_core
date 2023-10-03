@@ -116,6 +116,7 @@ module_config = {
 
     "count_analogs": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/count_analogs.git",
+        "description": "Analog counting via graph enumeration",
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
@@ -123,7 +124,7 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9911/count_analogs",
             "custom_prediction_url": "",
             "timeout": 120,
-            "available_models": []
+            "available_model_names": []
         }
     },
 
