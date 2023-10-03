@@ -1,4 +1,16 @@
 services:
+  nginx:
+    image: ${ASKCOS_IMAGE_REGISTRY}askcos-vue-nginx:${VERSION_NUMBER}
+    restart: always
+    volumes:
+      - './nginx.conf:/etc/nginx/nginx.conf'
+      - './askcos.ssl.cert:/etc/ssl/certs/askcos.ssl.cert'
+      - './askcos.ssl.key:/etc/ssl/private/askcos.ssl.key'
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - app
   app:
     image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
     hostname: app
