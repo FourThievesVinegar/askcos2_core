@@ -5,6 +5,7 @@ module_config = {
         "atom_map_wln": True,
         "cluster": True,
         "context_recommender": True,
+        "count_analogs": True,
         "descriptors": True,
         "evaluate_reactions": True,
         "fast_filter": True,
@@ -111,6 +112,25 @@ module_config = {
             "context_recommender_pr_fp",
             "context_recommender_pr_graph"
         ]
+    },
+
+    "count_analogs": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/count_analogs.git",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9911],
+            "default_prediction_url": "http://0.0.0.0:9911/count_analogs",
+            "custom_prediction_url": "",
+            "timeout": 120,
+            "available_models": [
+                "default"
+            ]
+        },
+        "celery": {
+            "queue_name": "generic",
+            "worker_name": "generic_worker"
+        }
     },
 
     "descriptors": {
