@@ -99,6 +99,7 @@ class MCTSResult(BaseModel):
     paths: list[dict[str, Any]]
     graph: dict[str, Any] | None
     version: int | None = 2
+    result_id: str = ""
 
 
 class MCTSOutput(BaseModel):
@@ -189,6 +190,7 @@ class MCTSWrapper(BaseWrapper):
             output = self.call_raw(input=input)
             response = self.convert_output_to_response(output)
             result_doc = response.result
+            result_doc.result_id = input.result_id
         except Exception:
             if input.run_async:
                 results_controller.update_result_state(

@@ -1,7 +1,7 @@
 import json
 from configs import db_config
 from datetime import datetime
-from fastapi import Depends, Response
+from fastapi import Depends, HTTPException, Response
 from pydantic import BaseModel, constr, Field
 from pymongo import errors, MongoClient
 from typing import Annotated, Any, Literal
@@ -106,7 +106,7 @@ class TreeSearchResultsController:
         return results
 
     def retrieve(self, result_id: str, token: Annotated[str, Depends(oauth2_scheme)]
-                 ) -> Response:
+                 ) -> TreeSearchSavedResults:
         """
         API endpoint to retrieve specified result by result_id.
 
@@ -128,23 +128,20 @@ class TreeSearchResultsController:
         }
         result = self.collection.find_one(query)
         if not result:
-            content = {
-                "message": f"Result with id {result_id} not found or not viewable!"
-            }
-            return Response(
-                content=json.dumps(content),
+            raise HTTPException(
                 status_code=404,
-                media_type="application/json"
+                detail=f"Result with id {result_id} not found or not viewable!"
             )
         if result["result_state"] in ["completed", "ipp"]:
             result["_id"] = str(result["_id"])
-            return Response(
-                content=json.dumps(result),
-                status_code=200,
-                media_type="application/json"
-            )
+            result = TreeSearchSavedResults(**result)
+
+            return result
         else:
-            return Response(content=f"Job not yet complete for id: {result_id}!")
+            raise HTTPException(
+                status_code=409,
+                detail=f"Job not yet complete for id: {result_id}!"
+            )
 
     def create(
         self,
@@ -167,7 +164,7 @@ class TreeSearchResultsController:
     def update(
         self,
         result_id: str,
-        updated_result: TreeSearchSavedResults,
+        updated_result: dict,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
         """
@@ -180,7 +177,7 @@ class TreeSearchResultsController:
 
         query = {
             "result_id": result_id,
-            "revision": updated_result.revision - 1,
+            "revision": updated_result["revision"] - 1,
             "$or": [
                 {"user": user.username},
                 {
@@ -190,7 +187,7 @@ class TreeSearchResultsController:
             ]
         }
         updated_result = {
-            k: v for k, v in updated_result.dict().items() if k in [
+            k: v for k, v in updated_result.items() if k in [
                 "result", "settings", "description", "tags", "modified", "revision"
             ] and v
         }
@@ -406,7 +403,11 @@ class TreeSearchResultsController:
             "user": user.username,
             "result_id": result_id
         }
+        result_doc = result.dict()
+        if "result_id" not in result_doc or not result_doc["result_id"]:
+            result_doc["result_id"] = result_id
+
         self.collection.update_one(
             query,
-            {"$set": {"result": result.dict()}}
+            {"$set": {"result": result_doc}}
         )

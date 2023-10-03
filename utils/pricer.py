@@ -13,10 +13,11 @@ from utils.similarity_search_utils import sim_search, sim_search_aggregate
 
 @register_util(name="pricer")
 class Pricer:
-    """Util class for Pricer, to be used as a controller (over Mongo/FilePricer"""
+    """Util class for Pricer, to be used as a controller (over Mongo/FilePricer)"""
     prefixes = ["pricer"]
     methods_to_bind: dict[str, list[str]] = {
-        "lookup_smarts": ["POST"]
+        "lookup_smarts": ["POST"],
+        "lookup_smiles": ["POST"]
     }
     # methods_to_bind: dict[str, list[str]] = {
     #     "lookup_smiles": ["POST"],
@@ -439,6 +440,12 @@ class MongoPricer:
             result = min(cursor, key=lambda x: x["ppg"], default=None)
             if result:
                 result["_id"] = str(result["_id"])
+                # keeping only these fields. Once the mols are computed, serialization
+                # becomes an issue.
+                result = {
+                    k: v for k, v in result.items()
+                    if k in ["_id", "smiles", "ppg", "source", "properties"]
+                }
             return result
         else:
             return None
@@ -466,7 +473,12 @@ class MongoPricer:
                 },
             ]
         )
-        result = {str(doc.pop("_id")): doc for doc in cursor}
+        result = {}
+        for doc in cursor:
+            result[str(doc.pop("_id"))] = {
+                k: v for k, v in doc.items()
+                if k in ["smiles", "ppg", "source", "properties"]
+            }
 
         return result
 

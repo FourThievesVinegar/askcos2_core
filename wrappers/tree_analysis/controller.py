@@ -7,6 +7,7 @@ from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper
+from wrappers.tree_analysis.tb_count_analogs import _tb_count_analogs
 from wrappers.tree_analysis.tb_pathway_ranking import _tb_pathway_ranking
 from wrappers.tree_analysis.tb_pmi_calculation import _tb_pmi_calculation
 from wrappers.tree_analysis.tb_reaction_classification \
@@ -33,6 +34,7 @@ class TreeAnalysisInput(BaseModel):
 
     # Count analogs options
     min_plausibility: float = 0.1
+    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
 
 
 class TreeAnalysisOutput(BaseModel):
@@ -70,15 +72,8 @@ class TreeAnalysisController(BaseWrapper):
         results_controller = get_util_registry().get_util(
             module="tree_search_results_controller"
         )
-        resp = results_controller.retrieve(result_id=input.result_id, token=token)
-        if resp.status_code == 404:
-            return resp
-
-        try:
-            result = json.loads(resp.body)
-        except Exception as e:
-            traceback.print_exc()
-            return resp
+        result = results_controller.retrieve(result_id=input.result_id, token=token)
+        result = result.dict()
 
         if result["result_type"] == "ipp":
             raise HTTPException(
@@ -134,7 +129,12 @@ class TreeAnalysisController(BaseWrapper):
         elif task == "pmi_calculation":
             result, info = _tb_pmi_calculation(tb_result=tb_result, index=input.index)
         elif task == "count_analogs":
-            result, info = _tb_count_analogs(tb_results, index, min_plausibility=0.1)
+            result, info = _tb_count_analogs(
+                tb_result=tb_result,
+                index=input.index,
+                min_plausibility=input.min_plausibility,
+                atom_map_backend=input.atom_map_backend
+            )
         else:
             output["success"] = False
             output["error"] = "Unrecognized tree analysis task type."
@@ -178,5 +178,5 @@ class TreeAnalysisController(BaseWrapper):
 
         return task_id
 
-    async def retrieve(self, task_id: str) -> Response | None:
+    async def retrieve(self, task_id: str) -> Response:
         return await super().retrieve(task_id=task_id)

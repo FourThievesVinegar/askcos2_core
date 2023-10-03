@@ -1,11 +1,15 @@
 import networkx as nx
+from wrappers.count_analogs.default import CountAnalogsInput
 from wrappers.tree_analysis.tree_analysis_utils import NODE_LINK_ATTRS
 from wrappers.registry import get_wrapper_registry
 from utils.registry import get_util_registry
 
 
-def _tb_count_analogs_combinations(tree: nx.Graph, min_plausibility: float
-                                   ) -> int:
+def _tb_count_analogs_combinations(
+    tree: nx.Graph,
+    min_plausibility: float,
+    atom_map_backend: str = "rxnmapper"
+) -> int:
     """
     Run Count Combinations for calculating analogs
 
@@ -28,15 +32,20 @@ def _tb_count_analogs_combinations(tree: nx.Graph, min_plausibility: float
     wrapper_input = CountAnalogsInput(
         reaction_smiles=reaction_smiles,
         reaction_smarts=reaction_smarts,
-        min_plausibility=min_plausibility
+        min_plausibility=min_plausibility,
+        atom_map_backend=atom_map_backend
     )
     count = graph_enumerator.call_sync(wrapper_input).result
 
     return count
 
 
-def _tb_count_analogs(tb_result: dict, index: int, min_plausibility: float
-                      ) -> tuple[dict, dict]:
+def _tb_count_analogs(
+    tb_result: dict,
+    index: int,
+    min_plausibility: float,
+    atom_map_backend: str = "rxnmapper"
+) -> tuple[dict, dict]:
     """
     Run a reaction classification prediction for a saved tree builder result.
 
@@ -78,7 +87,11 @@ def _tb_count_analogs(tb_result: dict, index: int, min_plausibility: float
         print(f"Counting analogs for {len(graph_paths)} trees")
         for i, tree in enumerate(graph_paths):
             num_analogs.append(
-                _tb_count_analogs_combinations(tree, min_plausibility)
+                _tb_count_analogs_combinations(
+                    tree=tree,
+                    min_plausibility=min_plausibility,
+                    atom_map_backend=atom_map_backend
+                )
             )
     except Exception as e:
         output["success"] = False

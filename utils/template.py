@@ -1,6 +1,6 @@
 import json
 from bson import ObjectId
-from config import db_config
+from configs import db_config
 from fastapi import Response
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
@@ -112,8 +112,9 @@ class Template:
             proj = [field]
 
         cursor = self.collection.find(filter=query, projection=proj)
-        result = {doc.pop("_id"): doc[field] if field else doc for doc in cursor}
-        resp = {"result": result, "query": data}
+        result = {str(doc.pop("_id")): doc[field] if field else doc
+                  for doc in cursor}
+        resp = {"result": result, "query": data.dict()}
 
         return Response(
             content=json.dumps(resp),
@@ -134,4 +135,8 @@ class Template:
             )
         resp = {"template_sets": names, "attributes": attributes}
 
-        return Response(resp)
+        return Response(
+            content=json.dumps(resp),
+            status_code=200,
+            media_type="application/json"
+        )
