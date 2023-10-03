@@ -1,4 +1,4 @@
-from config import db_config
+from configs import db_config
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
 from typing import Any
