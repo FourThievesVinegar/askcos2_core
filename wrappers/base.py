@@ -57,12 +57,11 @@ class BaseWrapper:
         return self.__doc__
 
     def is_ready(self) -> bool:
-        resp = self.session_sync.get(self.prediction_url)
-        status_code = resp.status_code
-        if status_code != 404:
-            return True
-
         try:
+            resp = self.session_sync.get(self.prediction_url)
+            status_code = resp.status_code
+            if status_code != 404:
+                return True
             # 404 can also be root endpoint not found rather than unavailable service
             # Right now we only need to check FastAPI (via "detail")
             # or torchserve (via "message")
