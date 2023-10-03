@@ -7,6 +7,8 @@ READABLE_NAMES = {
         "Generic Worker (ML Router equivalent)",
     "context_recommender_worker":
         "Context Recommender Worker for V1 and V2",
+    "count_analogs_worker":
+        "Reaction Graph Enumeration Worker",
     "evaluate_reactions_worker":
         "Evaluate Reactions Worker",
     "forward_worker":

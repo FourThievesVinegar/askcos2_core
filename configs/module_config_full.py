@@ -123,13 +123,7 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9911/count_analogs",
             "custom_prediction_url": "",
             "timeout": 120,
-            "available_models": [
-                "default"
-            ]
-        },
-        "celery": {
-            "queue_name": "generic",
-            "worker_name": "generic_worker"
+            "available_models": []
         }
     },
 

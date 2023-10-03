@@ -1,14 +1,14 @@
+from pydantic import BaseModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
-from typing import List
+
 
 class CountAnalogsInput(BaseModel):
-    smiles: list[str]
-
-
-class CountAnalogsResult(BaseModel):
-    __root__: int
+    reaction_smiles: list[str]
+    reaction_smarts: list[str] = None
+    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
+    min_plausibility: float = 0.1
 
 
 class CountAnalogsOutput(BaseModel):
@@ -38,7 +38,12 @@ class CountAnalogsWrapper(BaseWrapper):
         return response
 
     async def call_async(self, input: CountAnalogsInput, priority: int = 0) -> str:
-        return await super().call_async(input=input, priority=priority)
+        from askcos2_celery.tasks import count_analogs_task
+        async_result = count_analogs_task.apply_async(
+            args=(self.name, input.dict()), priority=priority)
+        task_id = async_result.id
+
+        return task_id
 
     async def retrieve(self, task_id: str) -> CountAnalogsResponse | None:
         return await super().retrieve(task_id=task_id)
