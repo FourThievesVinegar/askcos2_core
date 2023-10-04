@@ -9,7 +9,8 @@ from utils.registry import get_util_registry
 
 SECRET_KEY = "1d21d866fe6c71df2e2ab948e3d7d6bcf369c3d0f1f99d71570dc48365856c49"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+# ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 43200
 
 # The scheme itself returns a str (i.e., the token) when called
 # OAuth2PasswordBearer seems to have handled the conversion of token_dict -> token
