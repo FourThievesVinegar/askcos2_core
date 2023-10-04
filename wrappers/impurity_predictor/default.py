@@ -9,7 +9,7 @@ class ImpurityPredictorInput(BaseModel):
         "augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
     predictor_model_name: str = "pistachio"
     inspector: str = "Reaxys inspector"
-    atom_map_backend: Literal["indigo", "rxnmapper", "wln"]
+    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = "rxnmapper"
     topn_outcome: int = 3
     insp_threshold: float = 0.2
     check_mapping: bool = True
