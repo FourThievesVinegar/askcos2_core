@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import Depends
-from pydantic import BaseModel, constr, Field
+from pydantic import BaseModel, constr, Field, validator
 from typing import Annotated, Any, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
@@ -9,17 +9,54 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class RetroBackendOption(BaseModel):
-    retro_backend: str = "template_relevance"
+    retro_backend: Literal[
+        "template_relevance",
+        "augmented_transformer",
+        "graph2smiles"
+    ] = "template_relevance"
     retro_model_name: str = "reaxys"
     max_num_templates: int = 100
     max_cum_prob: float = 0.995
     attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
 
+    @validator("retro_model_name")
+    def check_retro_model_name(cls, v, values):
+        if "retro_backend" not in values:
+            raise ValueError("retro_backend not supplied!")
+        if values["retro_backend"] == "template_relevance":
+            if v not in [
+                "bkms_metabolic",
+                "cas",
+                "pistachio",
+                "pistachio_ringbreaker",
+                "reaxys",
+                "reaxys_biocatalysis"
+            ]:
+                raise ValueError(
+                    f"Unsupported retro_model_name {v} for template_relevance")
+        elif values["retro_backend"] == "augmented_transformer":
+            if v not in [
+                "USPTO_480k_mix",
+                "cas",
+                "pistachio_2023Q2"
+            ]:
+                raise ValueError(
+                    f"Unsupported retro_model_name {v} for augmented_transformer")
+        elif values["retro_backend"] == "graph2smiles":
+            if v not in [
+                "USPTO_480k_mix",
+                "cas",
+                "pistachio_2023Q2"
+            ]:
+                raise ValueError(
+                    f"Unsupported retro_model_name {v} for graph2smiles")
+        return v
+
 
 class ClusterSetting(BaseModel):
-    feature: str = "original"
+    feature: Literal["original", "outcomes", "all"] = "original"
     cluster_method: Literal["rxn_class", "hdbscan", "kmeans"] = "rxn_class"
-    fp_type: str = "morgan"
+    fp_type: Literal["morgan"] = "morgan"
     fp_length: int = 512
     fp_radius: int = 1
     classification_threshold: float = 0.2
@@ -32,7 +69,7 @@ class ExpandOneInput(BaseModel):
     banned_reactions: list[str] = None
     use_fast_filter: bool = True
     fast_filter_threshold: float = 0.75
-    retro_rerank_backend: str = "relevance_heuristic"
+    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = "scscore"
     cluster_precursors: bool = False
     cluster_setting: ClusterSetting = ClusterSetting()
     extract_template: bool = False
