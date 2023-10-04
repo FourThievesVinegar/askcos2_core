@@ -7,16 +7,18 @@ from typing import Optional
 
 class ContextRecommenderInput(BaseModel):
     smiles: str
-    reagents: list[str]
     n_conditions: Optional[int] = 10
+    with_smiles: bool = False
+    return_scores: bool = True
 
 
 class ContextRecommenderOutput(BaseModel):
-    __root__: list
+    conditions: list[list]
+    scores: list[float] | None
 
 
 class ContextRecommenderResponse(BaseResponse):
-    result: list
+    result: ContextRecommenderOutput
 
 
 # FP model condition
@@ -37,7 +39,7 @@ class ContextRecommenderWrapper(BaseWrapper):
             timeout=self.config["deployment"]["timeout"]
         )
         output = response.json()
-        output = ContextRecommenderOutput(__root__=output)
+        output = ContextRecommenderOutput(**output)
 
         return output
 
@@ -65,7 +67,7 @@ class ContextRecommenderWrapper(BaseWrapper):
         response = {
             "status_code": 200,
             "message": "",
-            "result": output.__root__
+            "result": output
         }
         response = ContextRecommenderResponse(**response)
 
