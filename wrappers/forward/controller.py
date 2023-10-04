@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+from scipy.special import softmax
 from typing import Literal
+from utils.rdkit import molecular_weight
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.forward.augmented_transformer import ForwardATInput, ForwardATResponse
@@ -21,6 +23,8 @@ class ForwardOutput(BaseModel):
 class ForwardResult(BaseModel):
     outcome: str
     score: float
+    prob: float
+    mol_wt: float
 
 
 class ForwardResponse(BaseResponse):
@@ -105,9 +109,18 @@ class ForwardController(BaseWrapper):
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:
+                normalized_scores = softmax(result_per_smi.scores)
                 result.append(
-                    [{"outcome": outcome, "score": score} for outcome, score
-                     in zip(result_per_smi.products, result_per_smi.scores)]
+                    [{
+                        "outcome": outcome,
+                        "score": score,
+                        "prob": float(normalized_score),
+                        "mol_wt": molecular_weight(outcome)
+                    } for outcome, score, normalized_score in zip(
+                        result_per_smi.products,
+                        result_per_smi.scores,
+                        normalized_scores
+                    )]
                 )
         elif backend == "wldn5":
             # list[list[dict]] -> list[list[dict]]
@@ -117,7 +130,8 @@ class ForwardController(BaseWrapper):
                     [{
                         "outcome": raw_result.outcome.smiles,
                         "score": raw_result.score,
-                        "prob": raw_result.prob
+                        "prob": raw_result.prob,
+                        "mol_wt": molecular_weight(raw_result.outcome.smiles)
                     } for raw_result in result_per_smi]
                 )
         else:
