@@ -44,7 +44,7 @@ module_config = {
             "ports_to_expose": [9661],
             "default_prediction_url": "http://0.0.0.0:9661/indigo_mapper",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -58,7 +58,7 @@ module_config = {
             "ports_to_expose": [9671],
             "default_prediction_url": "http://0.0.0.0:9671/ibm_rxnmapper",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -72,7 +72,7 @@ module_config = {
             "ports_to_expose": [9651],
             "default_prediction_url": "http://0.0.0.0:9651/wln_mapper",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -137,7 +137,7 @@ module_config = {
             "ports_to_expose": [9631],
             "default_prediction_url": "http://0.0.0.0:9631/descriptors",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -170,7 +170,7 @@ module_config = {
             "ports_to_expose": [9611],
             "default_prediction_url": "http://0.0.0.0:9611",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         },
         "wrapper_names": [
@@ -188,7 +188,7 @@ module_config = {
             "ports_to_expose": [9510, 9511, 9512],
             "default_prediction_url": "http://0.0.0.0:9510/predictions",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
                 "USPTO_480k_mix"
             ]
@@ -204,7 +204,7 @@ module_config = {
             "ports_to_expose": [9520, 9521, 9522],
             "default_prediction_url": "http://0.0.0.0:9520/predictions",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
                 "USPTO_480k_mix"
             ]
@@ -220,7 +220,7 @@ module_config = {
             "ports_to_expose": [9501],
             "default_prediction_url": "http://0.0.0.0:9501/wldn5_predict",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
                 "uspto_500k",
                 "pistachio"
@@ -320,7 +320,7 @@ module_config = {
             "ports_to_expose": [9410, 9411, 9412],
             "default_prediction_url": "http://0.0.0.0:9410/predictions",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
                 "bkms_metabolic",
                 "cas",
@@ -342,9 +342,9 @@ module_config = {
             "ports_to_expose": [9420, 9421, 9422],
             "default_prediction_url": "http://0.0.0.0:9420/predictions",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
-                "USPTO_480_mix"
+                "USPTO_480k_mix"
             ]
         }
     },
@@ -359,9 +359,9 @@ module_config = {
             "ports_to_expose": [9430, 9431, 9432],
             "default_prediction_url": "http://0.0.0.0:9430/predictions",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": [
-                "USPTO_480_mix"
+                "USPTO_480k_mix"
             ]
         }
     },
@@ -375,7 +375,7 @@ module_config = {
             "ports_to_expose": [9741],
             "default_prediction_url": "http://0.0.0.0:9741/scscore",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -389,7 +389,7 @@ module_config = {
             "ports_to_expose": [9601],
             "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -432,7 +432,7 @@ module_config = {
             "ports_to_expose": [9311],
             "default_prediction_url": "http://0.0.0.0:9311/get_buyable_paths",
             "custom_prediction_url": "",
-            "timeout": 120,
+            "timeout": 1200,
             "available_model_names": []
         }
     },
@@ -447,7 +447,7 @@ module_config = {
             "ports_to_expose": [9632],
             "default_prediction_url": "http://0.0.0.0:9632/predictions/descriptors",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
@@ -462,7 +462,7 @@ module_config = {
             "ports_to_expose": [9732],
             "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
             "custom_prediction_url": "",
-            "timeout": 3,
+            "timeout": 10,
             "available_model_names": []
         }
     },
