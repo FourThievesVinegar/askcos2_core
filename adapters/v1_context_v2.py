@@ -41,8 +41,8 @@ class V1ContextV2Results(BaseModel):
     input_class=V1ContextV2Input,
     result_class=V1ContextV2Results
 )
-class V1ContextAdapter:
-    """V1 Site Selectivity Adapter"""
+class V1ContextV2Adapter:
+    """V1 Context-v2 Adapter"""
     prefix = "legacy/context_v2"
     methods = ["POST"]
     backend_wrapper_names = {
