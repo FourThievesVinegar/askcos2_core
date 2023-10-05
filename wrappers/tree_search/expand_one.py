@@ -1,6 +1,7 @@
-from datetime import datetime
 from fastapi import Depends
-from pydantic import BaseModel, constr, Field, validator
+from pydantic import BaseModel, Field
+from schemas.cluster import ClusterSetting
+from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
@@ -8,65 +9,11 @@ from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class RetroBackendOption(BaseModel):
-    retro_backend: Literal[
-        "template_relevance",
-        "augmented_transformer",
-        "graph2smiles"
-    ] = "template_relevance"
-    retro_model_name: str = "reaxys"
-    max_num_templates: int = 100
-    max_cum_prob: float = 0.995
-    attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
-
-    @validator("retro_model_name")
-    def check_retro_model_name(cls, v, values):
-        if "retro_backend" not in values:
-            raise ValueError("retro_backend not supplied!")
-        if values["retro_backend"] == "template_relevance":
-            if v not in [
-                "bkms_metabolic",
-                "cas",
-                "pistachio",
-                "pistachio_ringbreaker",
-                "reaxys",
-                "reaxys_biocatalysis"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for template_relevance")
-        elif values["retro_backend"] == "augmented_transformer":
-            if v not in [
-                "USPTO_480k_mix",
-                "cas",
-                "pistachio_2023Q2"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for augmented_transformer")
-        elif values["retro_backend"] == "graph2smiles":
-            if v not in [
-                "USPTO_480k_mix",
-                "cas",
-                "pistachio_2023Q2"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for graph2smiles")
-        return v
-
-
-class ClusterSetting(BaseModel):
-    feature: Literal["original", "outcomes", "all"] = "original"
-    cluster_method: Literal["rxn_class", "hdbscan", "kmeans"] = "rxn_class"
-    fp_type: Literal["morgan"] = "morgan"
-    fp_length: int = 512
-    fp_radius: int = 1
-    classification_threshold: float = 0.2
-
-
 class ExpandOneInput(BaseModel):
     smiles: str
     retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
-    banned_chemicals: list[str] = None
-    banned_reactions: list[str] = None
+    banned_chemicals: list[str] = Field(default_factory=list)
+    banned_reactions: list[str] = Field(default_factory=list)
     use_fast_filter: bool = True
     fast_filter_threshold: float = 0.75
     retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = "scscore"
@@ -111,24 +58,6 @@ class ExpandOneOutput(BaseModel):
 
 class ExpandOneResponse(BaseResponse):
     result: list[RetroResult]
-
-
-class BlacklistedEntry(BaseModel):
-    id: str = ""
-    user: str
-    description: constr(max_length=1000) = None
-    created: datetime = Field(default_factory=datetime.now)
-    dt: constr(max_length=200) = None
-    smiles: constr(max_length=5000)
-    active: bool = True
-
-
-class BlacklistedChemicals(BaseModel):
-    __root__: list[BlacklistedEntry]
-
-
-class BlacklistedReactions(BaseModel):
-    __root__: list[BlacklistedEntry]
 
 
 @register_wrapper(
@@ -217,11 +146,19 @@ class ExpandOneWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: ExpandOneOutput
                                    ) -> ExpandOneResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = ExpandOneResponse(**response)
+        status_code = 200
+        message = "expand_one.call_raw() successfully executed."
+        result = output.results
+
+        if not output.status == "SUCCESS":
+            status_code = 500
+            message = f"Backend error encountered during expand_one.call_raw() " \
+                      f"with the following error message {output.error}"
+
+        response = ExpandOneResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response

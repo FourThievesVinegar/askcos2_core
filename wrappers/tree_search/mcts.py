@@ -1,30 +1,16 @@
+import traceback
 import uuid
 from datetime import datetime
-from fastapi import Depends
-from pydantic import BaseModel, constr, Field
+from fastapi import Depends, HTTPException
+from pydantic import BaseModel, Field
+from schemas.cluster import ClusterSetting
+from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
 from utils.tree_search_results import TreeSearchSavedResults
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-
-
-class RetroBackendOption(BaseModel):
-    retro_backend: str = "template_relevance"
-    retro_model_name: str = "reaxys"
-    max_num_templates: int = 100
-    max_cum_prob: float = 0.995
-    attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
-
-
-class ClusterSetting(BaseModel):
-    feature: str = "original"
-    cluster_method: str = "rxn_class"
-    fp_type: str = "morgan"
-    fp_length: int = 512
-    fp_radius: int = 1
-    classification_threshold: float = 0.2
 
 
 class ExpandOneOptions(BaseModel):
@@ -37,9 +23,9 @@ class ExpandOneOptions(BaseModel):
     retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
     use_fast_filter: bool = True
     filter_threshold: float = 0.75
-    retro_rerank_backend: str | None = None
+    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] = None
     cluster_precursors: bool = False
-    cluster_setting: ClusterSetting = None
+    cluster_setting: ClusterSetting = ClusterSetting()
     extract_template: bool = False
     return_reacting_atoms: bool = True
     selectivity_check: bool = False
@@ -112,24 +98,6 @@ class MCTSResponse(BaseResponse):
     result: MCTSResult
 
 
-class BlacklistedEntry(BaseModel):
-    id: str = ""
-    user: str
-    description: constr(max_length=1000) = None
-    created: datetime = Field(default_factory=datetime.now)
-    dt: constr(max_length=200) = None
-    smiles: constr(max_length=5000)
-    active: bool = True
-
-
-class BlacklistedChemicals(BaseModel):
-    __root__: list[BlacklistedEntry]
-
-
-class BlacklistedReactions(BaseModel):
-    __root__: list[BlacklistedEntry]
-
-
 @register_wrapper(
     name="tree_search_mcts",
     input_class=MCTSInput,
@@ -198,7 +166,11 @@ class MCTSWrapper(BaseWrapper):
                     state="failed",
                     token=token
                 )
-            raise
+            raise HTTPException(
+                status_code=500,
+                detail=f"mcts.call_sync() fails with the error: "
+                       f"{traceback.format_exc()}"
+            )
 
         if input.run_async:
             results_controller.update_result_state(
@@ -272,11 +244,19 @@ class MCTSWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: MCTSOutput
                                    ) -> MCTSResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = MCTSResponse(**response)
+        status_code = 200
+        message = "mcts.call_raw() successfully executed."
+        result = output.results
+
+        if not output.status == "SUCCESS":
+            status_code = 500
+            message = f"Backend error encountered during mcts.call_raw() " \
+                      f"with the following error message {output.error}"
+
+        response = MCTSResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response
