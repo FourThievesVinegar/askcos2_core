@@ -22,6 +22,7 @@ class ExpandOneInput(BaseModel):
     extract_template: bool = False
     return_reacting_atoms: bool = True
     selectivity_check: bool = False
+    group_by_strategy: bool = False
 
 
 class RetroResult(BaseModel):
@@ -57,7 +58,7 @@ class ExpandOneOutput(BaseModel):
 
 
 class ExpandOneResponse(BaseResponse):
-    result: list[RetroResult]
+    result: list[RetroResult] | dict[int, list[RetroResult]]
 
 
 @register_wrapper(
@@ -107,7 +108,7 @@ class ExpandOneWrapper(BaseWrapper):
 
         # actual backend call
         output = self.call_raw(input=input)
-        response = self.convert_output_to_response(output)
+        response = self.convert_output_to_response(output, input)
 
         return response
 
@@ -123,7 +124,7 @@ class ExpandOneWrapper(BaseWrapper):
 
         # actual backend call
         output = self.call_raw(input=input)
-        response = self.convert_output_to_response(output)
+        response = self.convert_output_to_response(output, input)
 
         return response
 
@@ -144,8 +145,10 @@ class ExpandOneWrapper(BaseWrapper):
         return await super().retrieve(task_id=task_id)
 
     @staticmethod
-    def convert_output_to_response(output: ExpandOneOutput
-                                   ) -> ExpandOneResponse:
+    def convert_output_to_response(
+        output: ExpandOneOutput,
+        input: ExpandOneInput
+    ) -> ExpandOneResponse:
         status_code = 200
         message = "expand_one.call_raw() successfully executed."
         result = output.results
@@ -154,6 +157,19 @@ class ExpandOneWrapper(BaseWrapper):
             status_code = 500
             message = f"Backend error encountered during expand_one.call_raw() " \
                       f"with the following error message {output.error}"
+
+        if input.group_by_strategy:
+            grouped_results = {}
+            for i, strategy in enumerate(input.retro_backend_options):
+                grouped_result = []
+                for prediction in result:
+                    if (
+                        prediction.retro_backend == strategy.retro_backend and
+                        prediction.retro_model_name == strategy.retro_model_name
+                    ):
+                        grouped_result.append(prediction)
+                grouped_results[i] = grouped_result
+            result = grouped_results
 
         response = ExpandOneResponse(
             status_code=status_code,
