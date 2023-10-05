@@ -4,4 +4,8 @@
 deployment/
 data/
 *.sif
+
 .env
+
+askcos.ssl.cert
+askcos.ssl.key

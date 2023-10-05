@@ -388,34 +388,34 @@ generate-deployment-scripts() {
   python scripts/pre_deploy.py
 }
 
-get-backend-images() {
+get-images() {
   echo "Getting images using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/get_images.sh"
   bash deployment/deployment_latest/get_images.sh
   echo "Images ready."
 }
 
-download-backend-data() {
+download-db-data() {
   echo "Downloading data for db using scripts/download_data.sh"
   bash scripts/download_data.sh
   echo "Data downloaded."
 }
 
-start-backend-services() {
+start-services() {
   echo "Start services using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/start_services.sh"
   bash deployment/deployment_latest/start_services.sh
   echo "Services started."
 }
 
-stop-backend-services() {
+stop-services() {
   echo "Stop services using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/stop_services.sh"
   bash deployment/deployment_latest/stop_services.sh
   echo "Services stopped."
 }
 
-remove-backend-volumes() {
+remove-volumes() {
   docker compose -f compose.yaml down -v
 }
 
@@ -552,8 +552,8 @@ else
       pre-deploy)
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        download-backend-data
+        get-images
+        download-db-data
         set-db-defaults
         seed-db
         ;;
@@ -561,27 +561,27 @@ else
         # Normal first deployment, do everything (pre-deploy + start-backend-services)
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        download-backend-data
+        get-images
+        download-db-data
         set-db-defaults
         seed-db
-        start-backend-services
+        start-services
         ;;
       update)
         # Update an existing configuration, database seeding is not performed
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        start-backend-services
+        get-images
+        start-services
         post-update-message
         ;;
       start)
         # (Re)start existing deployment
-        start-backend-services
+        start-services
         ;;
       stop)
         # Stop and remove currently running containers
-        stop-backend-services
+        stop-services
         ;;
       clean)
         # Clean up current deployment including all data volumes
@@ -591,8 +591,8 @@ else
         case "$response" in
           [Yy] | [Yy][Ee][Ss])
             echo "Cleaning deployment."
-            stop-backend-services
-            remove-backend-volumes
+            stop-services
+            remove-volumes
             ;;
           *)
             echo "Doing nothing."
@@ -601,8 +601,8 @@ else
         ;;
       restart)
         # Stop and remove currently running containers before starting
-        stop-backend-services
-        start-backend-services
+        stop-services
+        start-services
         ;;
       *)
         echo "Error: Unsupported command $arg" >&2  # print to stderr
