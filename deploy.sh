@@ -170,6 +170,14 @@ diff-env() {
   fi
 }
 
+create-ssl() {
+  if [ ! -f "askcos.ssl.cert" ]; then
+    echo "Creating SSL certificates."
+    openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=US/ST=MA/L=BOS/O=askcos/CN=askcos.$RANDOM.com" -keyout askcos.ssl.key -out askcos.ssl.cert
+    echo
+  fi
+}
+
 set-db-defaults() {
   # Set default values for seeding database if values are not already defined
   BUYABLES=${BUYABLES:-default}
@@ -543,13 +551,14 @@ else
   for arg in "$@"
   do
     case "$arg" in
-      clean-data | start-db-services | save-db | seed-db | copy-http-conf | copy-https-conf | create-ssl | pull-images | \
+      clean-data | start-db-services | save-db | seed-db | create-ssl | pull-images | \
       start-web-services | start-ml-servers | start-celery-workers | set-db-defaults | count-mongo-docs | \
       backup | restore | index-db | diff-env | post-update-message | old-messages | start-cpp-treebuilder-experimental )
         # This is a defined function, so execute it
         $arg
         ;;
       pre-deploy)
+        create-ssl
         diff-env
         generate-deployment-scripts
         get-images
@@ -559,6 +568,7 @@ else
         ;;
       deploy)
         # Normal first deployment, do everything (pre-deploy + start-backend-services)
+        create-ssl
         diff-env
         generate-deployment-scripts
         get-images
