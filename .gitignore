@@ -9,3 +9,4 @@ data/
 
 askcos.ssl.cert
 askcos.ssl.key
+nginx.conf

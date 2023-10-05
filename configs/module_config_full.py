@@ -30,7 +30,7 @@ module_config = {
     },
 
     "global": {
-        "require_frontend": True,
+        "require_frontend": False,
         "container_runtime": "docker",
         "image_policy": "build_all",
         "enable_gpu": False
