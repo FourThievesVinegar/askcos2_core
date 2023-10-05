@@ -1,7 +1,9 @@
 export VERSION ?= dev
 export TAG ?= $(VERSION)
 
-.PHONY: pre-deploy deploy update start stop clean restart test test-wrappers test-adapters
+ASKCOS_VUE_NGINX_DIR ?= ../../askcos-vue-nginx
+
+.PHONY: pre-deploy deploy update start stop clean restart test test-wrappers test-adapters build-vue
 
 pre-deploy:
 	bash deploy.sh pre-deploy -v $(TAG)
@@ -31,3 +33,6 @@ test-adapters:
 
 test-wrappers:
 	pytest tests/wrappers
+
+build-vue:
+	$(MAKE) -C $(ASKCOS_VUE_NGINX_DIR) VERSION=$(VERSION) TAG=$(TAG)
