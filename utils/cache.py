@@ -58,4 +58,5 @@ class CacheController:
 
         while len(cache_map) >= self.cache_size:
             k = random.choice(cache_map.keys())
+            collection.delete_one(cache_map[k])
             del cache_map[k]
