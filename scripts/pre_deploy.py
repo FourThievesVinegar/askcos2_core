@@ -77,6 +77,7 @@ def main():
     os.symlink(os.path.basename(deployment_dir), "./deployment/deployment_latest")
     shutil.copy2(args.config, deployment_dir)
 
+    require_frontend = module_config["global"]["require_frontend"]
     runtime = module_config["global"]["container_runtime"]
     enable_gpu = module_config["global"]["enable_gpu"]
     image_policy = module_config["global"]["image_policy"]
@@ -104,12 +105,12 @@ def main():
         output_dir = f"../{output_dir}"
 
         is_newly_cloned = False
-        if os.path.exists(output_dir):
+        if os.path.exists(output_dir) and len(os.listdir(output_dir)) != 0:
             print(f"{output_dir} already exists, skipping cloning.")
             command = ["git", "pull"]
             run_and_printchar(command, cwd=output_dir)
         else:
-            os.makedirs(output_dir)
+            os.makedirs(output_dir, exist_ok=True)
             print(f"Cloning {repo} into {output_dir}")
             command = ["git", "clone", repo, output_dir]
             run_and_printchar(command)
@@ -224,6 +225,47 @@ def main():
         "\n"
     ]
     cmds_stop_services.extend(cmds)
+
+    # clone the frontend repo, if not existing
+    if require_frontend:
+        repo = "git@gitlab.com:mlpds_mit/askcosv2/askcos-vue-nginx.git"
+        output_dir = repo.split("askcosv2/")[-1][:-4]
+        output_dir = f"../{output_dir}"
+
+        if os.path.exists(output_dir):
+            print(f"{output_dir} already exists, skipping cloning.")
+            command = ["git", "pull"]
+            run_and_printchar(command, cwd=output_dir)
+        else:
+            os.makedirs(output_dir)
+            print(f"Cloning {repo} into {output_dir}")
+            command = ["git", "clone", repo, output_dir]
+            run_and_printchar(command)
+
+        # extend with commands for the frontend
+        if image_policy == "build_all":
+            cmd = "make build-vue"
+            cmds = [
+                f"echo Building image for the frontend, runtime: {runtime}\n",
+                f"{cmd}\n",
+                "docker tag registry.gitlab.com/mlpds_mit/askcos/askcos-vue-nginx:dev "
+                "registry.gitlab.com/mlpds_mit/askcosv2/askcos-vue-nginx:2.0"
+                "\n"
+            ]
+            cmds_get_images.extend(cmds)
+        else:
+            raise NotImplementedError
+
+        cmd = "docker compose -f compose.yaml up -d web"
+        cmds = [
+            f"echo Starting service for the frontend, "
+            f"runtime: {runtime}\n",
+            f"{cmd}\n",
+            "\n"
+        ]
+        cmds_start_services.extend(cmds)
+
+        # The stopping command is already part of docker compose down
 
     print(f"Writing deployment commands into {deployment_dir}")
     ofn = os.path.join(deployment_dir, "get_images.sh")

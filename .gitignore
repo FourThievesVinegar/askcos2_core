@@ -4,4 +4,9 @@
 deployment/
 data/
 *.sif
+
 .env
+
+askcos.ssl.cert
+askcos.ssl.key
+nginx.conf

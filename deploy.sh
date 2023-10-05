@@ -170,6 +170,18 @@ diff-env() {
   fi
 }
 
+copy-https-conf() {
+  echo "Using https nginx configuration."
+  cp nginx.https.conf nginx.conf
+  echo
+  # Create SSL
+  if [ ! -f "askcos.ssl.cert" ]; then
+    echo "Creating SSL certificates."
+    openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=US/ST=MA/L=BOS/O=askcos/CN=askcos.$RANDOM.com" -keyout askcos.ssl.key -out askcos.ssl.cert
+    echo
+  fi
+}
+
 set-db-defaults() {
   # Set default values for seeding database if values are not already defined
   BUYABLES=${BUYABLES:-default}
@@ -388,34 +400,34 @@ generate-deployment-scripts() {
   python scripts/pre_deploy.py
 }
 
-get-backend-images() {
+get-images() {
   echo "Getting images using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/get_images.sh"
   bash deployment/deployment_latest/get_images.sh
   echo "Images ready."
 }
 
-download-backend-data() {
+download-db-data() {
   echo "Downloading data for db using scripts/download_data.sh"
   bash scripts/download_data.sh
   echo "Data downloaded."
 }
 
-start-backend-services() {
+start-services() {
   echo "Start services using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/start_services.sh"
   bash deployment/deployment_latest/start_services.sh
   echo "Services started."
 }
 
-stop-backend-services() {
+stop-services() {
   echo "Stop services using the script from the latest deployment directory"
   echo "    bash deployment/deployment_latest/stop_services.sh"
   bash deployment/deployment_latest/stop_services.sh
   echo "Services stopped."
 }
 
-remove-backend-volumes() {
+remove-volumes() {
   docker compose -f compose.yaml down -v
 }
 
@@ -543,45 +555,48 @@ else
   for arg in "$@"
   do
     case "$arg" in
-      clean-data | start-db-services | save-db | seed-db | copy-http-conf | copy-https-conf | create-ssl | pull-images | \
+      clean-data | start-db-services | save-db | seed-db | copy-https-conf | pull-images | \
       start-web-services | start-ml-servers | start-celery-workers | set-db-defaults | count-mongo-docs | \
       backup | restore | index-db | diff-env | post-update-message | old-messages | start-cpp-treebuilder-experimental )
         # This is a defined function, so execute it
         $arg
         ;;
       pre-deploy)
+        copy-https-conf
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        download-backend-data
+        get-images
+        download-db-data
         set-db-defaults
         seed-db
         ;;
       deploy)
         # Normal first deployment, do everything (pre-deploy + start-backend-services)
+        copy-https-conf
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        download-backend-data
+        get-images
+        download-db-data
         set-db-defaults
         seed-db
-        start-backend-services
+        start-services
         ;;
       update)
         # Update an existing configuration, database seeding is not performed
+        copy-https-conf
         diff-env
         generate-deployment-scripts
-        get-backend-images
-        start-backend-services
+        get-images
+        start-services
         post-update-message
         ;;
       start)
         # (Re)start existing deployment
-        start-backend-services
+        start-services
         ;;
       stop)
         # Stop and remove currently running containers
-        stop-backend-services
+        stop-services
         ;;
       clean)
         # Clean up current deployment including all data volumes
@@ -591,8 +606,8 @@ else
         case "$response" in
           [Yy] | [Yy][Ee][Ss])
             echo "Cleaning deployment."
-            stop-backend-services
-            remove-backend-volumes
+            stop-services
+            remove-volumes
             ;;
           *)
             echo "Doing nothing."
@@ -601,8 +616,8 @@ else
         ;;
       restart)
         # Stop and remove currently running containers before starting
-        stop-backend-services
-        start-backend-services
+        stop-services
+        start-services
         ;;
       *)
         echo "Error: Unsupported command $arg" >&2  # print to stderr
