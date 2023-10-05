@@ -32,7 +32,7 @@ class CountAnalogsWrapper(BaseWrapper):
     prefixes = ["count_analogs"]
 
     def call_sync(self, input: CountAnalogsInput) -> CountAnalogsResponse:
-        output = super().call_raw(input=input)
+        output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
