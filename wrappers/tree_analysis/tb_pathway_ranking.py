@@ -70,10 +70,10 @@ def _tb_pathway_ranking(
         results = pathway_ranker.call_sync(wrapper_input).result
         results = results.dict()
     except Exception as e:
-        traceback.print_tb(e.__traceback__)
+        traceback.format_exc()
         output["success"] = False
-        output["error"] = "Pathway ranking prediction failed."
-        print("Pathway ranking failed for tree builder result:", str(e))
+        output["error"] = f"Pathway ranking prediction failed. Traceback: " \
+                          f"{traceback.format_exc()}"
 
         return tb_result, output
 
@@ -86,10 +86,10 @@ def _tb_pathway_ranking(
             if clustering:
                 tree[key]["cluster_id"] = results["clusters"][i]
     except Exception as e:
-        traceback.print_tb(e.__traceback__)
+        traceback.format_exc()
         output["success"] = False
-        output["error"] = "Pathway ranking result processing failed."
-        print("Pathway ranking failed for tree builder result:", str(e))
+        output["error"] = f"Pathway ranking prediction failed. Traceback: " \
+                          f"{traceback.format_exc()}"
 
         return tb_result, output
 

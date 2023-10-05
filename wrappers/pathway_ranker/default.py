@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 
@@ -6,7 +7,7 @@ from wrappers.base import BaseWrapper, BaseResponse
 class PathwayRankerInput(BaseModel):
     trees: list[dict]
     clustering: bool = False
-    cluster_method: str = "hdbscan"
+    cluster_method: Literal["hdbscan", "kmeans"] = "hdbscan"
     min_samples: int = 5
     min_cluster_size: int = 5
 
@@ -14,7 +15,7 @@ class PathwayRankerInput(BaseModel):
 class PathwayRankerResult(BaseModel):
     scores: list
     encoded_trees: list
-    clusters: list
+    clusters: list | None
 
 
 class PathwayRankerOutput(BaseModel):

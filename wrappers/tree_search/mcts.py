@@ -82,7 +82,7 @@ class MCTSInput(BaseModel):
 
 class MCTSResult(BaseModel):
     stats: dict[str, Any] | None
-    paths: list[dict[str, Any]]
+    paths: list[dict[str, Any]] | None
     graph: dict[str, Any] | None
     version: int | None = 2
     result_id: str = ""
