@@ -1,4 +1,5 @@
 import json
+import uuid
 from configs import db_config
 from datetime import datetime
 from fastapi import Depends, HTTPException, Response
@@ -16,7 +17,7 @@ class TreeSearchSavedResults(BaseModel):
     """
     Reimplemented SavedResults model
     """
-    user: str
+    user: str = None
     description: constr(max_length=1000) = None
     created: datetime = Field(default_factory=datetime.now)
     modified: datetime = Field(default_factory=datetime.now)
@@ -156,10 +157,30 @@ class TreeSearchResultsController:
         user_controller = get_util_registry().get_util(module="user_controller")
         user = user_controller.get_current_user(token)
 
+        if not result.user:
+            # This implies this is a create call from IPP
+            result.user = user.username
+            result.shared_with = [user.username]
+            result.result_type = "ipp"
+            result.result_state = "ipp"
+
+            if not result.result_id:
+                result.result_id = str(uuid.uuid4())
+
         self.collection.insert_one(result.dict())
 
-        return Response(content=f"Successfully create a result for user: "
-                                f"{user.username}!")
+        resp = {
+            "success": True,
+            "id": result.result_id,
+            "modified": result.modified.isoformat(timespec="milliseconds"),
+            "message": f"Successfully create a result for user: {user.username}!"
+        }
+
+        return Response(
+            content=json.dumps(resp),
+            status_code=201,
+            media_type="application/json"
+        )
 
     def update(
         self,
@@ -196,17 +217,30 @@ class TreeSearchResultsController:
             {"$set": updated_result}
         )
         if not res.matched_count:
-            content = {
-                "message": f"Result {result_id} not editable by user {user.username},"
-                           f"or result changed since initial access!"
+            resp = {
+                "success": False,
+                "error": f"Result {result_id} not editable by user {user.username}, "
+                         f"or result changed since initial access!"
             }
             return Response(
-                content=json.dumps(content),
+                content=json.dumps(resp),
                 status_code=404,
                 media_type="application/json"
             )
         else:
-            return Response(content=f"Successfully update result {result_id}!")
+            resp = {
+                "success": True,
+                "id": result_id,
+                "modified": updated_result.get(
+                    "modified", datetime.now()
+                ).isoformat(timespec="milliseconds"),
+                "message": f"Successfully update result {result_id}!"
+            }
+            return Response(
+                content=json.dumps(resp),
+                status_code=200,
+                media_type="application/json"
+            )
 
     def destroy(self, result_id: str, token: Annotated[str, Depends(oauth2_scheme)]
                 ) -> Response:
@@ -226,25 +260,35 @@ class TreeSearchResultsController:
         try:
             res = self.collection.delete_one(query)
         except Exception:
-            content = {
-                "message": f"Could not delete result: {result_id}!"
+            resp = {
+                "success": False,
+                "message": f"Could not delete result {result_id}!"
             }
             return Response(
-                content=json.dumps(content),
+                content=json.dumps(resp),
                 status_code=500,
                 media_type="application/json"
             )
         if not res.deleted_count:
-            content = {
+            resp = {
+                "success": False,
                 "message": f"Failed to delete result {result_id}!"
             }
             return Response(
-                content=json.dumps(content),
+                content=json.dumps(resp),
                 status_code=500,
                 media_type="application/json"
             )
         else:
-            return Response(content=f"Successfully delete result: {result_id}!")
+            resp = {
+                "success": True,
+                "message": f"Successfully delete result: {result_id}!"
+            }
+            return Response(
+                content=json.dumps(resp),
+                status_code=200,
+                media_type="application/json"
+            )
 
     def share(self, result_id: str, token: Annotated[str, Depends(oauth2_scheme)]
               ) -> Response:
