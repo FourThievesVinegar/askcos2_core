@@ -15,6 +15,12 @@ class TemplateInput(BaseModel):
     template_set: str = None
 
 
+TEMPLATE_ALIASES = {
+    "bkms": "bkms_metabolic",
+    "reaxys_enzymatic": "reaxys_biocatalysis"
+}
+
+
 @register_util(name="template")
 class Template:
     """Util class for Reactions"""
@@ -127,13 +133,16 @@ class Template:
         names = self.collection.distinct("template_set")
         attributes = {}
         for name in names:
-            attributes[name] = list(
+            alias = TEMPLATE_ALIASES.get(name, name)
+            attributes[alias] = list(
                 self.collection
                 .find_one({"template_set": name}, {"attributes": 1})
                 .get("attributes", {})
                 .keys()
             )
-        resp = {"template_sets": names, "attributes": attributes}
+
+        aliases = [TEMPLATE_ALIASES.get(name, name) for name in names]
+        resp = {"template_sets": aliases, "attributes": attributes}
 
         return Response(
             content=json.dumps(resp),
