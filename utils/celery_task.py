@@ -55,7 +55,7 @@ class CeleryTaskController:
                 resp["output"] = output
 
                 # Additional error handling to override state based on output
-                if not output["status_code"] == 200:
+                if "status_code" in output and not output["status_code"] == 200:
                     resp["state"] = "FAILURE"
                     resp["failed"] = True
                     resp["message"] = "Task failed!"
