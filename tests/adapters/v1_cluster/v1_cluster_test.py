@@ -8,7 +8,7 @@ V2_HOST = os.environ.get("V2_HOST", "0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class V1SelectivityTest(unittest.TestCase):
+class V1ClusterTest(unittest.TestCase):
     """Test class for V1 Selectivity adapter"""
 
     @classmethod
@@ -18,9 +18,9 @@ class V1SelectivityTest(unittest.TestCase):
         cls.v1_username = "askcos"
         cls.v1_password = "MML4chem"
 
-        cls.v1_selectivity_url = "https://askcos-demo.mit.edu/api/v2/selectivity/"
+        cls.v1_cluster_url = "https://askcos-demo.mit.edu/api/v2/cluster/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"
-        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/selectivity/"
+        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/cluster/"
         cls.legacy_celery_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/celery/task"
 
     def get_result(self, task_id: str, celery_url: str, mode: str, timeout: int = 20):
@@ -45,12 +45,12 @@ class V1SelectivityTest(unittest.TestCase):
                     time.sleep(2)
 
     def test_1(self):
-        case_file = "tests/adapters/v1_selectivity/v1_selectivity_test_case_1.json"
+        case_file = "tests/adapters/v1_cluster/v1_cluster_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
         task_ids = {}
-        for mode, url in [("v1", self.v1_selectivity_url),
+        for mode, url in [("v1", self.v1_cluster_url),
                           ("legacy", self.legacy_adapter_url)]:
             if mode == "v1":
                 response = self.session.post(
@@ -66,7 +66,10 @@ class V1SelectivityTest(unittest.TestCase):
             # Confirm that request was interpreted correctly
             result = response.json()
             request = result["request"]
-            self.assertEqual(request["smiles"], data["smiles"])
+            print(mode)
+            print(request)
+            self.assertEqual(request["original"], data["original"])
+            self.assertEqual(request["outcomes"], data["outcomes"])
 
             # Test that we got the celery task id
             self.assertIsInstance(result["task_id"], str)
@@ -80,15 +83,17 @@ class V1SelectivityTest(unittest.TestCase):
             # Try retrieving task output
             result = self.get_result(task_id=task_id, celery_url=celery_url, mode=mode)
             self.assertTrue(result["complete"])
-            self.assertIsInstance(result["output"], list)
-            self.assertEqual(len(result["output"]), 123)
+            print(result)
+            print(result["output"])
+            self.assertIsInstance(result["output"]["output"], list)
+            #self.assertEqual(len(result["output"]), 123)
 
-            results[mode] = result
+            # results[mode] = result
 
-        # Added for v2, consistency check
-        for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
-            self.assertEqual(r1["smiles"], r2["smiles"])
-            self.assertEqual(r1["index"], r2["index"])
-            self.assertEqual(r1["task"], r2["task"])
-            for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"]):
-                self.assertAlmostEqual(s1, s2, places=4)
+        # # Added for v2, consistency check
+        # for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
+        #     self.assertEqual(r1["smiles"], r2["smiles"])
+        #     self.assertEqual(r1["index"], r2["index"])
+        #     self.assertEqual(r1["task"], r2["task"])
+        #     for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"]):
+        #         self.assertAlmostEqual(s1, s2, places=4)

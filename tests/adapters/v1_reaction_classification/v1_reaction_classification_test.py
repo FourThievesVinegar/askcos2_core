@@ -88,8 +88,6 @@ class V1ReactionClassificationTest(unittest.TestCase):
 
         # Added for v2, consistency check
         for r1, r2 in zip(results["v1"]["output"]["result"], results["legacy"]["output"]["result"]):
-            print("Here is the out put for:"+mode+"::::::::::::::::")
-            print(r1,r2)
             self.assertEqual(r1["rank"], r2["rank"])
             self.assertEqual(r1["reaction_num"], r2["reaction_num"])
             self.assertEqual(r1["reaction_name"], r2["reaction_name"])
