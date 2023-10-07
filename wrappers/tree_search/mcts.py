@@ -41,7 +41,7 @@ class BuildTreeOptions(BaseModel):
     max_depth: int = 5
     exploration_weight: float = 1.0
     return_first: bool = False
-    max_trees: int | None = None
+    max_trees: int = 500
     max_ppg: float | None = None
     max_scscore: float | None = None
     max_elements: dict[str, int] | None = None

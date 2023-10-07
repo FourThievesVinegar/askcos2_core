@@ -191,7 +191,7 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
-                "USPTO_480k_mix"
+                "cas"
             ]
         }
     },
@@ -207,7 +207,7 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
-                "USPTO_480k_mix"
+                "cas"
             ]
         }
     },
@@ -345,7 +345,7 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
-                "USPTO_480k_mix"
+                "cas"
             ]
         }
     },
@@ -362,7 +362,7 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
-                "USPTO_480k_mix"
+                "cas"
             ]
         }
     },
