@@ -1,3 +1,4 @@
+import re
 import traceback
 import uuid
 from datetime import datetime
@@ -73,6 +74,8 @@ class EnumeratePathsOptions(BaseModel):
 
 class MCTSInput(BaseModel):
     smiles: str
+    description: str | None = ""
+    tags: str | None = ""
     expand_one_options: ExpandOneOptions = ExpandOneOptions()
     build_tree_options: BuildTreeOptions = BuildTreeOptions()
     enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
@@ -215,15 +218,20 @@ class MCTSWrapper(BaseWrapper):
         input.result_id = str(uuid.uuid4())
         # Note that we can't use task_id as the result_id,
         # as it needs to be known beforehand
+        settings = input.dict()
+        settings = {k: v for k, v in settings.items() if "option" in k}
+
         saved_results = TreeSearchSavedResults(
             user=user.username,
+            description=input.description,
             created=datetime.now(),
             modified=datetime.now(),
             result_id=input.result_id,
             result_state="pending",
             result_type="tree_builder",
             result=None,
-            settings=input,
+            settings=settings,
+            tags=[tag.strip() for tag in re.split(r"[,;]", input.tags)],
             shared_with=[user.username]
         )
         results_controller = get_util_registry().get_util(
