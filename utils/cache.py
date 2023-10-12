@@ -8,11 +8,6 @@ from typing import Any
 from utils import register_util
 
 
-class APILog(BaseModel):
-    method: str
-    count: dict[str, int]
-
-
 @register_util(name="cache_controller")
 class CacheController:
     """Util class for controlling the cache"""
