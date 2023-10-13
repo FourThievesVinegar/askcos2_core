@@ -40,10 +40,14 @@ if [ ! -f ./data/db/historian/reactions.bkms_metabolic.json.gz ]; then
 fi
 
 if [ ! -f ./data/db/historian/reactions.cas.min.json.gz ]; then
-    echo "./data/db/historian/reactions.cas.min.json.gz not found. Downloading.."
-    wget -q --show-progress -O data/db/historian/reactions.cas.min.json.gz \
-      "https://www.dropbox.com/scl/fi/qa0uu6co3g0kp1988sgxe/reactions.cas.min.json.gz?rlkey=dj3cu1y6uia10pm7tt9pnpza7&dl=1"
-    echo "reactions.cas.min.json.gz Downloaded."
+    if [ -n "${DROPBOX_LINK_PASSWORD}" ]; then
+        echo "./data/db/historian/reactions.cas.min.json.gz not found. Downloading.."
+        curl -X POST https://content.dropboxapi.com/2/sharing/get_shared_link_file \
+          --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
+          --header "Dropbox-API-Arg: {\"path\":\"/reactions.cas.min.json.gz\",\"url\":\"https://www.dropbox.com/scl/fi/qa0uu6co3g0kp1988sgxe/reactions.cas.min.json.gz?rlkey=dj3cu1y6uia10pm7tt9pnpza7&dl=0\", \"link_password\":\"${DROPBOX_LINK_PASSWORD}\"}" \
+          -o ./data/db/historian/reactions.cas.min.json.gz
+        echo "reactions.cas.min.json.gz Downloaded."
+    fi
 fi
 
 if [ ! -f ./data/db/historian/reactions.pistachio.json.gz ]; then
@@ -81,7 +85,7 @@ if [ ! -f ./data/db/templates/retro.templates.cas.json.gz ]; then
         echo "./data/db/templates/retro.templates.cas.json.gz not found. Downloading.."
         curl -X POST https://content.dropboxapi.com/2/sharing/get_shared_link_file \
           --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
-          --header "Dropbox-API-Arg: {\"path\":\"/retro.templates.cas.json.gz\",\"url\":\"https://www.dropbox.com/scl/fi/o9myvcq06h1mrp3rar5vo/retro.templates.cas.json.gz?rlkey=tw1jt2fqsedfnlh310u1dfwzv&dl=0\", \"link_password\":\"MML4chem\"}" \
+          --header "Dropbox-API-Arg: {\"path\":\"/retro.templates.cas.json.gz\",\"url\":\"https://www.dropbox.com/scl/fi/o9myvcq06h1mrp3rar5vo/retro.templates.cas.json.gz?rlkey=tw1jt2fqsedfnlh310u1dfwzv&dl=0\", \"link_password\":\"${DROPBOX_LINK_PASSWORD}\"}" \
           -o ./data/db/templates/retro.templates.cas.json.gz
         echo "retro.templates.cas.json.gz Downloaded."
     fi
