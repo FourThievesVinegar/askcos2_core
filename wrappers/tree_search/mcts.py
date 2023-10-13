@@ -3,7 +3,7 @@ import traceback
 import uuid
 from datetime import datetime
 from fastapi import Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from schemas.cluster import ClusterSetting
 from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
@@ -12,6 +12,14 @@ from utils.registry import get_util_registry
 from utils.tree_search_results import TreeSearchSavedResults
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
+
+
+def to_lower_camel(name: str) -> str:
+    """
+    Converts a snake_case string to lowerCamelCase
+    """
+    upper = "".join(word.capitalize() for word in name.split("_"))
+    return upper[:1].lower() + upper[1:]
 
 
 class ExpandOneOptions(BaseModel):
@@ -55,7 +63,7 @@ class BuildTreeOptions(BaseModel):
 
 class EnumeratePathsOptions(BaseModel):
     path_format: Literal["json", "graph"] = "json"
-    json_format: Literal["treedata", "nodelink"] = "treedata"
+    json_format: Literal["treedata", "nodelink"] = "nodelink"
     sorting_metric: Literal[
         "plausibility",
         "number_of_starting_materials",
@@ -81,6 +89,8 @@ class MCTSInput(BaseModel):
     enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
     run_async: bool = False
     result_id: str = str(uuid.uuid4())
+
+    @validator(*)
 
 
 class MCTSResult(BaseModel):
