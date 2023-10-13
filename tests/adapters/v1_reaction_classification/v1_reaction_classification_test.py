@@ -20,7 +20,7 @@ class V1ReactionClassificationTest(unittest.TestCase):
 
         cls.v1_reaction_classification_url = "https://askcos-demo.mit.edu/api/v2/reaction-classification/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"
-        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/reaction_classification/"
+        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/reaction-classification/"
         cls.legacy_celery_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/celery/task"
 
     def get_result(self, task_id: str, celery_url: str, mode: str, timeout: int = 20):

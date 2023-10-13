@@ -15,7 +15,7 @@ class SiteSelectivityTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
-        cls.v2_url = f"http://{V2_HOST}:{V2_PORT}/api/site_selectivity"
+        cls.v2_url = f"http://{V2_HOST}:{V2_PORT}/api/site-selectivity"
 
     def get_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -38,12 +38,12 @@ class SiteSelectivityTest(unittest.TestCase):
 
         # get sync response
         response_sync = self.session.post(
-            f"{self.v2_url}/call_sync", json=data
+            f"{self.v2_url}/call-sync", json=data
         ).json()
 
         # get async response
         task_id = self.session.post(
-            f"{self.v2_url}/call_async", json=data
+            f"{self.v2_url}/call-async", json=data
         ).json()
         time.sleep(3)
         response_async = self.session.get(

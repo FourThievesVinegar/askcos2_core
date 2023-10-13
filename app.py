@@ -21,7 +21,7 @@ app.add_middleware(
 
 router = APIRouter(prefix="/api/admin")
 router.add_api_route(
-    path="/get_backend_status",
+    path="/get-backend-status",
     endpoint=wrapper_registry.get_backend_status,
     methods=["GET"]
 )
@@ -35,7 +35,9 @@ app.include_router(router)
 
 for wrapper in wrapper_registry:
     for i, prefix in enumerate(wrapper.prefixes):
-        router = APIRouter(prefix=f"/api/{prefix}")
+        # use hyphens which is the standard
+        prefix_with_hyphen = prefix.replace("_", "-")
+        router = APIRouter(prefix=f"/api/{prefix_with_hyphen}")
         # Bind specified wrapper.method to urls /{wrapper.prefixes}/method_name
         for method_name, bind_types in wrapper.methods_to_bind.items():
             # Only include the first prefix, and methods call_sync/async in the schema
@@ -45,8 +47,9 @@ for wrapper in wrapper_registry:
                 ["call_sync", "call_async", "call_sync_without_token"]
                 and "context_recommender" not in prefix
             )
+            method_name_with_hyphen = method_name.replace("_", "-")
             router.add_api_route(
-                path=f"/{method_name}",
+                path=f"/{method_name_with_hyphen}",
                 endpoint=getattr(wrapper, method_name),
                 methods=bind_types,
                 include_in_schema=include_in_schema
@@ -55,7 +58,9 @@ for wrapper in wrapper_registry:
 
 for adapter in adapter_registry:
     # Adapter should have a single prefix, by design
-    router = APIRouter(prefix=f"/api/{adapter.prefix}")
+    # use hyphens which is the standard
+    prefix_with_hyphen = adapter.prefix.replace("_", "-")
+    router = APIRouter(prefix=f"/api/{prefix_with_hyphen}")
     if adapter.name in ["v1_celery_task"]:
         path = "/{task_id}"
     else:
@@ -71,7 +76,9 @@ for adapter in adapter_registry:
 
 for util in util_registry:
     for prefix in util.prefixes:
-        router = APIRouter(prefix=f"/api/{prefix}")
+        # use hyphens which is the standard
+        prefix_with_hyphen = prefix.replace("_", "-")
+        router = APIRouter(prefix=f"/api/{prefix_with_hyphen}")
         # Bind specified util.method to urls /{util.prefixes}/method_name
         for method_name, bind_types in util.methods_to_bind.items():
             if util.name in ["draw"]:
@@ -80,7 +87,8 @@ for util in util_registry:
             elif method_name == "__call__":
                 path = "/"
             else:
-                path = f"/{method_name}"
+                method_name_with_hyphen = method_name.replace("_", "-")
+                path = f"/{method_name_with_hyphen}"
 
             router.add_api_route(
                 path=path,

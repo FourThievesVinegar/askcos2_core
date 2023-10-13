@@ -20,7 +20,7 @@ class V1ContextV2Test(unittest.TestCase):
 
         cls.v1_context_v2_url = "https://askcos-demo.mit.edu/api/v2/context-v2/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"
-        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/context_v2/"
+        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/context-v2/"
         cls.legacy_celery_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/celery/task"
 
     def get_result(self, task_id: str, celery_url: str, mode: str, timeout: int = 20):
