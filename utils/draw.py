@@ -1,6 +1,6 @@
 import json
 from fastapi import Depends, Response
-from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
 from utils import register_util
 from utils.draw_impl import (
@@ -11,7 +11,7 @@ from utils.draw_impl import (
 from utils.image_annotation import generate_annotated_image
 
 
-class DrawerInput(BaseModel):
+class DrawerInput(LowerCamelAliasModel):
     smiles: str
     input_type: Literal["", "chemical", "reaction", "template"] = None
     svg: bool = True

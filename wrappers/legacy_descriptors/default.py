@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
-from wrappers.base import BaseResponse, BaseWrapper
+from wrappers.base import BaseWrapper
 
 
-class LegacyDescriptorsInput(BaseModel):
+class LegacyDescriptorsInput(LowerCamelAliasModel):
     smiles: str
 
 

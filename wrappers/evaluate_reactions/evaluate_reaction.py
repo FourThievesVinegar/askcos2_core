@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class EvaluateReactionInput(BaseModel):
+class EvaluateReactionInput(LowerCamelAliasModel):
     forward_backend: str = "wldn5"
     forward_model_name: str = "pistachio"
     context_n_conditions: int = 10

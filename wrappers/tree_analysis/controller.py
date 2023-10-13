@@ -1,7 +1,7 @@
 import json
-import traceback
 from fastapi import Depends, HTTPException, Response
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Literal
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
@@ -14,7 +14,7 @@ from wrappers.tree_analysis.tb_reaction_classification \
     import _tb_reaction_classification
 
 
-class TreeAnalysisInput(BaseModel):
+class TreeAnalysisInput(LowerCamelAliasModel):
     result_id: str
     task: Literal[
         "pathway_ranking",
@@ -34,7 +34,7 @@ class TreeAnalysisInput(BaseModel):
 
     # Count analogs options
     min_plausibility: float = 0.1
-    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
+    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = "rxnmapper"
 
 
 class TreeAnalysisOutput(BaseModel):

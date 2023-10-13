@@ -1,8 +1,10 @@
+import re
 import traceback
 import uuid
 from datetime import datetime
 from fastapi import Depends, HTTPException
 from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
 from schemas.cluster import ClusterSetting
 from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
@@ -13,7 +15,7 @@ from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class ExpandOneOptions(BaseModel):
+class ExpandOneOptions(LowerCamelAliasModel):
     # aliasing to v1 fields
     template_max_count: int = Field(default=100, alias="template_count")
     template_max_cum_prob: int = Field(default=0.995, alias="max_cum_template_prob")
@@ -30,8 +32,11 @@ class ExpandOneOptions(BaseModel):
     return_reacting_atoms: bool = True
     selectivity_check: bool = False
 
+    class Config:
+        allow_population_by_field_name = True
 
-class BuildTreeOptions(BaseModel):
+
+class BuildTreeOptions(LowerCamelAliasModel):
     expansion_time: int = 30
     max_iterations: int | None = None
     max_chemicals: int | None = None
@@ -52,9 +57,9 @@ class BuildTreeOptions(BaseModel):
     custom_buyables: list[str] | None = None
 
 
-class EnumeratePathsOptions(BaseModel):
+class EnumeratePathsOptions(LowerCamelAliasModel):
     path_format: Literal["json", "graph"] = "json"
-    json_format: Literal["treedata", "nodelink"] = "treedata"
+    json_format: Literal["treedata", "nodelink"] = "nodelink"
     sorting_metric: Literal[
         "plausibility",
         "number_of_starting_materials",
@@ -71,8 +76,10 @@ class EnumeratePathsOptions(BaseModel):
     max_paths: int = 200
 
 
-class MCTSInput(BaseModel):
+class MCTSInput(LowerCamelAliasModel):
     smiles: str
+    description: str | None = ""
+    tags: str | None = ""
     expand_one_options: ExpandOneOptions = ExpandOneOptions()
     build_tree_options: BuildTreeOptions = BuildTreeOptions()
     enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
@@ -200,6 +207,8 @@ class MCTSWrapper(BaseWrapper):
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
+        print(input.expand_one_options)
+
         return response
 
     async def call_async(
@@ -215,15 +224,20 @@ class MCTSWrapper(BaseWrapper):
         input.result_id = str(uuid.uuid4())
         # Note that we can't use task_id as the result_id,
         # as it needs to be known beforehand
+        settings = input.dict()
+        settings = {k: v for k, v in settings.items() if "option" in k}
+
         saved_results = TreeSearchSavedResults(
             user=user.username,
+            description=input.description,
             created=datetime.now(),
             modified=datetime.now(),
             result_id=input.result_id,
             result_state="pending",
             result_type="tree_builder",
             result=None,
-            settings=input,
+            settings=settings,
+            tags=[tag.strip() for tag in re.split(r"[,;]", input.tags)],
             shared_with=[user.username]
         )
         results_controller = get_util_registry().get_util(

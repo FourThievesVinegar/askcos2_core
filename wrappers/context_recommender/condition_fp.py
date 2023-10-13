@@ -1,13 +1,13 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
-from typing import Optional
 
 
-class ContextRecommenderInput(BaseModel):
+class ContextRecommenderInput(LowerCamelAliasModel):
     smiles: str
     reagents: list[str]
-    n_conditions: Optional[int] = 10
+    n_conditions: int = 10
 
 
 class ContextRecommenderResult(BaseModel):

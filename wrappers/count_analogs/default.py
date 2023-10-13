@@ -1,13 +1,14 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class CountAnalogsInput(BaseModel):
+class CountAnalogsInput(LowerCamelAliasModel):
     reaction_smiles: list[str]
     reaction_smarts: list[str] = None
-    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
+    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = "rxnmapper"
     min_plausibility: float = 0.1
 
 

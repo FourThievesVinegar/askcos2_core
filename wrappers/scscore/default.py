@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class SCScoreInput(BaseModel):
+class SCScoreInput(LowerCamelAliasModel):
     smiles: str
 
 

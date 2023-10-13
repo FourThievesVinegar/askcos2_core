@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class ContextRecommenderFPInput(BaseModel):
+class ContextRecommenderFPInput(LowerCamelAliasModel):
     smiles: str
     reagents: list[str] = None
     n_conditions: int = 10

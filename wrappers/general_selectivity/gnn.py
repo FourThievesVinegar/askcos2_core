@@ -1,10 +1,11 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
-from typing import Literal
 
 
-class GeneralSelectivityInput(BaseModel):
+class GeneralSelectivityInput(LowerCamelAliasModel):
     smiles: str
     atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "wln"
     mapped: bool = False

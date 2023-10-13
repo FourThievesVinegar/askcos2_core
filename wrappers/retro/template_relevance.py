@@ -1,7 +1,8 @@
+from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
+from typing import Any, Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
-from typing import Any, Literal
 
 
 class AttributeFilter(BaseModel):
@@ -10,12 +11,12 @@ class AttributeFilter(BaseModel):
     value: int | float
 
 
-class RetroTemplRelInput(BaseModel):
+class RetroTemplRelInput(LowerCamelAliasModel):
     model_name: str
     smiles: list[str]
     max_num_templates: int = 1000
     max_cum_prob: float = 0.999
-    attribute_filter: list[AttributeFilter] = []
+    attribute_filter: list[AttributeFilter] = Field(default_factory=list)
 
 
 class RetroTemplRelResult(BaseModel):

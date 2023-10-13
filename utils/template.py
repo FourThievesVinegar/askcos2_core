@@ -2,13 +2,13 @@ import json
 from bson import ObjectId
 from configs import db_config
 from fastapi import Response
-from pydantic import BaseModel
 from pymongo import errors, MongoClient
+from schemas.base import LowerCamelAliasModel
 from typing import Any
 from utils import register_util
 
 
-class TemplateInput(BaseModel):
+class TemplateInput(LowerCamelAliasModel):
     _id: str = None
     ids: list[str] = None
     field: str = None

@@ -24,7 +24,7 @@ class TreeSearchSavedResults(BaseModel):
     dt: constr(max_length=200) = None
     result_id: constr(max_length=64) = None
     result: dict | None = None
-    setting: dict | None = None
+    settings: dict | None = None
     tags: str | None = None
     check_date: str | None = None
     result_state: constr(max_length=64) = None
@@ -91,11 +91,11 @@ class TreeSearchResultsController:
                 }
             ]
         }
-        # unsetting the result and setting fields to avoid gigantic returns
+        # unsetting the result and settings fields to avoid gigantic returns
         cursor = self.collection.aggregate(
             [
                 {"$match": query},
-                {"$unset": ["result", "setting"]},
+                {"$unset": ["result", "settings"]},
                 {"$sort": {"dt": -1}}
             ]
         )

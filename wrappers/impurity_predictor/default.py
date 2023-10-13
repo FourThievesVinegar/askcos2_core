@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 
 
-class ImpurityPredictorInput(BaseModel):
+class ImpurityPredictorInput(LowerCamelAliasModel):
     predictor_backend: Literal[
         "augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
     predictor_model_name: str = "pistachio"

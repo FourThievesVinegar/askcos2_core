@@ -1,3 +1,6 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.general_selectivity.gnn import (
     GeneralSelectivityInput as GnnGeneralSelectivityInput,
@@ -13,11 +16,9 @@ from wrappers.general_selectivity.qm_gnn_no_reagent import (
 )
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.registry import get_wrapper_registry
-from pydantic import BaseModel
-from typing import Literal
 
 
-class GeneralSelectivityInput(BaseModel):
+class GeneralSelectivityInput(LowerCamelAliasModel):
     backend: Literal["gnn", "qm_gnn", "qm_gnn_no_reagent"] = "gnn"
     smiles: str
     atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "wln"

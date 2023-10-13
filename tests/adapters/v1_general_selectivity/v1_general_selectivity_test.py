@@ -20,7 +20,7 @@ class V1GeneralSelectivityTest(unittest.TestCase):
 
         cls.v1_general_selectivity_url = "https://askcos-demo.mit.edu/api/v2/general-selectivity/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"
-        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/general_selectivity/"
+        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/general-selectivity/"
         cls.legacy_celery_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/celery/task"
 
     def get_result(self, task_id: str, celery_url: str, mode: str, timeout: int = 20):

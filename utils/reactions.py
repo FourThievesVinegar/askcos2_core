@@ -1,11 +1,12 @@
 from configs import db_config
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
+from schemas.base import LowerCamelAliasModel
 from typing import Any
 from utils import register_util
 
 
-class ReactionsInput(BaseModel):
+class ReactionsInput(LowerCamelAliasModel):
     ids: list[int]
     template_set: str = None
 

@@ -1,14 +1,15 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.atom_map.indigo import AtomMapIndigoInput, AtomMapIndigoResponse
 from wrappers.atom_map.rxnmapper import AtomMapRXNMapperInput, AtomMapRXNMapperResponse
 from wrappers.atom_map.wln import AtomMapWLNInput, AtomMapWLNResponse
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.registry import get_wrapper_registry
-from pydantic import BaseModel
-from typing import Literal
 
 
-class AtomMapInput(BaseModel):
+class AtomMapInput(LowerCamelAliasModel):
     backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
     smiles: list[str]
 
