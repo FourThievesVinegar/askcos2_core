@@ -1,9 +1,10 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
-class GetTopClassBatchInput(BaseModel):
+class GetTopClassBatchInput(LowerCamelAliasModel):
     smiles: list[str]
     level: int = 2
     threshold: float = 0.2

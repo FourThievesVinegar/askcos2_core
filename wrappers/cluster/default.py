@@ -1,10 +1,11 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
-from typing import Literal
 
 
-class ClusterInput(BaseModel):
+class ClusterInput(LowerCamelAliasModel):
     original: str
     outcomes: list[str]
     feature: Literal["original", "outcomes", "all"] = "original"

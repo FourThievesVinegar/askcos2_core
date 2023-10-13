@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, Extra, root_validator
 from typing import Any
 
 
@@ -30,6 +30,8 @@ def to_camel(snake: str) -> str:
 
 
 class LowerCamelAliasModel(BaseModel):
+    class Config:
+        extra = Extra.forbid
 
     @root_validator(pre=True)
     def populate_by_alias_if_needed(cls, values: dict[str, Any]):

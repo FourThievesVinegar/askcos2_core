@@ -1,6 +1,7 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
 class RXNMapperResult(BaseModel):
@@ -8,7 +9,7 @@ class RXNMapperResult(BaseModel):
     confidence: float
 
 
-class AtomMapRXNMapperInput(BaseModel):
+class AtomMapRXNMapperInput(LowerCamelAliasModel):
     smiles: list[str]
 
 

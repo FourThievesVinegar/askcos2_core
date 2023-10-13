@@ -3,6 +3,7 @@ import json
 import pandas as pd
 from fastapi import Depends, Form, HTTPException, Response, status, UploadFile
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
 from utils import register_util
 from utils.oauth2 import oauth2_scheme
@@ -27,7 +28,7 @@ class PropertyCriteria(BaseModel):
     value: float
 
 
-class LookupInput(BaseModel):
+class LookupInput(LowerCamelAliasModel):
     smiles: list[str]
     source: list[str] | str | None = None
     canonicalize: bool = True
@@ -47,7 +48,7 @@ class SourcesResponse(BaseModel):
     sources: list[str]
 
 
-class SearchInput(BaseModel):
+class SearchInput(LowerCamelAliasModel):
     q: str = ""
     source: list[str] | str | None = None
     properties: list[PropertyCriteria] = None

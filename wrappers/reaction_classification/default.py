@@ -1,9 +1,10 @@
+from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from pydantic import BaseModel
 
 
-class ReactionClassificationInput(BaseModel):
+class ReactionClassificationInput(LowerCamelAliasModel):
     smiles: list[str]
     num_results: int = 10
 

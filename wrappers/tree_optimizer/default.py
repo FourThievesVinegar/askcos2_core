@@ -1,9 +1,10 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 
 
-class TreeOptimizerInput(BaseModel):
+class TreeOptimizerInput(LowerCamelAliasModel):
     targets: list[str]
     graph: dict
 

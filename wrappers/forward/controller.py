@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from scipy.special import softmax
 from typing import Literal
 from utils.rdkit import molecular_weight
@@ -10,9 +11,9 @@ from wrappers.forward.wldn5 import ForwardWLDN5Input, ForwardWLDN5Response
 from wrappers.registry import get_wrapper_registry
 
 
-class ForwardInput(BaseModel):
+class ForwardInput(LowerCamelAliasModel):
     backend: Literal["augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
-    model_name: str
+    model_name: str = "pistachio"
     smiles: list[str]
 
 

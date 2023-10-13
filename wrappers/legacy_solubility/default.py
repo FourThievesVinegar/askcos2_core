@@ -1,10 +1,11 @@
 from pydantic import BaseModel, confloat, Field
+from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
-from wrappers.base import BaseResponse, BaseWrapper
+from wrappers.base import BaseWrapper
 from wrappers.legacy_solubility.utils import postprocess_solubility_results
 
 
-class LegacySolubilityTask(BaseModel):
+class LegacySolubilityTask(LowerCamelAliasModel):
     solvent: str
     solute: str
     temp: confloat(gt=0, lt=1000)
@@ -16,7 +17,7 @@ class LegacySolubilityTask(BaseModel):
     cp_solid_298: confloat(gt=0, lt=10000) | None = None
 
 
-class LegacySolubilityInput(BaseModel):
+class LegacySolubilityInput(LowerCamelAliasModel):
     task_list: list[LegacySolubilityTask]
 
 

@@ -1,10 +1,12 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class ForwardATInput(BaseModel):
-    model_name: str
+class ForwardATInput(LowerCamelAliasModel):
+    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
     smiles: list[str]
 
 

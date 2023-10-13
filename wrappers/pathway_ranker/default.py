@@ -1,10 +1,11 @@
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper, BaseResponse
 
 
-class PathwayRankerInput(BaseModel):
+class PathwayRankerInput(LowerCamelAliasModel):
     trees: list[dict]
     clustering: bool = False
     cluster_method: Literal["hdbscan", "kmeans"] = "hdbscan"

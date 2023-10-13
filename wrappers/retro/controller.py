@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
 from scipy.special import softmax
 from typing import Any, Literal
 from utils.registry import get_util_registry
@@ -16,7 +17,7 @@ class AttributeFilter(BaseModel):
     value: int | float
 
 
-class RetroInput(BaseModel):
+class RetroInput(LowerCamelAliasModel):
     backend: Literal[
         "augmented_transformer", "graph2smiles", "template_relevance"
     ] = "template_relevance"
@@ -26,7 +27,7 @@ class RetroInput(BaseModel):
     # For template_relevance only
     max_num_templates: int = 1000
     max_cum_prob: float = 0.999
-    attribute_filter: list[AttributeFilter] = []
+    attribute_filter: list[AttributeFilter] = Field(default_factory=list)
 
 
 class RetroOutput(BaseModel):

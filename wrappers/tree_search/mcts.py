@@ -32,6 +32,9 @@ class ExpandOneOptions(LowerCamelAliasModel):
     return_reacting_atoms: bool = True
     selectivity_check: bool = False
 
+    class Config:
+        allow_population_by_field_name = True
+
 
 class BuildTreeOptions(LowerCamelAliasModel):
     expansion_time: int = 30
@@ -203,6 +206,8 @@ class MCTSWrapper(BaseWrapper):
         # actual backend call
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
+
+        print(input.expand_one_options)
 
         return response
 

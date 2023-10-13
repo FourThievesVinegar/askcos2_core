@@ -1,11 +1,13 @@
 import copy
 from pydantic import BaseModel
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class ForwardWLDN5Input(BaseModel):
-    model_name: str
+class ForwardWLDN5Input(LowerCamelAliasModel):
+    model_name: Literal["pistachio", "uspto_500k"] = "pistachio"
     reactants: str | list[str]
     contexts: list[str] | None = None
 

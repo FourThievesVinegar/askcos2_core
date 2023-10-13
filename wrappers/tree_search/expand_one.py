@@ -1,5 +1,6 @@
 from fastapi import Depends
 from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
 from schemas.cluster import ClusterSetting
 from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
@@ -9,7 +10,7 @@ from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class ExpandOneInput(BaseModel):
+class ExpandOneInput(LowerCamelAliasModel):
     smiles: str
     retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
     banned_chemicals: list[str] = Field(default_factory=list)

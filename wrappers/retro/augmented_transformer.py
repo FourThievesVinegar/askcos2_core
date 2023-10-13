@@ -1,10 +1,12 @@
 from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
+from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-class RetroATInput(BaseModel):
-    model_name: str
+class RetroATInput(LowerCamelAliasModel):
+    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
     smiles: list[str]
 
 
