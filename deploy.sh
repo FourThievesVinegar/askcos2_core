@@ -297,10 +297,12 @@ seed-db() {
     echo "Loading default reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
     mongoimport reactions "$reactions_file"
-    reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
-    DB_DROP="" mongoimport reactions "$reactions_file"
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
     DB_DROP="" mongoimport reactions "$reactions_file"
+    reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
+    if [ -f "$reactions_file" ]; then
+      DB_DROP="" mongoimport reactions "$reactions_file"
+    fi
   elif [ "$REACTIONS" = "pistachio" ]; then
     echo "Loading pistachio reactions data in background..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
@@ -326,14 +328,16 @@ seed-db() {
     mongoimport retro_templates "$retro_file"
     retro_file="${DATA_DIR}/templates/retro.templates.pistachio.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
-    retro_file="${DATA_DIR}/templates/retro.templates.cas.json.gz"
-    DB_DROP="" mongoimport retro_templates "$retro_file"
     retro_file="${DATA_DIR}/templates/retro.templates.bkms_metabolic.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
     retro_file="${DATA_DIR}/templates/retro.templates.pistachio_ringbreaker.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
     retro_file="${DATA_DIR}/templates/retro.templates.reaxys_biocatalysis.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
+    retro_file="${DATA_DIR}/templates/retro.templates.cas.json.gz"
+    if [ -f "retro_file" ]; then
+      DB_DROP="" mongoimport retro_templates "$retro_file"
+    fi
   elif [ "$RETRO_TEMPLATES" = "pistachio" ]; then
     echo "Loading pistachio retrosynthetic templates..."
     retro_file="${DATA_DIR}/templates/retro.templates.pistachio.json.gz"
@@ -474,75 +478,9 @@ post-update-message() {
   echo
   echo "The local ASKCOS deployment has been updated to version ${VERSION_NUMBER}!"
   echo
-  echo "Please note the following items which may require further action:"
-  echo
-  echo "1) ASKCOS 2022.01 added reference data for the CAS template relevance model."
-  echo "   If you have not done so already, you should import the required data:"
-  echo
-  echo "       bash deploy.sh seed-db -x cas"
-  echo
-  echo "2) ASKCOS 2021.10 added two new template relevance models: one for enzymatic"
-  echo "   reactions from BKMS and one for ring-breaking reactions from Pistachio."
-  echo "   If you have not done so already, you should import the required data:"
-  echo
-  echo "       bash deploy.sh seed-db -r bkms -c bkms -x bkms"
-  echo "       bash deploy.sh seed-db -r ringbreaker"
-  echo
-  echo "3) ASKCOS 2021.07 added a new SciFinder/CAS-based template relevance model."
-  echo "   If you have not done so already, you should import the required data:"
-  echo
-  echo "       bash deploy.sh seed-db -r cas"
-  echo
-  echo "   Please note that chemical historian data is not provided at this time."
-  echo
-  echo "4) ASKCOS 2021.04 added new reference data for the site selectivity model"
-  echo "   and the Pistachio template relevance model."
-  echo "   If you have not done so already, you should import the data as follows:"
-  echo
-  echo "       bash deploy.sh seed-db -e default -x default"
-  echo
-  echo "5) ASKCOS 2023.01 added a new template relevance model trained on"
-  echo "   a Reaxys Enzymatic template set."
-  echo "   If you have not done so already, you should import the data as follows:"
-  echo "       bash deploy.sh seed-db -r reaxys_enzymatic"
-  echo
-  echo "For reference, past messages can be viewed using 'bash deploy.sh old-messages'."
-  echo
   echo "                      ~~~ Thank you for using ASKCOS! ~~~"
   echo
   echo -e "\033[92m================================================================================\033[00m"
-}
-
-old-messages() {
-  echo
-  echo -e "\033[92m================================================================================\033[00m"
-  echo
-  echo "Post-update notes from past releases:"
-  echo
-  echo "1) ASKCOS 2020.07 changed the default MongoDB index types for much faster look-ups."
-  echo "   If you have not done so already, you should recreate the MongoDB indexes:"
-  echo
-  echo "       bash deploy.sh index-db --drop-indexes"
-  echo
-  echo "2) ASKCOS 2020.10 added updated buyables data with more sources."
-  echo "   If you have not done so already, you can import the data as follows:"
-  echo
-  echo "       bash deploy.sh seed-db -b default"
-  echo
-  echo "   If no custom buyables have been added and you would like to remove existing"
-  echo "   buyables data before importing, you can add the '--drop' argument."
-  echo
-  echo "3) ASKCOS 2020.10 added a new Pistachio-based template relevance model."
-  echo "   If you have not done so already, you should import the required data:"
-  echo
-  echo "       bash deploy.sh seed-db -c pistachio -r pistachio"
-  echo
-  echo "4) ASKCOS 2021.04 added new reference data for the site selectivity model"
-  echo "   and the Pistachio template relevance model."
-  echo "   If you have not done so already, you should import the data as follows:"
-  echo
-  echo -e "\033[92m================================================================================\033[00m"
-
 }
 
 # Handle positional arguments, which should be commands
