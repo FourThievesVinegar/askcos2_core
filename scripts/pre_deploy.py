@@ -28,7 +28,9 @@ def run_and_printchar(args, cwd="."):
             shell=False,
             cwd=cwd,
             stdout=None,
-            stderr=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+            env=os.environ.copy()
+        )
     except Exception as e:
         print(f"{inspect.stack()[1][3]} error: {str(e)}")
         return False

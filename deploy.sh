@@ -16,7 +16,9 @@ if [ ! -f ".env" ]; then
 fi
 
 # Get docker compose variables from .env
+set -a
 source .env
+set +a
 
 # Default argument values
 BUYABLES=""
