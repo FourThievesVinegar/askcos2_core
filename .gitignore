@@ -4,6 +4,7 @@
 deployment/
 data/
 *.sif
+*.out
 
 .env
 

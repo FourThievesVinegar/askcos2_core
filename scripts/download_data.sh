@@ -77,10 +77,14 @@ if [ ! -f ./data/db/templates/retro.templates.bkms_metabolic.json.gz ]; then
 fi
 
 if [ ! -f ./data/db/templates/retro.templates.cas.json.gz ]; then
-    echo "./data/db/templates/retro.templates.cas.json.gz not found. Downloading.."
-    wget -q --show-progress -O data/db/templates/retro.templates.cas.json.gz \
-      "https://www.dropbox.com/scl/fi/o9myvcq06h1mrp3rar5vo/retro.templates.cas.json.gz?rlkey=tw1jt2fqsedfnlh310u1dfwzv&dl=1"
-    echo "retro.templates.cas.json.gz Downloaded."
+    if [ -n "${DROPBOX_LINK_PASSWORD}" ]; then
+        echo "./data/db/templates/retro.templates.cas.json.gz not found. Downloading.."
+        curl -X POST https://content.dropboxapi.com/2/sharing/get_shared_link_file \
+          --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
+          --header "Dropbox-API-Arg: {\"path\":\"/retro.templates.cas.json.gz\",\"url\":\"https://www.dropbox.com/scl/fi/o9myvcq06h1mrp3rar5vo/retro.templates.cas.json.gz?rlkey=tw1jt2fqsedfnlh310u1dfwzv&dl=0\", \"link_password\":\"MML4chem\"}" \
+          -o ./data/db/templates/retro.templates.cas.json.gz
+        echo "retro.templates.cas.json.gz Downloaded."
+    fi
 fi
 
 if [ ! -f ./data/db/templates/retro.templates.pistachio_ringbreaker.json.gz ]; then
