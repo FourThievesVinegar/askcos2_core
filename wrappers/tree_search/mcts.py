@@ -3,7 +3,8 @@ import traceback
 import uuid
 from datetime import datetime
 from fastapi import Depends, HTTPException
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
+from schemas.base import LowerCamelAliasModel
 from schemas.cluster import ClusterSetting
 from schemas.retro import RetroBackendOption
 from typing import Annotated, Any, Literal
@@ -14,15 +15,7 @@ from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
-def to_lower_camel(name: str) -> str:
-    """
-    Converts a snake_case string to lowerCamelCase
-    """
-    upper = "".join(word.capitalize() for word in name.split("_"))
-    return upper[:1].lower() + upper[1:]
-
-
-class ExpandOneOptions(BaseModel):
+class ExpandOneOptions(LowerCamelAliasModel):
     # aliasing to v1 fields
     template_max_count: int = Field(default=100, alias="template_count")
     template_max_cum_prob: int = Field(default=0.995, alias="max_cum_template_prob")
@@ -40,7 +33,7 @@ class ExpandOneOptions(BaseModel):
     selectivity_check: bool = False
 
 
-class BuildTreeOptions(BaseModel):
+class BuildTreeOptions(LowerCamelAliasModel):
     expansion_time: int = 30
     max_iterations: int | None = None
     max_chemicals: int | None = None
@@ -61,7 +54,7 @@ class BuildTreeOptions(BaseModel):
     custom_buyables: list[str] | None = None
 
 
-class EnumeratePathsOptions(BaseModel):
+class EnumeratePathsOptions(LowerCamelAliasModel):
     path_format: Literal["json", "graph"] = "json"
     json_format: Literal["treedata", "nodelink"] = "nodelink"
     sorting_metric: Literal[
@@ -80,7 +73,7 @@ class EnumeratePathsOptions(BaseModel):
     max_paths: int = 200
 
 
-class MCTSInput(BaseModel):
+class MCTSInput(LowerCamelAliasModel):
     smiles: str
     description: str | None = ""
     tags: str | None = ""
@@ -89,8 +82,6 @@ class MCTSInput(BaseModel):
     enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
     run_async: bool = False
     result_id: str = str(uuid.uuid4())
-
-    @validator(*)
 
 
 class MCTSResult(BaseModel):

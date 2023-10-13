@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
+from schemas.base import LowerCamelAliasModel
 from typing import Any, Literal
 
 
-class RetroBackendOption(BaseModel):
+class RetroBackendOption(LowerCamelAliasModel):
     retro_backend: Literal[
         "template_relevance",
         "augmented_transformer",
@@ -30,7 +31,6 @@ class RetroBackendOption(BaseModel):
                     f"Unsupported retro_model_name {v} for template_relevance")
         elif values["retro_backend"] == "augmented_transformer":
             if v not in [
-                "USPTO_480k_mix",
                 "cas",
                 "pistachio_2023Q2"
             ]:
@@ -38,7 +38,6 @@ class RetroBackendOption(BaseModel):
                     f"Unsupported retro_model_name {v} for augmented_transformer")
         elif values["retro_backend"] == "graph2smiles":
             if v not in [
-                "USPTO_480k_mix",
                 "cas",
                 "pistachio_2023Q2"
             ]:
