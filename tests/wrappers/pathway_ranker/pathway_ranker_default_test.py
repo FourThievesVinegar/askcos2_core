@@ -8,14 +8,14 @@ V2_HOST = os.environ.get("V2_HOST", "0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class ClusterTest(unittest.TestCase):
-    """Test class for Cluster wrapper"""
+class PathwayRankerTest(unittest.TestCase):
+    """Test class for Pathway Ranker wrapper"""
 
     @classmethod
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
-        cls.v2_url = f"http://{V2_HOST}:{V2_PORT}/api/cluster"
+        cls.v2_url = f"http://{V2_HOST}:{V2_PORT}/api/pathway-ranker"
 
     def get_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -32,7 +32,7 @@ class ClusterTest(unittest.TestCase):
                     time.sleep(2)
 
     def test_1(self):
-        case_file = "tests/wrappers/cluster/default_test_case_1.json"
+        case_file = "tests/wrappers/pathway_ranker/default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
@@ -52,9 +52,7 @@ class ClusterTest(unittest.TestCase):
 
         for response in [response_sync, response_async]:
             self.assertEqual(response["status_code"], 200)
-            self.assertIsInstance(response["result"], list)
-            self.assertIsInstance(response["result"][0], list)
-            self.assertIsInstance(response["result"][1], dict)
-        #
-        # self.assertEqual(response_sync, response_async)
-        # self.assertEqual(response_sync["result"][0], response_async["result"][0])
+            self.assertIsInstance(response["result"], dict)
+            self.assertIsInstance(response["result"]["scores"], list)
+            self.assertIsInstance(response["result"]["encoded_trees"], list)
+            self.assertIsInstance(response["result"]["clusters"], list)
