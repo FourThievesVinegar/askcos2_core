@@ -38,12 +38,12 @@ class SiteSelectivityTest(unittest.TestCase):
 
         # get sync response
         response_sync = self.session.post(
-            f"{self.v2_url}/call_sync", json=data
+            f"{self.v2_url}/call-sync", json=data
         ).json()
 
         # get async response
         task_id = self.session.post(
-            f"{self.v2_url}/call_async", json=data
+            f"{self.v2_url}/call-async", json=data
         ).json()
         time.sleep(3)
         response_async = self.session.get(
