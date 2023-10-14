@@ -52,7 +52,7 @@ def _canonicalize(_smi: str, isomericSmiles: bool) -> str:
 @register_util(name="rdkit")
 class RDKitUtil:
     """Util class for RDKit"""
-    prefixes = []
+    prefixes = ["rdkit"]
     methods_to_bind: dict[str, list[str]] = {
         "canonicalize": ["POST"],
         "validate": ["POST"]

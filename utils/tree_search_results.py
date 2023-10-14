@@ -25,11 +25,13 @@ class TreeSearchSavedResults(BaseModel):
     result_id: constr(max_length=64) = None
     result: dict | None = None
     settings: dict | None = None
-    tags: str | None = None
+    tags: list[str] = Field(default_factory=list)
     check_date: str | None = None
     result_state: constr(max_length=64) = None
     result_type: Literal["tree_builder", "ipp"] = "tree_builder"
     revision: int = 0
+
+    num_trees: int = 0
 
     public: bool = False
     shared_with: list[str] = Field(default_factory=list)
@@ -453,5 +455,8 @@ class TreeSearchResultsController:
 
         self.collection.update_one(
             query,
-            {"$set": {"result": result_doc}}
+            {"$set": {
+                "result": result_doc,
+                "num_trees": result_doc["stats"]["total_paths"]
+            }}
         )
