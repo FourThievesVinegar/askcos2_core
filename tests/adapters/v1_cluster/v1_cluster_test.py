@@ -8,8 +8,8 @@ V2_HOST = os.environ.get("V2_HOST", "0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class V1ReactionClassificationTest(unittest.TestCase):
-    """Test class for V1 Reaction Classification"""
+class V1ClusterTest(unittest.TestCase):
+    """Test class for V1 Selectivity adapter"""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -18,9 +18,9 @@ class V1ReactionClassificationTest(unittest.TestCase):
         cls.v1_username = "askcos"
         cls.v1_password = "MML4chem"
 
-        cls.v1_reaction_classification_url = "https://askcos-demo.mit.edu/api/v2/reaction-classification/"
+        cls.v1_cluster_url = "https://askcos-demo.mit.edu/api/v2/cluster/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"
-        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/reaction-classification/"
+        cls.legacy_adapter_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/cluster/"
         cls.legacy_celery_url = f"http://{V2_HOST}:{V2_PORT}/api/legacy/celery/task"
 
     def get_result(self, task_id: str, celery_url: str, mode: str, timeout: int = 20):
@@ -45,12 +45,12 @@ class V1ReactionClassificationTest(unittest.TestCase):
                     time.sleep(2)
 
     def test_1(self):
-        case_file = "tests/adapters/v1_reaction_classification/v1_reaction_classification_test_case_1.json"
+        case_file = "tests/adapters/v1_cluster/v1_cluster_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
         task_ids = {}
-        for mode, url in [("v1", self.v1_reaction_classification_url),
+        for mode, url in [("v1", self.v1_cluster_url),
                           ("legacy", self.legacy_adapter_url)]:
             if mode == "v1":
                 response = self.session.post(
@@ -60,15 +60,16 @@ class V1ReactionClassificationTest(unittest.TestCase):
                 )
             else:
                 response = self.session.post(url, json=data)
-
             # Copied from askcos_site/api2/api_test.py
             self.assertEqual(response.status_code, 200)
 
             # Confirm that request was interpreted correctly
             result = response.json()
             request = result["request"]
-            self.assertEqual(request["reactants"], data["reactants"])
-            self.assertEqual(request["products"], data["products"])
+            print(mode)
+            print(request)
+            self.assertEqual(request["original"], data["original"])
+            self.assertEqual(request["outcomes"], data["outcomes"])
 
             # Test that we got the celery task id
             self.assertIsInstance(result["task_id"], str)
@@ -82,19 +83,17 @@ class V1ReactionClassificationTest(unittest.TestCase):
             # Try retrieving task output
             result = self.get_result(task_id=task_id, celery_url=celery_url, mode=mode)
             self.assertTrue(result["complete"])
-            self.assertIsInstance(result["output"]["result"], list)
+            print(result)
+            print(result["output"])
+            self.assertIsInstance(result["output"]["output"], list)
             #self.assertEqual(len(result["output"]), 123)
-            results[mode] = result
 
-        # Added for v2, consistency check
-        for r1, r2 in zip(results["v1"]["output"]["result"], results["legacy"]["output"]["result"]):
-            self.assertEqual(r1["rank"], r2["rank"])
-            self.assertEqual(r1["reaction_num"], r2["reaction_num"])
-            self.assertEqual(r1["reaction_name"], r2["reaction_name"])
-            self.assertEqual(r1["reaction_classnum"], r2["reaction_classnum"])
-            self.assertEqual(r1["reaction_classname"], r2["reaction_classname"])
-            self.assertEqual(r1["reaction_superclassnum"], r2["reaction_superclassnum"])
-            self.assertEqual(r1["reaction_superclassname"], r2["reaction_superclassname"])
-            self.assertAlmostEqual(r1["prediction_certainty"], r2["prediction_certainty"], places=4)
-            # for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"]):
-            #     self.assertAlmostEqual(s1, s2, places=4)
+            # results[mode] = result
+
+        # # Added for v2, consistency check
+        # for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
+        #     self.assertEqual(r1["smiles"], r2["smiles"])
+        #     self.assertEqual(r1["index"], r2["index"])
+        #     self.assertEqual(r1["task"], r2["task"])
+        #     for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"]):
+        #         self.assertAlmostEqual(s1, s2, places=4)

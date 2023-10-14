@@ -60,7 +60,6 @@ class V1SelectivityTest(unittest.TestCase):
                 )
             else:
                 response = self.session.post(url, json=data)
-
             # Copied from askcos_site/api2/api_test.py
             self.assertEqual(response.status_code, 200)
 
@@ -72,7 +71,6 @@ class V1SelectivityTest(unittest.TestCase):
             # Test that we got the celery task id
             self.assertIsInstance(result["task_id"], str)
             task_ids[mode] = result["task_id"]
-            print(task_ids)
 
         results = {}
         for mode, celery_url in [("v1", self.v1_celery_url),
