@@ -76,6 +76,10 @@ class GeneralSelectivityGNNWrapper(BaseWrapper):
             "message": "",
             "result": output.results
         }
+        if output.status == "FAIL":
+            response["status_code"] = 500
+            response["message"] = output.error
+
         response = GeneralSelectivityResponse(**response)
 
         return response

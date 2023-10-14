@@ -12,14 +12,15 @@ from wrappers.general_selectivity.controller import (
 class V1GeneralSelectivityInput(BaseModel):
     reactants: str
     product: str
-    reagents: Optional[str] = None
-    solvent: Optional[str] = None
+    reagents: str = ""
+    solvent: str = ""
     mapped: bool = False
     all_outcomes: bool = False
     verbose: bool = True
-    mapper: Optional[Literal["Transformer", "WLN atom mapper"]] #Literal["indigo", "rxnmapper", "wln"] = "wln"
+    mapper: Literal["Transformer", "WLN atom mapper"] = "Transformer"
     no_map_reagents: bool = True
-    mode: Optional[Literal["GNN", "qm_GNN"]] #Literal["gnn", "qm_gnn", "qm_gnn_no_reagent"] = "gnn"
+    mode: Literal["GNN", "qm_GNN"] = "GNN"
+
 
 class V1GeneralSelectivityAsyncReturn(BaseModel):
     request: V1GeneralSelectivityInput
@@ -67,47 +68,29 @@ class V1GeneralSelectivityAdapter:
 
     @staticmethod
     def convert_input(input: V1GeneralSelectivityInput) -> GeneralSelectivityInput:
-        if input.mapper=="Transformer" or input.mapper==None:
-            if input.mode=="GNN" or input.mode==None:
-                wrapper_input = GeneralSelectivityInput(
-                    backend="gnn",
-                    smiles=input.reactants+">"+input.reagents+">"+input.product,
-                    atom_map_backend="rxnmapper",
-                    mapped=input.mapped,
-                    all_outcomes=input.all_outcomes,
-                    no_map_reagents=input.no_map_reagents
-                )
-            elif input.mode=="qm_GNN":
-                wrapper_input = GeneralSelectivityInput(
-                    backend="qm_gnn",
-                    smiles=input.reactants+">"+input.reagents+">"+input.product,
-                    atom_map_backend="rxnmapper",
-                    mapped=input.mapped,
-                    all_outcomes=input.all_outcomes,
-                    no_map_reagents=input.no_map_reagents
-                )
-        elif input.mapper=="WLN atom mapper":
-            if input.mode=="GNN":
-                wrapper_input = GeneralSelectivityInput(
-                    backend="gnn",
-                    smiles=input.reactants+">"+input.reagents+">"+input.product,
-                    atom_map_backend="wln",
-                    mapped=input.mapped,
-                    all_outcomes=input.all_outcomes,
-                    no_map_reagents=input.no_map_reagents
-                )
-            elif input.mode=="qm_GNN":
-                wrapper_input = GeneralSelectivityInput(
-                    backend="qm_gnn",
-                    smiles=input.reactants+">"+input.reagents+">"+input.product,
-                    atom_map_backend="wln",
-                    mapped=input.mapped,
-                    all_outcomes=input.all_outcomes,
-                    no_map_reagents=input.no_map_reagents
-                )
+        if input.mapper == "Transformer" or input.mapper is None:
+            atom_map_backend = "rxnmapper"
+        elif input.mapper == "WLN atom mapper":
+            atom_map_backend = "wln"
         else:
-            print("there is something wrong")
-            wrapper_input = None
+            raise ValueError(f"Unsupported atom_map_backend {input.mapper}")
+
+        if input.mode == "GNN" or input.mode is None:
+            backend = "gnn"
+        elif input.mode == "qm_GNN":
+            backend = "qm_gnn"
+        else:
+            raise ValueError(f"Unsupported mode {input.mode}")
+
+        wrapper_input = GeneralSelectivityInput(
+            backend=backend,
+            smiles=input.reactants + ">" + input.reagents + ">" + input.product,
+            atom_map_backend=atom_map_backend,
+            mapped=input.mapped,
+            all_outcomes=input.all_outcomes,
+            no_map_reagents=input.no_map_reagents
+        )
+
         return wrapper_input
 
     @staticmethod
