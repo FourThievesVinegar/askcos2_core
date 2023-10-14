@@ -87,6 +87,7 @@ class V1GeneralSelectivityTest(unittest.TestCase):
 
             # Try retrieving task output
             result = self.get_result(task_id=task_id, celery_url=celery_url, mode=mode)
+            print(result)
             self.assertTrue(result["complete"])
             self.assertIsInstance(result["output"], list)
             #self.assertEqual(len(result["output"]), 123)
@@ -94,7 +95,7 @@ class V1GeneralSelectivityTest(unittest.TestCase):
             results[mode] = result
 
         # Added for v2, consistency check
-        for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
+        for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"], strict=True):
             self.assertEqual(r1["smiles"], r2["smiles"])
             self.assertAlmostEqual(r1["prob"], r2["prob"], places=4)
             self.assertEqual(r1["rank"], r2["rank"])

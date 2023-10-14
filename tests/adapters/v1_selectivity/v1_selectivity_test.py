@@ -86,9 +86,9 @@ class V1SelectivityTest(unittest.TestCase):
             results[mode] = result
 
         # Added for v2, consistency check
-        for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
+        for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"], strict=True):
             self.assertEqual(r1["smiles"], r2["smiles"])
             self.assertEqual(r1["index"], r2["index"])
             self.assertEqual(r1["task"], r2["task"])
-            for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"]):
+            for s1, s2 in zip(r1["atom_scores"], r2["atom_scores"], strict=True):
                 self.assertAlmostEqual(s1, s2, places=4)

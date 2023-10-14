@@ -92,11 +92,17 @@ class V1PathwayRankerTest(unittest.TestCase):
 
         #Added for v2, consistency check
 
-        for r1, r2 in zip(results["v1"]["output"]["scores"], results["legacy"]["output"]["scores"]):
+        for r1, r2 in zip(results["v1"]["output"]["scores"],
+                          results["legacy"]["output"]["scores"],
+                          strict=True):
             self.assertAlmostEqual(r1, r2, places=4)
 
-        for r1, r2 in zip(results["v1"]["output"]["encoded_trees"][2], results["legacy"]["output"]["encoded_trees"][2]):
+        for r1, r2 in zip(results["v1"]["output"]["encoded_trees"][2],
+                          results["legacy"]["output"]["encoded_trees"][2],
+                          strict=True):
             self.assertAlmostEqual(r1, r2, places=4)
 
-        for r1, r2 in zip(results["v1"]["output"]["clusters"], results["legacy"]["output"]["clusters"]):
+        for r1, r2 in zip(results["v1"]["output"]["clusters"],
+                          results["legacy"]["output"]["clusters"],
+                          strict=True):
             self.assertAlmostEqual(r1, r2, places=4)

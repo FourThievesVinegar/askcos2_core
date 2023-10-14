@@ -87,8 +87,8 @@ class V1ForwardTest(unittest.TestCase):
             results[mode] = result
 
         # Added for v2, consistency check
-        for i in range (6):
-            for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"]):
+        for i in range(6):
+            for r1, r2 in zip(results["v1"]["output"], results["legacy"]["output"], strict=True):
                 self.assertEqual(r1["rank"], r2["rank"])
                 self.assertAlmostEqual(r1["prob"], r2["prob"], places=3)
                 self.assertAlmostEqual(r1["mol_wt"], r2["mol_wt"], places=4)
