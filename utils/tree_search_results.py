@@ -25,7 +25,7 @@ class TreeSearchSavedResults(BaseModel):
     result_id: constr(max_length=64) = None
     result: dict | None = None
     settings: dict | None = None
-    tags: list[str] = Field(default_factory=list)
+    tags: list[str] | str | None = Field(default_factory=list)
     check_date: str | None = None
     result_state: constr(max_length=64) = None
     result_type: Literal["tree_builder", "ipp"] = "tree_builder"
