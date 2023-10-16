@@ -44,11 +44,7 @@ class V1GeneralSelectivityAdapter:
 
     def call_sync(self, input: V1GeneralSelectivityInput) -> V1GeneralSelectivityResult:
         wrapper = get_wrapper_registry().get_wrapper(module="general_selectivity_controller")
-        print("I am inside the call Sync now!!!!!!!!!!!!!")
-        print(input)
         wrapper_input = self.convert_input(input=input)
-        print("Here is the wrapper input:::::::::::::::::")
-        print(wrapper_input)
         wrapper_response = wrapper.call_sync(wrapper_input)
         response = self.convert_response(wrapper_response=wrapper_response)
 
