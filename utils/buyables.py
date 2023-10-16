@@ -2,7 +2,7 @@ import io
 import json
 import pandas as pd
 from fastapi import Depends, Form, HTTPException, Response, status, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
 from utils import register_util
@@ -16,6 +16,7 @@ class BuyableProperty(BaseModel):
 
 
 class Buyable(BaseModel):
+    id: str = Field(default=None, alias="_id")
     smiles: str = None
     ppg: float = 0.0
     source: str = ""
