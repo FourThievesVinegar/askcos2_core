@@ -31,6 +31,7 @@ class TreeSearchSavedResults(BaseModel):
     result_type: Literal["tree_builder", "ipp"] = "tree_builder"
     revision: int = 0
 
+    target_smiles: str | None = None
     num_trees: int = 0
 
     public: bool = False

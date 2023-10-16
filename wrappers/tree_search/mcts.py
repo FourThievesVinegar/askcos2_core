@@ -229,6 +229,7 @@ class MCTSWrapper(BaseWrapper):
 
         saved_results = TreeSearchSavedResults(
             user=user.username,
+            target_smiles=input.smiles,
             description=input.description,
             created=datetime.now(),
             modified=datetime.now(),
