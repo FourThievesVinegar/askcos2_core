@@ -3,13 +3,20 @@ import traceback as tb
 from fastapi import Response
 from pydantic import BaseModel
 from rdkit import Chem
-from rdkit.Chem import Descriptors
+from rdkit.Chem import Descriptors, rdDepictor
 from typing import Any
 from utils import register_util
+from utils.draw_impl import align_molecule
 
 
-class RDKitInput(BaseModel):
+class SmilesInput(BaseModel):
     smiles: str
+    isomericSmiles: bool = True
+    reference: str = None
+
+
+class MolfileInput(BaseModel):
+    molfile: str
     isomericSmiles: bool = True
 
 
@@ -55,14 +62,16 @@ class RDKitUtil:
     prefixes = ["rdkit"]
     methods_to_bind: dict[str, list[str]] = {
         "canonicalize": ["POST"],
-        "validate": ["POST"]
+        "validate": ["POST"],
+        "from_molfile": ["POST"],
+        "to_molfile": ["POST"]
     }
 
     def __init__(self, util_config: dict[str, Any] = None):
         pass
 
     @staticmethod
-    def canonicalize(input: RDKitInput) -> Response:
+    def canonicalize(input: SmilesInput) -> Response:
         smiles = input.smiles
         isomericSmiles = input.isomericSmiles
 
@@ -92,7 +101,7 @@ class RDKitUtil:
             )
 
     @staticmethod
-    def validate(input: RDKitInput) -> Response:
+    def validate(input: SmilesInput) -> Response:
         smiles = input.smiles
 
         mol = Chem.MolFromSmiles(smiles, sanitize=False)
@@ -113,6 +122,113 @@ class RDKitUtil:
             "correct_syntax": correct_syntax,
             "valid_chem_name": valid_chem_name,
         }
+
+        return Response(
+            content=json.dumps(resp),
+            status_code=200,
+            media_type="application/json"
+        )
+
+    @staticmethod
+    def from_molfile(input: MolfileInput):
+        """
+        Convert the provided Molfile to a SMILES string.
+
+        Method: POST
+
+        Parameters:
+
+        - `molfile` (str): Molfile input
+        - `isomericSmiles` (bool, optional): whether to generate isomeric SMILES
+
+        Returns:
+
+        - `smiles` (str): canonical SMILES
+        """
+        molfile = input.molfile
+        isomericSmiles = input.isomericSmiles
+
+        resp = {}
+
+        mol = Chem.MolFromMolBlock(molfile)
+        if not mol:
+            resp["error"] = "Cannot parse sdf molfile with rdkit."
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=500,
+                media_type="application/json"
+            )
+
+        try:
+            smiles = Chem.MolToSmiles(mol, isomericSmiles=isomericSmiles)
+        except Exception:
+            resp["error"] = "Cannot parse sdf molfile with rdkit."
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=500,
+                media_type="application/json"
+            )
+
+        resp["smiles"] = smiles
+
+        return Response(
+            content=json.dumps(resp),
+            status_code=200,
+            media_type="application/json"
+        )
+
+    @staticmethod
+    def to_molfile(input: SmilesInput):
+        """
+        Convert the provided SMILES string to a Molfile.
+
+        Method: POST
+
+        Parameters:
+
+        - `smiles` (str): SMILES input
+        - `reference` (str, optional): SMILES of reference molecule for alignment
+
+        Returns:
+
+        - `molfile` (str): Molfile output
+        """
+
+        smiles = input.smiles
+        reference = input.reference
+
+        resp = {}
+
+        mol = Chem.MolFromSmiles(smiles)
+        if not mol:
+            resp["error"] = "Cannot parse smiles with rdkit."
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=500,
+                media_type="application/json"
+            )
+
+        if reference:
+            ref = Chem.MolFromSmiles(reference)
+            align_molecule(mol, ref)
+        else:
+            rdDepictor.Compute2DCoords(mol)
+
+        try:
+            molfile = Chem.MolToMolBlock(mol)
+        except Exception:
+            resp["error"] = "Cannot parse smiles with rdkit."
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=500,
+                media_type="application/json"
+            )
+
+        resp["molfile"] = molfile
 
         return Response(
             content=json.dumps(resp),
