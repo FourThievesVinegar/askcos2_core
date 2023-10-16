@@ -1,6 +1,7 @@
 from adapters import register_adapter
+from fastapi import HTTPException
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.general_selectivity.controller import (
     GeneralSelectivityInput,
@@ -96,6 +97,11 @@ class V1GeneralSelectivityAdapter:
     @staticmethod
     def convert_response(wrapper_response: GeneralSelectivityResponse
                          ) -> V1GeneralSelectivityResult:
+        if not wrapper_response.status_code == 200:
+            # reverse parse the exception in string format
+            e = eval(wrapper_response.message.split("\n")[-3].strip())
+            raise ValueError(e)
+
         result = wrapper_response.result
         result = V1GeneralSelectivityResult(__root__=result)
 
