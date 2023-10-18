@@ -16,6 +16,9 @@ class ForwardInput(LowerCamelAliasModel):
     model_name: str = "pistachio"
     smiles: list[str]
 
+    reagents: str = ""
+    solvent: str = ""
+
 
 class ForwardOutput(BaseModel):
     placeholder: str
@@ -53,6 +56,14 @@ class ForwardController(BaseWrapper):
     def call_sync(self, input: ForwardInput) -> ForwardResponse:
         module = self.backend_wrapper_names[input.backend]
         wrapper = get_wrapper_registry().get_wrapper(module=module)
+
+        if input.reagents:
+            for i, smi in enumerate(input.smiles):
+                input.smiles[i] = smi + "." + input.reagents
+
+        if input.solvent:
+            for i, smi in enumerate(input.smiles):
+                input.smiles[i] = smi + "." + input.solvent
 
         wrapper_input = self.convert_input(
             input=input, backend=input.backend)
