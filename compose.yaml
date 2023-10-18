@@ -2,6 +2,7 @@ services:
   web:
     image: ${ASKCOS_REGISTRY}/askcos-vue-nginx:2.0
     restart: always
+    network_mode: host
     volumes:
       - './nginx.conf:/etc/nginx/nginx.conf'
       - './askcos.ssl.cert:/etc/ssl/certs/askcos.ssl.cert'
