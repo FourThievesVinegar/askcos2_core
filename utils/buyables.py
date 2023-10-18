@@ -88,8 +88,13 @@ class Buyables:
 
     def list_buyables(
         self,
-        query_params: Annotated[SearchInput, Depends()]
+        query_params: Annotated[SearchInput, Depends()],
+        source: str = None
     ) -> SearchResponse:
+        # hardcode; Depends() doesn't fully work with list or union fields
+        # https://github.com/tiangolo/fastapi/issues/5719
+        query_params.source = source
+
         return self.search(query_params)
 
     @staticmethod

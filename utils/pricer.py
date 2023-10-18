@@ -197,7 +197,7 @@ class Pricer:
                 query["smiles"] = {"$in": smiles_matches}
 
         if source is not None:
-            query["source"] = {"$in": self._source_to_query(source)}
+            query["source"] = {"$in": self._pricer._source_to_query(source)}
 
         if properties is not None:
             property_query = []
@@ -400,7 +400,7 @@ class MongoPricer:
         self.count_collection = None
 
     @staticmethod
-    def _source_to_query(source):
+    def _source_to_query(source: list[str] | str | None) -> list[str] | None:
         """
         Convert no source keyword to query for MongoDB.
 
@@ -417,6 +417,7 @@ class MongoPricer:
                 # Include both null and empty string source in query
                 source.remove("none")
                 source.extend([None, ""])
+
         return source
 
     def lookup_smiles(
