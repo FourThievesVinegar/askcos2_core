@@ -46,6 +46,8 @@ for wrapper in wrapper_registry:
                 i == 0 and method_name in
                 ["call_sync", "call_async", "call_sync_without_token"]
                 and "context_recommender" not in prefix
+                and "count_analogs" not in prefix
+                and "descriptors" not in prefix
             )
             method_name_with_hyphen = method_name.replace("_", "-")
             router.add_api_route(
