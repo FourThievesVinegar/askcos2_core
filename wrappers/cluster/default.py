@@ -63,7 +63,7 @@ class ClusterWrapper(BaseWrapper):
     def call_sync(self, input: ClusterInput
                   ) -> ClusterResponse:
         """
-        Endpoint for synchronous call to the clustering service
+        Endpoint for synchronous call to the reaction clustering service
         """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
@@ -73,7 +73,7 @@ class ClusterWrapper(BaseWrapper):
     async def call_async(self, input: ClusterInput, priority: int = 0
                          ) -> str:
         """
-        Endpoint for asynchronous call to the clustering service
+        Endpoint for asynchronous call to the reaction clustering service
         """
         return await super().call_async(input=input, priority=priority)
 

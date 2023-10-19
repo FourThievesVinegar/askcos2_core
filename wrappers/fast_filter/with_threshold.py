@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
 class FastFilterWThresholdInput(LowerCamelAliasModel):
-    smiles: list[str]
+    smiles: list[str] = Field(description="tuple of reactant SMILES and target SMILES")
     threshold: float
 
 
@@ -21,7 +21,7 @@ class FastFilterWThresholdOutput(BaseModel):
 
 
 class FastFilterWThresholdResponse(BaseResponse):
-    result: FastFilterWThresholdResult
+    result: FastFilterWThresholdResult | None
 
 
 @register_wrapper(
@@ -53,11 +53,20 @@ class FastFilterWThresholdWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: FastFilterWThresholdOutput
                                    ) -> FastFilterWThresholdResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results[0]
-        }
-        response = FastFilterWThresholdResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results[0]
+        else:
+            status_code = 500
+            message = f"Backend error encountered in fast_filter_with_threshold " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = FastFilterWThresholdResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response
