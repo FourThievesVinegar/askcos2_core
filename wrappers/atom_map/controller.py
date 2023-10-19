@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -11,7 +11,15 @@ from wrappers.registry import get_wrapper_registry
 
 class AtomMapInput(LowerCamelAliasModel):
     backend: Literal["indigo", "rxnmapper", "wln"] = "rxnmapper"
-    smiles: list[str]
+    smiles: list[str] = Field(description="list of SMILES strings to be atom-mapped")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "backend": "rxnmapper",
+                "smiles": ["CC.CC>>CCCC", "c1ccccc1>>C1CCCCC1"]
+            }
+        }
 
 
 class AtomMapOutput(BaseModel):
@@ -19,7 +27,7 @@ class AtomMapOutput(BaseModel):
 
 
 class AtomMapResponse(BaseResponse):
-    result: list[str]
+    result: list[str] | None
 
 
 @register_wrapper(
@@ -41,6 +49,10 @@ class AtomMapController(BaseWrapper):
         pass        # TODO: proper inheritance
 
     def call_sync(self, input: AtomMapInput) -> AtomMapResponse:
+        """
+        Endpoint for synchronous call to the atom mapper controller,
+        which dispatches the call to respective atom mapping backend service
+        """
         module = self.backend_wrapper_names[input.backend]
         wrapper = get_wrapper_registry().get_wrapper(module=module)
 
@@ -53,6 +65,10 @@ class AtomMapController(BaseWrapper):
         return response
 
     async def call_async(self, input: AtomMapInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to the atom mapper controller,
+        which dispatches the call to respective atom mapping backend service
+        """
         return await super().call_async(input=input, priority=priority)
 
     async def retrieve(self, task_id: str) -> AtomMapResponse | None:
@@ -81,12 +97,16 @@ class AtomMapController(BaseWrapper):
     ) -> AtomMapResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
+
         if backend in ["indigo", "wln"]:
             # list[str] -> list[str]
             result = wrapper_response.result
         elif backend == "rxnmapper":
             # list[RXNMapperResult] -> list[str]
-            result = [r.mapped_rxn for r in wrapper_response.result]
+            try:
+                result = [r.mapped_rxn for r in wrapper_response.result]
+            except TypeError:
+                result = None
         else:
             raise ValueError(f"Unsupported atom map backend: {backend}!")
 

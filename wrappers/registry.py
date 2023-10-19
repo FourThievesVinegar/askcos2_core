@@ -75,6 +75,7 @@ class WrapperRegistry:
         self._wrappers["tree_analysis_controller"] = controller_class()
 
     def get_backend_status(self) -> BackendStatusResponse:
+        """Endpoint for getting the status of backend services"""
         status_list = []
 
         for module, to_start in self.module_config["modules_to_start"].items():
