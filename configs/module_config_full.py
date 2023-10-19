@@ -260,7 +260,7 @@ module_config = {
             "ports_to_expose": [9691],
             "default_prediction_url": "http://0.0.0.0:9691/impurity",
             "custom_prediction_url": "",
-            "timeout": 60,
+            "timeout": 180,
             "available_model_names": []
         }
     },
