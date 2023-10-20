@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -6,8 +6,14 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ForwardG2SInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
-    smiles: list[str]
+    model_name: Literal["pistachio_23Q3", "cas"] = Field(
+        default="pistachio_23Q3",
+        description="model name for torchserve backend"
+    )
+    smiles: list[str] = Field(
+        description="list of reactant SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1.Nc1cc(Br)ccn1", "CCO.CC(=O)O"]
+    )
 
 
 class ForwardG2SResult(BaseModel):
@@ -48,12 +54,20 @@ class ForwardG2SWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: ForwardG2SInput) -> ForwardG2SResponse:
+        """
+        Endpoint for synchronous call to Graph2SMILES forward predictor.
+        https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: ForwardG2SInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to Graph2SMILES forward predictor.
+        https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
+        """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
             args=(self.name, input.dict()), priority=priority)

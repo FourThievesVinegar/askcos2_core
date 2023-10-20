@@ -1,11 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper
 
 
 class LegacyDescriptorsInput(LowerCamelAliasModel):
-    smiles: str
+    smiles: str = Field(
+        description="SMILES of the molecule",
+        example="CCC"
+    )
 
 
 class LegacyDescriptorsOutput(BaseModel):
@@ -44,6 +47,9 @@ class LegacyDescriptorsWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: LegacyDescriptorsInput) -> LegacyDescriptorsResponse:
+        """
+        Endpoint for synchronous call to QM descriptors service
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
@@ -51,6 +57,9 @@ class LegacyDescriptorsWrapper(BaseWrapper):
 
     async def call_async(self, input: LegacyDescriptorsInput, priority: int = 0
                          ) -> str:
+        """
+        Endpoint for asynchronous call to QM descriptors service
+        """
         return await super().call_async(input=input, priority=priority)
 
     async def retrieve(self, task_id: str) -> LegacyDescriptorsResponse | None:

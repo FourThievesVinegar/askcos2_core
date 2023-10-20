@@ -1,5 +1,5 @@
 import copy
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -7,9 +7,19 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ForwardWLDN5Input(LowerCamelAliasModel):
-    model_name: Literal["pistachio", "uspto_500k"] = "pistachio"
-    reactants: str | list[str]
-    contexts: list[str] | None = None
+    model_name: Literal["pistachio", "uspto_500k"] = Field(
+        default="pistachio",
+        description="model name for WLDN5 backend"
+    )
+    reactants: str | list[str] = Field(
+        description="list of reactant SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1.Nc1cc(Br)ccn1", "CCO.CC(=O)O"]
+    )
+    contexts: list[str] | None = Field(
+        default=None,
+        description="not used; only for legacy compatibility",
+        example=[]
+    )
 
 
 class ForwardWLDN5Outcome(BaseModel):
@@ -33,7 +43,7 @@ class ForwardWLDN5Output(BaseModel):
 
 
 class ForwardWLDN5Response(BaseResponse):
-    result: list[list[ForwardWLDN5Result]]
+    result: list[list[ForwardWLDN5Result]] | None
 
 
 @register_wrapper(
@@ -69,12 +79,20 @@ class ForwardWLDN5Wrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: ForwardWLDN5Input) -> ForwardWLDN5Response:
+        """
+        Endpoint for synchronous call to WLDN5 forward predictor.
+        https://pubs.rsc.org/en/content/articlehtml/2019/sc/c8sc04228d
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: ForwardWLDN5Input, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to WLDN5 forward predictor.
+        https://pubs.rsc.org/en/content/articlehtml/2019/sc/c8sc04228d
+        """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
@@ -88,11 +106,20 @@ class ForwardWLDN5Wrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: ForwardWLDN5Output
                                    ) -> ForwardWLDN5Response:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = ForwardWLDN5Response(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in forward/wldn5 " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = ForwardWLDN5Response(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response

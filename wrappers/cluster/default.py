@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -6,15 +6,38 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ClusterInput(LowerCamelAliasModel):
-    original: str
-    outcomes: list[str]
+    original: str = Field(
+        description="SMILES string or the target molecule",
+        example="CCCCCC"
+    )
+    outcomes: list[str] = Field(
+        description="list of SMILES strings of precursors",
+        example=["CCC.CCC", "CCCC.CC"]
+    )
     feature: Literal["original", "outcomes", "all"] = "original"
     cluster_method: Literal["kmeans", "hdbscan", "rxn_class"] = "kmeans"
-    fp_type: Literal["morgan"] = "morgan"
-    fp_length: int = 512
-    fp_radius: int = 1
-    scores: list[float] = None
-    classification_threshold: float = 0.2
+    fp_type: Literal["morgan"] = Field(
+        default="morgan",
+        description="fingerprint type"
+    )
+    fp_length: int = Field(
+        default=512,
+        description="fingerprint bits"
+    )
+    fp_radius: int = Field(
+        default=1,
+        description="fingerprint radius"
+    )
+    scores: list[float] = Field(
+        default=None,
+        description="list of scores of precursors",
+        example=[0.5, 0.6]
+    )
+    classification_threshold: float = Field(
+        default=0.2,
+        description="threshold to classify a reaction as unknown when "
+                    "clustering by 'rxn_class'"
+    )
 
 
 class ClusterOutput(BaseModel):
@@ -24,7 +47,7 @@ class ClusterOutput(BaseModel):
 
 
 class ClusterResponse(BaseResponse):
-    result: list[list[int] | dict[str, str]]
+    result: list[list[int] | dict[str, str]] | None
 
 
 @register_wrapper(
@@ -39,6 +62,9 @@ class ClusterWrapper(BaseWrapper):
 
     def call_sync(self, input: ClusterInput
                   ) -> ClusterResponse:
+        """
+        Endpoint for synchronous call to the reaction clustering service
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
@@ -46,6 +72,9 @@ class ClusterWrapper(BaseWrapper):
 
     async def call_async(self, input: ClusterInput, priority: int = 0
                          ) -> str:
+        """
+        Endpoint for asynchronous call to the reaction clustering service
+        """
         return await super().call_async(input=input, priority=priority)
 
     async def retrieve(self, task_id: str) -> ClusterResponse | None:
@@ -54,11 +83,20 @@ class ClusterWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: ClusterOutput
                                    ) -> ClusterResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = ClusterResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in cluster " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = ClusterResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response

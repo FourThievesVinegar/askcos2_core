@@ -42,7 +42,7 @@ class EvaluateContextOutput(BaseModel):
 
 
 class EvaluateContextResponse(BaseResponse):
-    result: list[EvaluateContextResult]
+    result: list[EvaluateContextResult] | None
 
 
 @register_wrapper(
@@ -86,11 +86,20 @@ class EvaluateContextWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: EvaluateContextOutput
                                    ) -> EvaluateContextResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = EvaluateContextResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in evaluate_context " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = EvaluateContextResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response

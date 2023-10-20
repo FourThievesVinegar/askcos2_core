@@ -10,7 +10,11 @@ adapter_registry = get_adapter_registry()
 util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
 
-app = FastAPI()
+app = FastAPI(
+    swagger_ui_parameters={
+        "docExpansion": None
+    }
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,13 +27,15 @@ router = APIRouter(prefix="/api/admin")
 router.add_api_route(
     path="/get-backend-status",
     endpoint=wrapper_registry.get_backend_status,
-    methods=["GET"]
+    methods=["GET"],
+    tags=["admin"]
 )
 router.add_api_route(
     path="/token",
     endpoint=oauth2.login_for_access_token,
     methods=["POST"],
-    response_model=oauth2.Token
+    response_model=oauth2.Token,
+    tags=["admin"]
 )
 app.include_router(router)
 
@@ -46,13 +52,24 @@ for wrapper in wrapper_registry:
                 i == 0 and method_name in
                 ["call_sync", "call_async", "call_sync_without_token"]
                 and "context_recommender" not in prefix
+                and "count_analogs" not in prefix
+                and not "descriptors" == prefix
+                and "evaluate_context" not in prefix
+                and "fast_filter/with_threshold" not in prefix
+                and "general_selectivity/gnn" not in prefix
+                and "general_selectivity/qm_gnn" not in prefix
+                and "general_selectivity/qm_gnn_no_reagent" not in prefix
+                and "get_top_class_batch" not in prefix
+                and "pmi_calculator" not in prefix
+                and "tree_optimizer" not in prefix
             )
             method_name_with_hyphen = method_name.replace("_", "-")
             router.add_api_route(
                 path=f"/{method_name_with_hyphen}",
                 endpoint=getattr(wrapper, method_name),
                 methods=bind_types,
-                include_in_schema=include_in_schema
+                include_in_schema=include_in_schema,
+                tags=[prefix.split("/")[0]]
             )
         app.include_router(router)
 
@@ -66,11 +83,16 @@ for adapter in adapter_registry:
     else:
         path = "/"
     include_in_schema = adapter.name not in ["v1_descriptors"]
+    if adapter.name in ["v1_descriptors"]:
+        # unbind this too; appears to be in conflict with wrapper/legacy_descriptors
+        continue
     router.add_api_route(
         path=path,
         endpoint=adapter.__call__,
         methods=adapter.methods,
-        include_in_schema=include_in_schema
+        include_in_schema=include_in_schema,
+        tags=["legacy"],
+        deprecated=True
     )
     app.include_router(router)
 
@@ -90,10 +112,16 @@ for util in util_registry:
                 method_name_with_hyphen = method_name.replace("_", "-")
                 path = f"/{method_name_with_hyphen}"
 
+            tag = prefix.split("/")[0]
+            if tag in ["user", "api_logging", "status"]:
+                tag = "admin"
+            else:
+                tag = f"utils/{tag}"
             router.add_api_route(
                 path=path,
                 endpoint=getattr(util, method_name),
-                methods=bind_types
+                methods=bind_types,
+                tags=[tag]
             )
         app.include_router(router)
 

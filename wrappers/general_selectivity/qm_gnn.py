@@ -20,13 +20,13 @@ class GeneralSelectivityResult(BaseModel):
 
 
 class GeneralSelectivityOutput(BaseModel):
-    error: str
     status: str
+    error: str
     results: list[GeneralSelectivityResult]
 
 
 class GeneralSelectivityResponse(BaseResponse):
-    result: list[GeneralSelectivityResult]
+    result: list[GeneralSelectivityResult] | None
 
 
 @register_wrapper(
@@ -71,15 +71,20 @@ class GeneralSelectivityQMGNNWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: GeneralSelectivityOutput
                                    ) -> GeneralSelectivityResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        if output.status == "FAIL":
-            response["status_code"] = 500
-            response["message"] = output.error
-        response = GeneralSelectivityResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in general_selectivity/qm_gnn " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = GeneralSelectivityResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response
-

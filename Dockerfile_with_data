@@ -16,7 +16,7 @@ RUN pip install \
     networkx==2.6.3 \
     pandas==1.5.3 \
     "passlib[bcrypt]"==1.7.4 \
-    pillow==9.5.0 \
+    pillow==10.1.0 \
     protobuf==3.19.0 \
     pulp==2.6.0 \
     pydantic==1.10.12 \
