@@ -6,8 +6,14 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class RetroATInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
-    smiles: list[str]
+    model_name: Literal["pistachio_23Q3", "cas"] = Field(
+        default="pistachio_23Q3",
+        description="model name for torchserve backend"
+    )
+    smiles: list[str] = Field(
+        description="list of target SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1", "CN(C)CCOC(c1ccccc1)c1ccccc1"]
+    )
 
 
 class RetroATResult(BaseModel):
@@ -48,12 +54,20 @@ class RetroATWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: RetroATInput) -> RetroATResponse:
+        """
+        Endpoint for synchronous call to one-step retrosynthesis based on
+        Aug. Transformer. https://www.nature.com/articles/s41467-020-19266-y
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: RetroATInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to one-step retrosynthesis based on
+        Aug. Transformer. https://www.nature.com/articles/s41467-020-19266-y
+        """
         from askcos2_celery.tasks import retro_task
         async_result = retro_task.apply_async(
             args=(self.name, input.dict()), priority=priority)

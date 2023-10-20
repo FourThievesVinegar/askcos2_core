@@ -72,6 +72,7 @@ for wrapper in wrapper_registry:
                 endpoint=getattr(wrapper, method_name),
                 methods=bind_types,
                 include_in_schema=include_in_schema,
+                response_model_by_alias="retro" not in prefix,
                 tags=[prefix_with_hyphen.split("/")[0]]
             )
         app.include_router(router)

@@ -20,14 +20,34 @@ class AttributeFilter(BaseModel):
 class RetroInput(LowerCamelAliasModel):
     backend: Literal[
         "augmented_transformer", "graph2smiles", "template_relevance"
-    ] = "template_relevance"
-    model_name: str = "reaxys"
-    smiles: list[str]
-
-    # For template_relevance only
-    max_num_templates: int = 1000
-    max_cum_prob: float = 0.999
-    attribute_filter: list[AttributeFilter] = Field(default_factory=list)
+    ] = Field(
+        default="template_relevance",
+        description="backend for one-step retrosynthesis"
+    )
+    model_name: str = Field(
+        default="reaxys",
+        description="backend model name for one-step retrosynthesis"
+    )
+    smiles: list[str] = Field(
+        description="list of target SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1", "CN(C)CCOC(c1ccccc1)c1ccccc1"]
+    )
+    max_num_templates: int = Field(
+        default=1000,
+        description="number of templates to consider; "
+                    "used for template_relevance only"
+    )
+    max_cum_prob: float = Field(
+        default=0.995,
+        description="maximum cumulative probability of templates; "
+                    "used for template_relevance only"
+    )
+    attribute_filter: list[AttributeFilter] = Field(
+        default_factory=list,
+        description="template attribute filter to apply before template application; "
+                    "used for template_relevance only",
+        example=[]
+    )
 
 
 class RetroOutput(BaseModel):
@@ -64,6 +84,10 @@ class RetroController(BaseWrapper):
         pass        # TODO: proper inheritance
 
     def call_sync(self, input: RetroInput) -> RetroResponse:
+        """
+        Endpoint for synchronous call to the retro controller,
+        which dispatches the call to respective one-step retro backend service
+        """
         cache_controller = get_util_registry().get_util(module="cache_controller")
         try:
             response = cache_controller.get(module_name=self.name, input=input)
@@ -84,6 +108,10 @@ class RetroController(BaseWrapper):
         return response
 
     async def call_async(self, input: RetroInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to the retro controller,
+        which dispatches the call to respective one-step retro backend service
+        """
         from askcos2_celery.tasks import retro_task
         async_result = retro_task.apply_async(
             args=(self.name, input.dict()), priority=priority)

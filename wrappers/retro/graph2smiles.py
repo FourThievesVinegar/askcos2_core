@@ -6,8 +6,14 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class RetroG2SInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
-    smiles: list[str]
+    model_name: Literal["pistachio_23Q3", "cas"] = Field(
+        default="pistachio_23Q3",
+        description="model name for torchserve backend"
+    )
+    smiles: list[str] = Field(
+        description="list of target SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1", "CN(C)CCOC(c1ccccc1)c1ccccc1"]
+    )
 
 
 class RetroG2SResult(BaseModel):
@@ -48,12 +54,20 @@ class RetroG2SWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: RetroG2SInput) -> RetroG2SResponse:
+        """
+        Endpoint for synchronous call to one-step retrosynthesis
+        based on Graph2SMILES. https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: RetroG2SInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to one-step retrosynthesis
+        based on Graph2SMILES. https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
+        """
         from askcos2_celery.tasks import retro_task
         async_result = retro_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
