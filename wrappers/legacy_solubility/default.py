@@ -6,19 +6,62 @@ from wrappers.legacy_solubility.utils import postprocess_solubility_results
 
 
 class LegacySolubilityTask(LowerCamelAliasModel):
-    solvent: str
-    solute: str
-    temp: confloat(gt=0, lt=1000)
-    ref_solvent: str | None = None
-    ref_solubility: confloat(gt=-15, lt=15) | None = None
-    ref_temp: confloat(gt=0, lt=1000) | None = None
-    hsub298: confloat(gt=0, lt=10000) | None = None
-    cp_gas_298: confloat(gt=0, lt=10000) | None = None
-    cp_solid_298: confloat(gt=0, lt=10000) | None = None
+    solvent: str = Field(
+        description="solvent SMILES"
+    )
+    solute: str = Field(
+        description="solute SMILES"
+    )
+    temp: confloat(gt=0, lt=1000) = Field(
+        default=298.0,
+        description="temperature for solubility prediction (K)",
+    )
+    ref_solvent: str | None = Field(
+        default=None,
+        description="reference solvent SMILES"
+    )
+    ref_solubility: confloat(gt=-15, lt=15) | None = Field(
+        default=None,
+        description="solute solubility in reference solvent as logS (log10(mol/L))"
+    )
+    ref_temp: confloat(gt=0, lt=1000) | None = Field(
+        default=None,
+        description="temperature for reference solubility (K)"
+    )
+    hsub298: confloat(gt=0, lt=10000) | None = Field(
+        default=None,
+        description="sublimation enthalpy of solute at 298 K (kcal/mol)"
+    )
+    cp_gas_298: confloat(gt=0, lt=10000) | None = Field(
+        default=None,
+        description="gas phase heat capacity of solute at 298 K (cal/K/mol)"
+    )
+    cp_solid_298: confloat(gt=0, lt=10000) | None = Field(
+        default=None,
+        description="solid phase heat capacity of solute at 298 K (cal/K/mol)"
+    )
 
 
 class LegacySolubilityInput(LowerCamelAliasModel):
     task_list: list[LegacySolubilityTask]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "task_list": [
+                    {
+                        "solvent": "CC(=O)O",
+                        "solute": "C(CCC(=O)O)CC(=O)O",
+                        "temp": 298.0,
+                    },
+                    {
+                        "solvent": "CC(=O)O",
+                        "solute": "C(CCC(=O)O)CC(=O)O",
+                        "temp": 500.0,
+                    },
+                ]
+            }
+        }
 
 
 class LegacySolubilityOutput(BaseModel):
@@ -123,12 +166,18 @@ class LegacySolubilityWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: LegacySolubilityInput) -> LegacySolubilityResponse:
+        """
+        Endpoint for synchronous call to solubility prediction backend
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: LegacySolubilityInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to solubility prediction backend
+        """
         return await super().call_async(input=input, priority=priority)
 
     async def retrieve(self, task_id: str) -> LegacySolubilityResponse | None:
