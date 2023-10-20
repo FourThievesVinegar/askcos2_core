@@ -79,12 +79,20 @@ class ForwardWLDN5Wrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: ForwardWLDN5Input) -> ForwardWLDN5Response:
+        """
+        Endpoint for synchronous call to WLDN5 forward predictor.
+        https://pubs.rsc.org/en/content/articlehtml/2019/sc/c8sc04228d
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: ForwardWLDN5Input, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to WLDN5 forward predictor.
+        https://pubs.rsc.org/en/content/articlehtml/2019/sc/c8sc04228d
+        """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
             args=(self.name, input.dict()), priority=priority)

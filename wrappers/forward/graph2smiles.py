@@ -56,6 +56,7 @@ class ForwardG2SWrapper(BaseWrapper):
     def call_sync(self, input: ForwardG2SInput) -> ForwardG2SResponse:
         """
         Endpoint for synchronous call to Graph2SMILES forward predictor.
+        https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
         """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
@@ -65,6 +66,7 @@ class ForwardG2SWrapper(BaseWrapper):
     async def call_async(self, input: ForwardG2SInput, priority: int = 0) -> str:
         """
         Endpoint for asynchronous call to Graph2SMILES forward predictor.
+        https://pubs.acs.org/doi/10.1021/acs.jcim.2c00321
         """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(

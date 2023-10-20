@@ -56,6 +56,7 @@ class ForwardATWrapper(BaseWrapper):
     def call_sync(self, input: ForwardATInput) -> ForwardATResponse:
         """
         Endpoint for synchronous call to forward predictor based on Aug. Transformer.
+        https://www.nature.com/articles/s41467-020-19266-y
         """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
@@ -65,6 +66,7 @@ class ForwardATWrapper(BaseWrapper):
     async def call_async(self, input: ForwardATInput, priority: int = 0) -> str:
         """
         Endpoint for asynchronous call to forward predictor based on Aug. Transformer.
+        https://www.nature.com/articles/s41467-020-19266-y
         """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
