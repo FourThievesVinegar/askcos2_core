@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -6,8 +6,14 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ForwardATInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q2", "cas"] = "pistachio_23Q2"
-    smiles: list[str]
+    model_name: Literal["pistachio_23Q3", "cas"] = Field(
+        default="pistachio_23Q3",
+        description="model name for torchserve backend"
+    )
+    smiles: list[str] = Field(
+        description="list of reactant SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1.Nc1cc(Br)ccn1", "CCO.CC(=O)O"]
+    )
 
 
 class ForwardATResult(BaseModel):
@@ -48,12 +54,18 @@ class ForwardATWrapper(BaseWrapper):
         return output
 
     def call_sync(self, input: ForwardATInput) -> ForwardATResponse:
+        """
+        Endpoint for synchronous call to forward predictor based on Aug. Transformer.
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: ForwardATInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to forward predictor based on Aug. Transformer.
+        """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
             args=(self.name, input.dict()), priority=priority)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from scipy.special import softmax
 from typing import Literal
@@ -12,12 +12,28 @@ from wrappers.registry import get_wrapper_registry
 
 
 class ForwardInput(LowerCamelAliasModel):
-    backend: Literal["augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
-    model_name: str = "pistachio"
-    smiles: list[str]
+    backend: Literal["augmented_transformer", "graph2smiles", "wldn5"] = Field(
+        default="wldn5",
+        description="backend for forward prediction",
+    )
 
-    reagents: str = ""
-    solvent: str = ""
+    model_name: str = Field(
+        default="pistachio",
+        description="model name for forward prediction backend"
+    )
+    smiles: list[str] = Field(
+        description="list of reactant SMILES",
+        example=["CS(=N)(=O)Cc1cccc(Br)c1.Nc1cc(Br)ccn1", "CCO.CC(=O)O"]
+    )
+
+    reagents: str = Field(
+        default="",
+        description="SMILES of reagents (dot-separated)"
+    )
+    solvent: str = Field(
+        default="",
+        description="SMILES of solvents (dot-separated)"
+    )
 
 
 class ForwardOutput(BaseModel):
@@ -32,7 +48,7 @@ class ForwardResult(BaseModel):
 
 
 class ForwardResponse(BaseResponse):
-    result: list[list[ForwardResult]]
+    result: list[list[ForwardResult]] | None
 
 
 @register_wrapper(
@@ -54,6 +70,10 @@ class ForwardController(BaseWrapper):
         pass        # TODO: proper inheritance
 
     def call_sync(self, input: ForwardInput) -> ForwardResponse:
+        """
+        Endpoint for synchronous call to the forward prediction controller,
+        which dispatches the call to respective forward prediction backend service
+        """
         module = self.backend_wrapper_names[input.backend]
         wrapper = get_wrapper_registry().get_wrapper(module=module)
 
@@ -74,6 +94,10 @@ class ForwardController(BaseWrapper):
         return response
 
     async def call_async(self, input: ForwardInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to the forward prediction controller,
+        which dispatches the call to respective forward prediction backend service
+        """
         from askcos2_celery.tasks import forward_task
         async_result = forward_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
@@ -117,6 +141,17 @@ class ForwardController(BaseWrapper):
     ) -> ForwardResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
+
+        if not status_code == 200:
+            response = {
+                "status_code": status_code,
+                "message": message,
+                "result": None
+            }
+            response = ForwardResponse(**response)
+
+            return response
+
         if backend in ["augmented_transformer", "graph2smiles"]:
             # list[dict] -> list[list[dict]]
             result = []
