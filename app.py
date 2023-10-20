@@ -10,7 +10,11 @@ adapter_registry = get_adapter_registry()
 util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
 
-app = FastAPI()
+app = FastAPI(
+    swagger_ui_parameters={
+        "docExpansion": None
+    }
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
