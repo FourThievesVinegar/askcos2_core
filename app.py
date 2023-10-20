@@ -23,13 +23,15 @@ router = APIRouter(prefix="/api/admin")
 router.add_api_route(
     path="/get-backend-status",
     endpoint=wrapper_registry.get_backend_status,
-    methods=["GET"]
+    methods=["GET"],
+    tags=["admin"]
 )
 router.add_api_route(
     path="/token",
     endpoint=oauth2.login_for_access_token,
     methods=["POST"],
-    response_model=oauth2.Token
+    response_model=oauth2.Token,
+    tags=["admin"]
 )
 app.include_router(router)
 
@@ -62,7 +64,8 @@ for wrapper in wrapper_registry:
                 path=f"/{method_name_with_hyphen}",
                 endpoint=getattr(wrapper, method_name),
                 methods=bind_types,
-                include_in_schema=include_in_schema
+                include_in_schema=include_in_schema,
+                tags=[prefix.split("/")[0]]
             )
         app.include_router(router)
 
@@ -83,7 +86,9 @@ for adapter in adapter_registry:
         path=path,
         endpoint=adapter.__call__,
         methods=adapter.methods,
-        include_in_schema=include_in_schema
+        include_in_schema=include_in_schema,
+        tags=["legacy"],
+        deprecated=True
     )
     app.include_router(router)
 
@@ -103,10 +108,16 @@ for util in util_registry:
                 method_name_with_hyphen = method_name.replace("_", "-")
                 path = f"/{method_name_with_hyphen}"
 
+            tag = prefix.split("/")[0]
+            if tag in ["user", "api_logging", "status"]:
+                tag = "admin"
+            else:
+                tag = f"utils/{tag}"
             router.add_api_route(
                 path=path,
                 endpoint=getattr(util, method_name),
-                methods=bind_types
+                methods=bind_types,
+                tags=[tag]
             )
         app.include_router(router)
 
