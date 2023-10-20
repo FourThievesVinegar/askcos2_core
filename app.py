@@ -10,9 +10,12 @@ adapter_registry = get_adapter_registry()
 util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
 
+
 app = FastAPI(
     swagger_ui_parameters={
-        "docExpansion": None
+        "docExpansion": None,
+        "filter": True,
+        "tagsSorter": "alpha"
     }
 )
 app.add_middleware(
@@ -69,7 +72,7 @@ for wrapper in wrapper_registry:
                 endpoint=getattr(wrapper, method_name),
                 methods=bind_types,
                 include_in_schema=include_in_schema,
-                tags=[prefix.split("/")[0]]
+                tags=[prefix_with_hyphen.split("/")[0]]
             )
         app.include_router(router)
 
@@ -112,8 +115,8 @@ for util in util_registry:
                 method_name_with_hyphen = method_name.replace("_", "-")
                 path = f"/{method_name_with_hyphen}"
 
-            tag = prefix.split("/")[0]
-            if tag in ["user", "api_logging", "status"]:
+            tag = prefix_with_hyphen.split("/")[0]
+            if tag in ["user", "api-logging", "status"]:
                 tag = "admin"
             else:
                 tag = f"utils/{tag}"

@@ -40,13 +40,6 @@ class WrapperRegistry:
         for module, to_start in module_config["modules_to_start"].items():
             if to_start:
                 wrapper_config = module_config[module]
-                if "wrapper_names" in wrapper_config:       # for multiple endpoints
-                    for name in wrapper_config["wrapper_names"]:
-                        wrapper_class = WRAPPER_CLASSES[name]
-                        self._wrappers[name] = wrapper_class(wrapper_config)
-                else:                                       # default to module name
-                    wrapper_class = WRAPPER_CLASSES[module]
-                    self._wrappers[module] = wrapper_class(wrapper_config)
 
                 if module.startswith("atom_map") and \
                         "atom_map_controller" not in self._wrappers:
@@ -69,6 +62,16 @@ class WrapperRegistry:
                         "retro_controller" not in self._wrappers:
                     controller_class = WRAPPER_CLASSES["retro_controller"]
                     self._wrappers["retro_controller"] = controller_class()
+
+                # Moved the wrapper binding behind controller so that the
+                # controller doc appears first in the API doc
+                if "wrapper_names" in wrapper_config:       # for multiple endpoints
+                    for name in wrapper_config["wrapper_names"]:
+                        wrapper_class = WRAPPER_CLASSES[name]
+                        self._wrappers[name] = wrapper_class(wrapper_config)
+                else:                                       # default to module name
+                    wrapper_class = WRAPPER_CLASSES[module]
+                    self._wrappers[module] = wrapper_class(wrapper_config)
 
         # tree analysis controller will be created always
         controller_class = WRAPPER_CLASSES["tree_analysis_controller"]
