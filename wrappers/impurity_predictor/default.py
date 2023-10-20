@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
@@ -7,18 +7,51 @@ from wrappers.base import BaseWrapper, BaseResponse
 
 class ImpurityPredictorInput(LowerCamelAliasModel):
     predictor_backend: Literal[
-        "augmented_transformer", "graph2smiles", "wldn5"] = "wldn5"
-    predictor_model_name: str = "pistachio"
-    inspector: str = "Reaxys inspector"
-    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = "rxnmapper"
-    topn_outcome: int = 3
-    insp_threshold: float = 0.2
-    check_mapping: bool = True
+        "augmented_transformer", "graph2smiles", "wldn5"] = Field(
+        default="wldn5",
+        description="backend for forward prediction"
+    )
+    predictor_model_name: str = Field(
+        default="pistachio",
+        description="backend model name for forward prediction"
+    )
+    inspector: str = Field(
+        default="Reaxys inspector",
+        description="reaction scorer to use"
+    )
+    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = Field(
+        default="rxnmapper",
+        description="backend for atom mapping"
+    )
+    topn_outcome: int = Field(
+        default=3,
+        description="max number of top results to return"
+    )
+    insp_threshold: float = Field(
+        default=0.2,
+        description="threshold for the inspector"
+    )
+    check_mapping: bool = Field(
+        default=True,
+        description="whether to check atom mapping"
+    )
 
-    rct_smi: str
-    prd_smi: str = ""
-    sol_smi: str = ""
-    rea_smi: str = ""
+    rct_smi: str = Field(
+        description="reactant SMILES",
+        example="CN(C)CCCl.OC(c1ccccc1)c1ccccc1"
+    )
+    prd_smi: str = Field(
+        default="",
+        description="product SMILES"
+    )
+    sol_smi: str = Field(
+        default="",
+        description="solvent SMILES"
+    )
+    rea_smi: str = Field(
+        default="",
+        description="reagent SMILES"
+    )
 
 
 class ForwardResult(BaseModel):
@@ -49,7 +82,7 @@ class ImpurityPredictorOutput(BaseModel):
 
 
 class ImpurityPredictorResponse(BaseResponse):
-    result: ImpurityPredictorResult
+    result: ImpurityPredictorResult | None
 
 
 @register_wrapper(
@@ -64,6 +97,10 @@ class ImpurityPredictorWrapper(BaseWrapper):
 
     def call_sync(self, input: ImpurityPredictorInput
                   ) -> ImpurityPredictorResponse:
+        """
+        Endpoint for synchronous call to the impurity prediction service.
+        Primarily making use of the forward predictor to explore other reaction modes
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
@@ -71,6 +108,10 @@ class ImpurityPredictorWrapper(BaseWrapper):
 
     async def call_async(self, input: ImpurityPredictorInput, priority: int = 0
                          ) -> str:
+        """
+        Endpoint for asynchronous call to the impurity prediction service.
+        Primarily making use of the forward predictor to explore other reaction modes
+        """
         from askcos2_celery.tasks import impurity_predictor_task
         async_result = impurity_predictor_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
@@ -84,12 +125,20 @@ class ImpurityPredictorWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: ImpurityPredictorOutput
                                    ) -> ImpurityPredictorResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = ImpurityPredictorResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in impurity_predictor " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = ImpurityPredictorResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response
-
