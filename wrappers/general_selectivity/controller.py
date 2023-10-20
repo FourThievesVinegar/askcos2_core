@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Literal
 from wrappers import register_wrapper
+from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.general_selectivity.gnn import (
     GeneralSelectivityInput as GnnGeneralSelectivityInput,
     GeneralSelectivityResponse as GnnGeneralSelectivityResponse
@@ -14,17 +15,36 @@ from wrappers.general_selectivity.qm_gnn_no_reagent import (
     GeneralSelectivityInput as NoReagentGeneralSelectivityInput,
     GeneralSelectivityResponse as NoReagentGeneralSelectivityResponse
 )
-from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.registry import get_wrapper_registry
 
 
 class GeneralSelectivityInput(LowerCamelAliasModel):
-    backend: Literal["gnn", "qm_gnn", "qm_gnn_no_reagent"] = "gnn"
-    smiles: str
-    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = "wln"
-    mapped: bool = False
-    all_outcomes: bool = False
-    no_map_reagents: bool = False
+    backend: Literal["gnn", "qm_gnn", "qm_gnn_no_reagent"] = Field(
+        default="gnn",
+        description="backend for general selectivity prediction"
+    )
+    smiles: str = Field(
+        description="reaction SMILES on which general selectivity prediction "
+                    "is to be performed",
+        example="CC(COc1n[nH]cc1)C.CC(C)(OC(c1c(Cl)nc(Cl)cc1)=O)C>>"
+                "CC(OC(c1ccc(n2ccc(OCC(C)C)n2)nc1Cl)=O)(C)C"
+    )
+    atom_map_backend: Literal["indigo", "rxnmapper", "wln"] = Field(
+        default="wln",
+        description="backend for atom mapping"
+    )
+    mapped: bool = Field(
+        default=False,
+        description="whether the input SMILES has been atom mapped"
+    )
+    all_outcomes: bool = Field(
+        default=False,
+        description="whether to return all outcomes"
+    )
+    no_map_reagents: bool = Field(
+        default=True,
+        description="flag to NOT map reagents"
+    )
 
 
 class GeneralSelectivityOutput(BaseModel):
@@ -38,7 +58,7 @@ class GeneralSelectivityResult(BaseModel):
 
 
 class GeneralSelectivityResponse(BaseResponse):
-    result: list[GeneralSelectivityResult]
+    result: list[GeneralSelectivityResult] | None
 
 
 @register_wrapper(
@@ -60,6 +80,11 @@ class GeneralSelectivityController(BaseWrapper):
         pass        # TODO: proper inheritance
 
     def call_sync(self, input: GeneralSelectivityInput) -> GeneralSelectivityResponse:
+        """
+        Endpoint for synchronous call to the general selectivity controller,
+        which dispatches the call to respective backend service. Models based on
+        https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc04823b
+        """
         module = self.backend_wrapper_names[input.backend]
         wrapper = get_wrapper_registry().get_wrapper(module=module)
 
@@ -73,6 +98,11 @@ class GeneralSelectivityController(BaseWrapper):
 
     async def call_async(self, input: GeneralSelectivityInput, priority: int = 0
                          ) -> str:
+        """
+        Endpoint for asynchronous call to the general selectivity controller,
+        which dispatches the call to respective backend service. Models based on
+        https://pubs.rsc.org/en/content/articlehtml/2021/sc/d0sc04823b
+        """
         from askcos2_celery.tasks import general_selectivity_task
         async_result = general_selectivity_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
