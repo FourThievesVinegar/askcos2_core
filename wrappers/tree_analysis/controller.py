@@ -1,6 +1,6 @@
 import json
 from fastapi import Depends, HTTPException, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Literal
 from utils.oauth2 import oauth2_scheme
@@ -15,26 +15,52 @@ from wrappers.tree_analysis.tb_reaction_classification \
 
 
 class TreeAnalysisInput(LowerCamelAliasModel):
-    result_id: str
+    result_id: str = Field(description="tree result_id")
     task: Literal[
         "pathway_ranking",
         "reaction_classification",
         "pmi_calculation",
         "count_analogs",
-    ]
+    ] = Field(
+        default="pathway_ranking",
+        description="tree analysis task name"
+    )
 
     # PMI calculator and count_analogs option
-    index: int = -1
+    index: int = Field(
+        default=-1,
+        description="only applicable for pmi_calculation and count_analogs. "
+                    "Index of tree to be analyzed. "
+                    "An index of -1 will analyze all trees."
+    )
 
     # Pathway ranking options
-    cluster_trees: bool = True
-    cluster_method: Literal["hdbscan", "kmeans"] = "hdbscan"
-    cluster_min_samples: int = 5
-    cluster_min_size: int = 5
+    cluster_trees: bool = Field(
+        default=True,
+        description="only for pathway_ranking; whether to cluster trees"
+    )
+    cluster_method: Literal["hdbscan", "kmeans"] = Field(
+        default="hdbscan",
+        description="only for pathway_ranking; method to cluster trees"
+    )
+    cluster_min_samples: int = Field(
+        default=5,
+        description="minimum number of samples when using 'hdbscan'"
+    )
+    cluster_min_size: int = Field(
+        default=5,
+        description="minimum cluster size when using 'hdbscan'"
+    )
 
     # Count analogs options
-    min_plausibility: float = 0.1
-    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = "rxnmapper"
+    min_plausibility: float = Field(
+        default=0.1,
+        description="only for count_analogs; minimum plausibility for fast filter"
+    )
+    atom_map_backend: Literal["rxnmapper", "indigo", "wln"] = Field(
+        default="rxnmapper",
+        description="only for count_analogs; atom mapping backend"
+    )
 
 
 class TreeAnalysisOutput(BaseModel):
@@ -69,6 +95,10 @@ class TreeAnalysisController(BaseWrapper):
         input: TreeAnalysisInput,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
+        """
+        Endpoint for synchronous call to the tree analysis controller,
+        which dispatches the call to respective backend service
+        """
         results_controller = get_util_registry().get_util(
             module="tree_search_results_controller"
         )
@@ -171,6 +201,10 @@ class TreeAnalysisController(BaseWrapper):
         priority: int = 0,
         token: Annotated[str, Depends(oauth2_scheme)] = None
     ) -> str:
+        """
+        Endpoint for asynchronous call to the tree analysis controller,
+        which dispatches the call to respective backend service
+        """
         from askcos2_celery.tasks import tree_analysis_task
         async_result = tree_analysis_task.apply_async(
             args=(self.name, input.dict(), token), priority=priority)

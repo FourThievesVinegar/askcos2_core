@@ -1,11 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
 class SiteSelectivityInput(LowerCamelAliasModel):
-    smiles: list[str]
+    smiles: list[str] = Field(
+        description="list of reactant SMILES for site selectivity prediction",
+        example=["Cc1ccccc1"]
+    )
 
 
 class SiteSelectivityResult(BaseModel):
@@ -36,12 +39,18 @@ class SiteSelectivityWrapper(BaseWrapper):
     prefixes = ["site_selectivity"]
 
     def call_sync(self, input: SiteSelectivityInput) -> SiteSelectivityResponse:
+        """
+        Endpoint for synchronous call to the site selectivity predictor.
+        """
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
         return response
 
     async def call_async(self, input: SiteSelectivityInput, priority: int = 0) -> str:
+        """
+        Endpoint for asynchronous call to the site selectivity predictor.
+        """
         from askcos2_celery.tasks import site_selectivity_task
         async_result = site_selectivity_task.apply_async(
             args=(self.name, input.dict()), priority=priority)
@@ -55,11 +64,21 @@ class SiteSelectivityWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: SiteSelectivityOutput
                                    ) -> SiteSelectivityResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = SiteSelectivityResponse(**response)
+
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in site_selectivity " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = SiteSelectivityResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response
