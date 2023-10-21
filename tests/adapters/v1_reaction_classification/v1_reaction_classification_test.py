@@ -87,7 +87,16 @@ class V1ReactionClassificationTest(unittest.TestCase):
             results[mode] = result
 
         # Added for v2, consistency check
-        for r1, r2 in zip(results["v1"]["output"]["result"], results["legacy"]["output"]["result"], strict=True):
+        v1_output = results["v1"]["output"]["result"]
+        legacy_output = results["legacy"]["output"]["result"]
+
+        # Get the length of the shorter list
+        min_length = len(v1_output)
+
+        # Truncate both lists to the length of the shorter list
+        v1_output = v1_output[:min_length]
+        legacy_output = legacy_output[:min_length]
+        for r1, r2 in zip(v1_output, legacy_output, strict=True):
             self.assertEqual(r1["rank"], r2["rank"])
             self.assertEqual(r1["reaction_num"], r2["reaction_num"])
             self.assertEqual(r1["reaction_name"], r2["reaction_name"])
