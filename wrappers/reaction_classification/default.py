@@ -6,7 +6,8 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 class ReactionClassificationInput(LowerCamelAliasModel):
     smiles: list[str] = Field(
-        default="list of single reaction SMILES to be classified",
+        default="list of reaction SMILES to be classified; "
+                "currently only supports prediction for a single SMILES",
         example=["CC(O)C.OC(=O)CC>>CC(OC(=O)CC)C"]
     )
     num_results: int = Field(
