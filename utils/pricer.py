@@ -134,7 +134,7 @@ class Pricer:
         smarts: str,
         limit: int | None = None,
         precomputed_mols: bool = False
-    ) -> dict | list:
+    ) -> list | dict:
         return self._pricer.lookup_smarts(
             smarts=smarts,
             limit=limit,
@@ -572,10 +572,11 @@ class MongoPricer:
         """
         if not self.is_mols_precomputed():
             self.precompute_mols()
+
         if smarts in self.smarts_query_index.keys():
             matched_ids = self.smarts_query_index[smarts]
             query = {"smiles": {"$in": matched_ids}}
-            result = self.collection.aggregate(
+            cursor = self.collection.aggregate(
                 [
                     {"$match": query},
                     {
@@ -586,7 +587,14 @@ class MongoPricer:
                     },
                 ]
             )
-            result = list(result)
+            # result = list(result)
+            result = []
+            for doc in cursor:
+                trimmed_doc = {
+                    "_id": str(doc["_id"]),
+                    "smiles": doc["smiles"]
+                }
+                result.append(trimmed_doc)
 
         else:
             pattern = Chem.MolFromSmarts(smarts)
@@ -619,7 +627,12 @@ class MongoPricer:
                     rdmol = Chem.Mol(doc["mol"])
                     if rdmol.HasSubstructMatch(pattern, useChirality=True):
                         matched_ids.append(doc["_id"])
-                        result.append(doc)
+                        # Not returning the "mol"; serialization issue with fastapi
+                        trimmed_doc = {
+                            "_id": str(doc["_id"]),
+                            "smiles": doc["smiles"]
+                        }
+                        result.append(trimmed_doc)
                 except KeyError as e:
                     print("Key error {}, {}".format(e, doc["smiles"]))
 
