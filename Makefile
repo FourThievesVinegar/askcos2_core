@@ -27,10 +27,10 @@ restart:
 test: | test-adapters test-wrappers
 
 test-adapters:
-	pytest tests/adapters
+	pytest -rs tests/adapters
 
 test-wrappers:
-	pytest tests/wrappers
+	pytest -rs tests/wrappers
 
 build-vue:
 	$(MAKE) -C ../askcos-vue-nginx VERSION=$(VERSION) TAG=$(TAG)

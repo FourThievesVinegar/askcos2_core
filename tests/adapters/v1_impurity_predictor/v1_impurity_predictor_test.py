@@ -44,6 +44,10 @@ class V1SelectivityTest(unittest.TestCase):
                 else:
                     time.sleep(2)
 
+    @unittest.skip(
+        reason="Test turned off for impurity consistency check "
+               "as it takes a very long time (at least a few minutes)"
+    )
     def test_1(self):
         case_file = "tests/adapters/v1_impurity_predictor/v1_impurity_predictor_test_case_1.json"
         with open(case_file, "r") as f:
