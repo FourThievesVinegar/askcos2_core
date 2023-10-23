@@ -1,6 +1,6 @@
 services:
   web:
-    image: ${ASKCOS_REGISTRY}/askcos-vue-nginx:2.0
+    image: $registry.gitlab.com/mlpds_mit/askcosv2/askcos-vue-nginx:2.0
     restart: always
     network_mode: host
     volumes:
