@@ -9,6 +9,7 @@ from typing import Annotated, Any, Literal
 from utils import register_util
 from utils.oauth2 import oauth2_scheme
 from utils.registry import get_util_registry
+from utils.tree_search_results_util import standardize_result
 
 # TODO: fix the time zone issue
 
@@ -138,6 +139,7 @@ class TreeSearchResultsController:
             )
         if result["result_state"] in ["completed", "ipp"]:
             result["_id"] = str(result["_id"])
+            result["result"] = standardize_result(result["result"])
             result = TreeSearchSavedResults(**result)
 
             return result
