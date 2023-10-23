@@ -19,42 +19,179 @@ class ExpandOneOptions(LowerCamelAliasModel):
     # aliasing to v1 fields
     template_max_count: int = Field(default=100, alias="template_count")
     template_max_cum_prob: int = Field(default=0.995, alias="max_cum_template_prob")
-    banned_chemicals: list[str] = Field(default_factory=list, alias="forbidden_molecules")
-    banned_reactions: list[str] = Field(default_factory=list, alias="known_bad_reactions")
+    banned_chemicals: list[str] = Field(
+        default_factory=list,
+        description="banned chemicals (in addition to user banned chemicals)",
+        alias="forbidden_molecules",
+        example=[]
+    )
+    banned_reactions: list[str] = Field(
+        default_factory=list,
+        description="banned reactions (in addition to user banned reactions)",
+        alias="known_bad_reactions",
+        example=[]
+    )
 
-    retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
-    use_fast_filter: bool = True
-    filter_threshold: float = 0.75
-    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] = None
-    cluster_precursors: bool = False
-    cluster_setting: ClusterSetting = ClusterSetting()
-    extract_template: bool = False
-    return_reacting_atoms: bool = True
-    selectivity_check: bool = False
+    retro_backend_options: list[RetroBackendOption] = Field(
+        default=[RetroBackendOption()],
+        description="list of retro strategies to run in series"
+    )
+    use_fast_filter: bool = Field(
+        default=True,
+        description="whether to filter the results with the fast filter"
+    )
+    filter_threshold: float = Field(
+        default=0.75,
+        description="threshold for the fast filter"
+    )
+    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = Field(
+        default=None,
+        description="backend for retro rerank"
+    )
+    cluster_precursors: bool = Field(
+        default=False,
+        description="whether to cluster proposed precursors"
+    )
+    cluster_setting: ClusterSetting = Field(
+        default_factory=ClusterSetting,
+        description="settings for clustering"
+    )
+    extract_template: bool = Field(
+        default=False,
+        description="whether to extract templates "
+                    "(mostly for template-free suggestions)"
+    )
+    return_reacting_atoms: bool = Field(
+        default=True,
+        description="whether to return the indices of reacting atoms"
+    )
+    selectivity_check: bool = Field(
+        default=False,
+        description="whether to perform quick selectivity check "
+                    "by reverse application of the forward template"
+    )
 
     class Config:
         allow_population_by_field_name = True
 
 
 class BuildTreeOptions(LowerCamelAliasModel):
-    expansion_time: int = 30
-    max_iterations: int | None = None
-    max_chemicals: int | None = None
-    max_reactions: int | None = None
-    max_templates: int | None = None
-    max_branching: int = 25
-    max_depth: int = 5
-    exploration_weight: float = 1.0
-    return_first: bool = False
-    max_trees: int = 500
-    max_ppg: float | None = None
-    max_scscore: float | None = None
-    max_elements: dict[str, int] | None = None
-    min_history: dict[str, int] | None = None
-    property_criteria: list[dict[str, Any]] | None = None
-    termination_logic: dict[str, list[str]] = {"and": ["buyable"]}
-    buyables_source: str | list[str] | None = None
-    custom_buyables: list[str] | None = None
+    expansion_time: int = Field(
+        default=30,
+        description="max time for tree search in seconds",
+        example=10
+    )
+    max_iterations: int | None = Field(
+        default=None,
+        description="max number of iterations"
+    )
+    max_chemicals: int | None = Field(
+        default=None,
+        description="max number of chemicals to explore"
+    )
+    max_reactions: int | None = Field(
+        default=None,
+        description="max number of reactions to explore"
+    )
+    max_templates: int | None = Field(
+        default=None,
+        description="max number of templates to explore"
+    )
+    max_branching: int = Field(
+        default=25,
+        description="max number of branching"
+    )
+    max_depth: int = Field(
+        default=5,
+        description="max tree depth"
+    )
+    exploration_weight: float = Field(
+        default=1.0,
+        description="weight for exploration (vs. exploitation)"
+    )
+    return_first: bool = Field(
+        default=False,
+        description="whether to stop when the first buyable path is found"
+    )
+    max_trees: int = Field(
+        default=500,
+        description="max number of buyable paths to explore"
+    )
+
+    # a bunch of termination logic. These were passed directly from the front end.
+    # Grouping happens at the Django side. Let's tentatively keep that pattern for now.
+    buyable_logic: Literal["none", "and", "or"] | None = Field(
+        default="and",
+        description="logic type for buyable termination"
+    )
+    max_ppg_logic: Literal["none", "and", "or"] | None = Field(
+        default="none",
+        description="logic type for price based termination"
+    )
+    max_ppg: float | None = Field(
+        default=None,
+        description="maximum price for price based termination"
+    )
+    max_scscore_logic: Literal["none", "and", "or"] | None = Field(
+        default="none",
+        description="logic type for synthetic complexity termination"
+    )
+    max_scscore: float | None = Field(
+        default=None,
+        description="maximum scscore for synthetic complexity termination"
+    )
+    chemical_property_logic: Literal["none", "and", "or"] | None = Field(
+        default="none",
+        description="logic type for chemical property termination"
+    )
+    max_chemprop_c: int | None = Field(
+        default=None,
+        description="maximum carbon count for termination"
+    )
+    max_chemprop_n: int | None = Field(
+        default=None,
+        description="maximum nitrogen count for termination"
+    )
+    max_chemprop_o: int | None = Field(
+        default=None,
+        description="maximum oxygen count for termination"
+    )
+    max_chemprop_h: int | None = Field(
+        default=None,
+        description="maximum hydrogen count for termination"
+    )
+    chemical_popularity_logic: Literal["none", "and", "or"] | None = Field(
+        default="none",
+        description="logic type for chemical popularity termination"
+    )
+    min_chempop_reactants: int | None = Field(
+        default=5,
+        description="minimum reactant precedents for termination"
+    )
+    min_chempop_products: int | None = Field(
+        default=5,
+        description="minimum product precedents for termination"
+    )
+
+    buyables_source: list[str] | None = Field(
+        default=None,
+        description="list of source(s) to consider when looking up buyables"
+    )
+    custom_buyables: list[str] | None = Field(
+        default=None,
+        description="list of chemicals to consider as buyable",
+        example=[]
+    )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict[str, Any], model) -> None:
+            # dropping the optional fields from the example
+            del schema.get("properties")["max_iterations"]
+            del schema.get("properties")["max_chemicals"]
+            del schema.get("properties")["max_reactions"]
+            del schema.get("properties")["max_templates"]
+            del schema.get("properties")["buyables_source"]
 
 
 class EnumeratePathsOptions(LowerCamelAliasModel):
@@ -77,12 +214,30 @@ class EnumeratePathsOptions(LowerCamelAliasModel):
 
 
 class MCTSInput(LowerCamelAliasModel):
-    smiles: str
-    description: str | None = ""
-    tags: str | None = ""
-    expand_one_options: ExpandOneOptions = ExpandOneOptions()
-    build_tree_options: BuildTreeOptions = BuildTreeOptions()
-    enumerate_paths_options: EnumeratePathsOptions = EnumeratePathsOptions()
+    smiles: str = Field(
+        description="target SMILES for MCTS tree building",
+        example="CN(C)CCOC(c1ccccc1)c1ccccc1"
+    )
+    description: str | None = Field(
+        default="",
+        description="description of the MCTS task",
+    )
+    tags: str | None = Field(
+        default="",
+        description="tags of the MCTS task",
+    )
+    expand_one_options: ExpandOneOptions = Field(
+        default_factory=ExpandOneOptions,
+        description="options for one-step expansion"
+    )
+    build_tree_options: BuildTreeOptions = Field(
+        default_factory=BuildTreeOptions,
+        description="options for MCTS tree search"
+    )
+    enumerate_paths_options: EnumeratePathsOptions = Field(
+        default_factory=EnumeratePathsOptions,
+        description="options for path enumeration once the tree is built"
+    )
     run_async: bool = False
     result_id: str = str(uuid.uuid4())
 
@@ -102,7 +257,7 @@ class MCTSOutput(BaseModel):
 
 
 class MCTSResponse(BaseResponse):
-    result: MCTSResult
+    result: MCTSResult | None
 
 
 @register_wrapper(
@@ -123,11 +278,30 @@ class MCTSWrapper(BaseWrapper):
         "retrieve": ["GET"]
     }
 
+    def call_raw(self, input: MCTSInput) -> MCTSOutput:
+        # Grouping for termination logics used to happen at the Django side.
+        # Let's tentatively keep that pattern for now.
+        dict_input = self.process_input(input)
+
+        response = self.session_sync.post(
+            self.prediction_url,
+            json=dict_input,
+            timeout=self.config["deployment"]["timeout"]
+        )
+        output = response.json()
+        output = MCTSOutput(**output)
+
+        return output
+
     def call_sync(
         self,
         input: MCTSInput,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> MCTSResponse:
+        """
+        Endpoint for synchronous call to the MCTS tree searcher.
+        Login required for access to user banned lists.
+        """
         # banned_chemicals handling, requires login token
         if not input.expand_one_options.banned_chemicals:
             input.expand_one_options.banned_chemicals = []
@@ -194,7 +368,10 @@ class MCTSWrapper(BaseWrapper):
         return response
 
     def call_sync_without_token(self, input: MCTSInput) -> MCTSResponse:
-        """Special method to be called by other modules"""
+        """
+        Endpoint for synchronous call to the MCTS tree searcher.
+        Skip login at the expense of losing access to user banned lists.
+        """
         # banned_chemicals handling, does not require login token
         if not input.expand_one_options.banned_chemicals:
             input.expand_one_options.banned_chemicals = []
@@ -217,6 +394,10 @@ class MCTSWrapper(BaseWrapper):
         token: Annotated[str, Depends(oauth2_scheme)],
         priority: int = 0
     ) -> str:
+        """
+        Endpoint for asynchronous call to the MCTS tree searcher.
+        Login required for access to user banned lists.
+        """
         user_controller = get_util_registry().get_util(module="user_controller")
         user = user_controller.get_current_user(token)
 
@@ -257,6 +438,67 @@ class MCTSWrapper(BaseWrapper):
         return await super().retrieve(task_id=task_id)
 
     @staticmethod
+    def process_input(input: MCTSInput) -> dict:
+        build_tree_options = input.build_tree_options
+        dict_input = input.dict()
+
+        termination_logic = {"and": [], "or": []}
+
+        buyable_logic = build_tree_options.buyable_logic
+        if buyable_logic != "none":
+            termination_logic[buyable_logic].append("buyable")
+
+        max_ppg_logic = build_tree_options.max_ppg_logic
+        if max_ppg_logic != "none":
+            max_ppg = build_tree_options.max_ppg
+            termination_logic[max_ppg_logic].append("max_ppg")
+        else:
+            max_ppg = None
+
+        max_scscore_logic = build_tree_options.max_scscore_logic
+        if max_scscore_logic != "none":
+            max_scscore = build_tree_options.max_scscore
+            termination_logic[max_scscore_logic].append("max_scscore")
+        else:
+            max_scscore = None
+
+        chemical_property_logic = build_tree_options.chemical_property_logic
+        if chemical_property_logic != "none":
+            param_dict = {
+                "C": "max_chemprop_c",
+                "N": "max_chemprop_n",
+                "O": "max_chemprop_o",
+                "H": "max_chemprop_h",
+            }
+            max_elements = {
+                k: getattr(build_tree_options, v) for k, v in param_dict.items()
+                if hasattr(build_tree_options, v)
+            }
+            termination_logic[chemical_property_logic].append("max_elements")
+        else:
+            max_elements = None
+
+        chemical_popularity_logic = build_tree_options.chemical_popularity_logic
+        if chemical_popularity_logic != "none":
+            min_history = {
+                "as_reactant": build_tree_options.min_chempop_reactants,
+                "as_product": build_tree_options.min_chempop_products
+            }
+            termination_logic[chemical_popularity_logic].append("min_history")
+        else:
+            min_history = None
+
+        dict_input.update({
+            "max_ppg": max_ppg,
+            "max_scscore": max_scscore,
+            "max_elements": max_elements,
+            "min_history": min_history,
+            "termination_logic": termination_logic,
+        })
+
+        return dict_input
+
+    @staticmethod
     def convert_output_to_response(output: MCTSOutput
                                    ) -> MCTSResponse:
         status_code = 200
@@ -267,6 +509,7 @@ class MCTSWrapper(BaseWrapper):
             status_code = 500
             message = f"Backend error encountered during mcts.call_raw() " \
                       f"with the following error message {output.error}"
+            result = None
 
         response = MCTSResponse(
             status_code=status_code,
