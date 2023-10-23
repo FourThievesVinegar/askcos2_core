@@ -377,7 +377,11 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": []
-        }
+        },
+        "wrapper_names": [
+            "scscore",
+            "scscore_batch"
+        ]
     },
 
     "site_selectivity": {
