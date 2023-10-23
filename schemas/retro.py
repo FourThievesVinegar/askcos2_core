@@ -5,14 +5,29 @@ from typing import Any, Literal
 
 class RetroBackendOption(LowerCamelAliasModel):
     retro_backend: Literal[
-        "template_relevance",
-        "augmented_transformer",
-        "graph2smiles"
-    ] = "template_relevance"
-    retro_model_name: str = "reaxys"
-    max_num_templates: int = 100
-    max_cum_prob: float = 0.995
-    attribute_filter: list[dict[str, Any]] = Field(default_factory=list)
+        "augmented_transformer", "graph2smiles", "template_relevance"
+    ] = Field(
+        default="template_relevance",
+        description="backend for one-step retrosynthesis"
+    )
+    retro_model_name: str = Field(
+        default="reaxys",
+        description="backend model name for one-step retrosynthesis"
+    )
+
+    max_num_templates: int = Field(
+        default=1000,
+        description="number of templates to consider"
+    )
+    max_cum_prob: float = Field(
+        default=0.995,
+        description="maximum cumulative probability of templates"
+    )
+    attribute_filter: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="template attribute filter to apply before template application",
+        example=[]
+    )
 
     @validator("retro_model_name")
     def check_retro_model_name(cls, v, values):
