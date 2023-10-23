@@ -15,6 +15,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 43200
 # The scheme itself returns a str (i.e., the token) when called
 # OAuth2PasswordBearer seems to have handled the conversion of token_dict -> token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/admin/token")
+# optional_oauth2_scheme = OAuth2PasswordBearer(
+#     tokenUrl="api/admin/token",
+#     auto_error=False
+# )
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
