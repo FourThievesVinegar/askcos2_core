@@ -68,6 +68,7 @@ class ImpurityResult(BaseModel):
     avg_insp_score: float
     similarity_to_major: float
     modes: list[int]
+    modes_name: str
 
 
 class ImpurityPredictorResult(BaseModel):
