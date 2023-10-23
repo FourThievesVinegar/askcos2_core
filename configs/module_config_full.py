@@ -22,7 +22,6 @@ module_config = {
         "retro_graph2smiles": True,
         "scscore": True,
         "site_selectivity": True,
-        "tree_optimizer": True,
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
         "legacy_descriptors": True,
@@ -30,7 +29,7 @@ module_config = {
     },
 
     "global": {
-        "require_frontend": False,
+        "require_frontend": True,
         "container_runtime": "docker",
         "image_policy": "build_all",
         "enable_gpu": False
@@ -391,20 +390,6 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
             "custom_prediction_url": "",
             "timeout": 10,
-            "available_model_names": []
-        }
-    },
-
-    "tree_optimizer": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_optimizer.git",
-        "description": "Optimizer for graph (and paths) found from the tree search",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "use_gpu": False,
-            "ports_to_expose": [9711],
-            "default_prediction_url": "http://0.0.0.0:9711/tree_optimizer",
-            "custom_prediction_url": "",
-            "timeout": 600,
             "available_model_names": []
         }
     },

@@ -11,19 +11,62 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ExpandOneInput(LowerCamelAliasModel):
-    smiles: str
-    retro_backend_options: list[RetroBackendOption] = [RetroBackendOption()]
-    banned_chemicals: list[str] = Field(default_factory=list)
-    banned_reactions: list[str] = Field(default_factory=list)
-    use_fast_filter: bool = True
-    fast_filter_threshold: float = 0.75
-    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = "scscore"
-    cluster_precursors: bool = False
-    cluster_setting: ClusterSetting = ClusterSetting()
-    extract_template: bool = False
-    return_reacting_atoms: bool = True
-    selectivity_check: bool = False
-    group_by_strategy: bool = False
+    smiles: str = Field(
+        description="target SMILES for one-step expansion",
+        example="CN(C)CCOC(c1ccccc1)c1ccccc1"
+    )
+    retro_backend_options: list[RetroBackendOption] = Field(
+        default=[RetroBackendOption()],
+        description="list of retro strategies to run in series"
+    )
+    banned_chemicals: list[str] = Field(
+        default_factory=list,
+        description="banned chemicals (in addition to user banned chemicals)",
+        example=[]
+    )
+    banned_reactions: list[str] = Field(
+        default_factory=list,
+        description="banned reactions (in addition to user banned reactions)",
+        example=[]
+    )
+    use_fast_filter: bool = Field(
+        default=True,
+        description="whether to filter the results with the fast filter"
+    )
+    fast_filter_threshold: float = Field(
+        default=0.75,
+        description="threshold for the fast filter"
+    )
+    retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = Field(
+        default="scscore",
+        description="backend for retro rerank"
+    )
+    cluster_precursors: bool = Field(
+        default=False,
+        description="whether to cluster proposed precursors"
+    )
+    cluster_setting: ClusterSetting = Field(
+        default_factory=ClusterSetting,
+        description="settings for clustering"
+    )
+    extract_template: bool = Field(
+        default=False,
+        description="whether to extract templates "
+                    "(mostly for template-free suggestions)"
+    )
+    return_reacting_atoms: bool = Field(
+        default=True,
+        description="whether to return the indices of reacting atoms"
+    )
+    selectivity_check: bool = Field(
+        default=False,
+        description="whether to perform quick selectivity check "
+                    "by reverse application of the forward template"
+    )
+    group_by_strategy: bool = Field(
+        default=False,
+        description="whether to group the returned results by strategies"
+    )
 
 
 class RetroResult(BaseModel):
@@ -59,7 +102,7 @@ class ExpandOneOutput(BaseModel):
 
 
 class ExpandOneResponse(BaseResponse):
-    result: list[RetroResult] | dict[int, list[RetroResult]]
+    result: list[RetroResult] | dict[int, list[RetroResult]] | None
 
 
 @register_wrapper(
@@ -85,6 +128,11 @@ class ExpandOneWrapper(BaseWrapper):
         input: ExpandOneInput,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> ExpandOneResponse:
+        """
+        Endpoint for synchronous call to the one-step expansion engine,
+        which combines retro prediction, retro rerank and postprocessing.
+        Login required for access to user banned lists.
+        """
         # banned_chemicals handling, requires login token
         if not input.banned_chemicals:
             input.banned_chemicals = []
@@ -114,7 +162,11 @@ class ExpandOneWrapper(BaseWrapper):
         return response
 
     def call_sync_without_token(self, input: ExpandOneInput) -> ExpandOneResponse:
-        """Special method to be called by other tree searchers"""
+        """
+        Endpoint for synchronous call to the one-step expansion engine,
+        which combines retro prediction, retro rerank and postprocessing.
+        Skip login at the expense of losing access to user banned lists.
+        """
         # banned_chemicals handling, does not require login token
         if not input.banned_chemicals:
             input.banned_chemicals = []
@@ -135,6 +187,11 @@ class ExpandOneWrapper(BaseWrapper):
         token: Annotated[str, Depends(oauth2_scheme)],
         priority: int = 0
     ) -> str:
+        """
+        Endpoint for asynchronous call to the one-step expansion engine,
+        which combines retro prediction, retro rerank and postprocessing.
+        Login required for access to user banned lists.
+        """
         from askcos2_celery.tasks import tree_search_expand_one_task
         async_result = tree_search_expand_one_task.apply_async(
             args=(self.name, input.dict(), token), priority=priority)
@@ -158,6 +215,7 @@ class ExpandOneWrapper(BaseWrapper):
             status_code = 500
             message = f"Backend error encountered during expand_one.call_raw() " \
                       f"with the following error message {output.error}"
+            result = None
 
         if input.group_by_strategy:
             grouped_results = {}
