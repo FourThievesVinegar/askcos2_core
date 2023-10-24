@@ -1,0 +1,5 @@
+{
+  "smiles": "CS(=N)(=O)Cc1cccc(Br)c1.Nc1cc(Br)ccn1>>CS(=N)(=O)Cc1cccc(Nc2cc(Br)ccn2)c1",
+  "context_num_results": 5,
+  "forward_num_results": 20
+}
