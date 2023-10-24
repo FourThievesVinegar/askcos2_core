@@ -110,6 +110,9 @@ for util in util_registry:
             if util.name in ["draw"]:
                 # hardcode for some util for legacy convention
                 path = "/"
+            elif util.name in ["selectivity_refs"]:
+                # hardcode for some util for legacy convention
+                path = "/{pk}"
             elif method_name == "__call__":
                 path = "/"
             else:

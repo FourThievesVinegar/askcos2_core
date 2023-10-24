@@ -489,6 +489,10 @@ module_config = {
         "precompute_mols": False
     },
 
+    "selectivity_refs": {
+        "file": "utils/site_selectivity_refs.json"
+    },
+
     "tree_search_results_controller": {
         "database": "results",
         "collection": "results"
