@@ -1,5 +1,5 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.context_recommender.predict_graph import (
@@ -13,11 +13,25 @@ from wrappers.context_recommender.predict_fp import (
 
 
 class V1ContextV2Input(BaseModel):
-    reactants: str
-    products: str
-    reagents: list[str] = None
-    num_results: int = 10
-    model: Literal["graph", "fp"] = "graph"
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    products: str = Field(
+        description="SMILES string of products"
+    )
+    reagents: list[str] | None = Field(
+        default=None,
+        description="predefined reagents"
+    )
+    num_results: int = Field(
+        default=10,
+        description="max number of results to return. "
+                    "It is also the beam width in beam search."
+    )
+    model: Literal["graph", "fp"] = Field(
+        default="graph",
+        description="model backend"
+    )
 
 
 class V1ContextV2AsyncReturn(BaseModel):

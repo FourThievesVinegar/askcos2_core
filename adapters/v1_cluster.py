@@ -1,6 +1,6 @@
 from adapters import register_adapter
-from pydantic import BaseModel
-from typing import List, Optional, Literal
+from pydantic import BaseModel, Field
+from typing import Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.cluster.default import (
     ClusterInput,
@@ -9,14 +9,32 @@ from wrappers.cluster.default import (
 
 
 class V1ClusterInput(BaseModel):
-    original: str     #smiles string
-    outcomes: list[str]    #list of smiles strings of outcomes
-    feature: Optional[Literal["original", "outcomes", "all"]] = "original" #(str, optional): features to use [original', 'outcomes', 'all']
-    fingerprint: str ="morgan"    #(str, optional): fingerprint type ['morgan']
-    fpradius: int = 1        #(int, optional): fingerprint radius, default 1
-    fpnbits: int = 512       #(int, optional): fingerprint bits, default 512
-    clustermethod: Optional[Literal["hdbscan", "kmeans", "rxn_class"]] = "kmeans"     #(str, optional): cluster method ['hdbscan', 'kmeans', 'rxn_class']
-    scores: Optional[List[float]] = None       #(list, optional): list of scores of precursors
+    original: str = Field(description="smiles string")
+    outcomes: list[str] = Field(description="list of smiles strings of outcomes")
+    feature: Literal["original", "outcomes", "all"] | None = Field(
+        default="original",
+        description="features to use"
+    )
+    fingerprint: str = Field(
+        default="morgan",
+        description="fingerprint type"
+    )
+    fpradius: int = Field(
+        default=1,
+        description="fingerprint radius"
+    )
+    fpnbits: int = Field(
+        default=512,
+        description="fingerprint bits"
+    )
+    clustermethod: Literal["hdbscan", "kmeans", "rxn_class"] | None = Field(
+        default="kmeans",
+        description="cluster method"
+    )
+    scores: list[float] | None = Field(
+        default=None,
+        description="list of scores of precursors"
+    )
 
 
 class V1ClusterAsyncReturn(BaseModel):
@@ -25,7 +43,7 @@ class V1ClusterAsyncReturn(BaseModel):
 
 
 class V1ClusterResult(BaseModel):
-    output: List[int]
+    output: list[int]
     names: dict[str, str]
 
 

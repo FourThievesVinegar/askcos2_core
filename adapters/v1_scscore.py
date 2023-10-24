@@ -1,5 +1,5 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.scscore.default import (
     SCScoreInput,
@@ -8,12 +8,15 @@ from wrappers.scscore.default import (
 
 
 class V1SCScoreInput(BaseModel):
-    smiles: str
+    smiles: str = Field(
+        description="SMILES string of target"
+    )
 
 
 class V1SCScoreAsyncReturn(BaseModel):
     request: V1SCScoreInput
     score: float
+
 
 class V1SCScoreResult(BaseModel):
     request: V1SCScoreInput | None

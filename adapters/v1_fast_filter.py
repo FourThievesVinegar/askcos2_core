@@ -1,16 +1,19 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.fast_filter.default import (
     FastFilterInput,
-    FastFilterResult,
     FastFilterResponse
 )
 
 
 class V1FastFilterInput(BaseModel):
-    reactants: str
-    products: str
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    products: str = Field(
+        description="SMILES string of products"
+    )
 
 
 class V1FastFilterAsyncReturn(BaseModel):

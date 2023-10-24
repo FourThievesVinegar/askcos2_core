@@ -1,5 +1,5 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.reaction_classification.default import (
     ReactionClassificationInput,
@@ -9,13 +9,18 @@ from wrappers.reaction_classification.default import (
 
 
 class V1ReactionClassificationInput(BaseModel):
-    reactants: str
-    products: str
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    products: str = Field(
+        description="SMILES string of products"
+    )
 
 
 class V1ReactionClassificationAsyncReturn(BaseModel):
     request: V1ReactionClassificationInput
     task_id: str
+
 
 class V1ReactionClassificationResult(BaseModel):
     status: str

@@ -1,6 +1,6 @@
-from adapters import register_adapter
 import json
-from pydantic import BaseModel
+from adapters import register_adapter
+from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.pathway_ranker.default import (
@@ -11,11 +11,25 @@ from wrappers.pathway_ranker.default import (
 
 
 class V1PathwayRankerInput(BaseModel):
-    trees: str
-    cluster: bool = True
-    cluster_method: Optional[Literal["hdbscan", "kmeans"]] = "hdbscan" #= serializers.CharField(default="hdbscan")
-    min_samples: int = 5  #=serializers.IntegerField(default=5)
-    min_cluster_size: int = 5  # = serializers.IntegerField(default=5)
+    trees: str = Field(
+        description="list of trees to rank as a json string"
+    )
+    cluster: bool | None = Field(
+        default=True,
+        description="whether to cluster pathways"
+    )
+    cluster_method: Literal["hdbscan", "kmeans"] | None = Field(
+        default="hdbscan",
+        description="cluster method for pathways"
+    )
+    min_samples: int | None = Field(
+        default=5,
+        description="min samples for hdbscan"
+    )
+    min_cluster_size: int | None = Field(
+        default=5,
+        description="min cluster size for hdbscan"
+    )
 
 
 class V1PathwayRankerAsyncReturn(BaseModel):

@@ -1,36 +1,71 @@
 from adapters import register_adapter
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.impurity_predictor.default import (
     ImpurityPredictorInput,
-    ImpurityPredictorResult,
     ImpurityPredictorResponse,
     ImpurityResult
 )
 
 
 class V1ImpurityPredictorInput(BaseModel):
-    reactants: str #(str): SMILES string of reactants
-    reagents: Optional[str] = "" #(str, optional): SMILES string of reagents
-    products: Optional[str] = "" #(str, optional): SMILES string of products
-    solvent: Optional[str] = "" #(str, optional): SMILES string of solvent
-    top_k: Optional[int] = 3  #(int, optional): max number of results to return
-    threshold: Optional[float] = 0.1 #(float, optional): probability threshold
-    predictor: Optional[str] = "WLN forward predictor" #(str, optional): forward predictor to use
-    inspector: Optional[str] = "WLN forward inspector" #(str, optional): reaction scorer to use
-    mapper: Optional[str] = "WLN atom mapper" #(str, optional): reaction atom mapper to use
-    training_set: Optional[str] = "uspto_500k" #(str, optional): WLN forward model training set to use
-    model_version: Optional[str] = "" #(str, optional): WLN forward model version to use for prediction
-    check_mapping: Optional[bool] = True #(bool, optional): whether to check atom mapping
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    reagents: str | None = Field(
+        default="",
+        description="SMILES string of reagents"
+    )
+    products: str | None = Field(
+        default="",
+        description="SMILES string of products"
+    )
+    solvent: str | None = Field(
+        default="",
+        description="SMILES string of solvent"
+    )
+    top_k: int | None = Field(
+        default=3,
+        description="max number of results to return"
+    )
+    threshold: float | None = Field(
+        default=0.1,
+        description="probability threshold"
+    )
+    predictor: str | None = Field(
+        default="WLN forward predictor",
+        description="forward predictor to use"
+    )
+    inspector: str | None = Field(
+        default="WLN forward inspector",
+        description="reaction scorer to use"
+    )
+    mapper: str | None = Field(
+        default="WLN atom mapper",
+        description="reaction atom mapper to use"
+    )
+    training_set: str | None = Field(
+        default="uspto_500k",
+        description="WLN forward model training set to use"
+    )
+    model_version: str | None = Field(
+        default="",
+        description="WLN forward model version to use for prediction"
+    )
+    check_mapping: str | None = Field(
+        default=True,
+        description="whether to check atom mapping"
+    )
 
 
 class V1ImpurityPredictorAsyncReturn(BaseModel):
     request: V1ImpurityPredictorInput
     task_id: str
 
+
 class ForwardOutcome(BaseModel):
     smiles: str
+
 
 class ForwardResult(BaseModel):
     rank: int
@@ -73,7 +108,6 @@ class V1ImpurityPredictorAdapter:
             request=input, task_id=task_id)
 
         return async_return
-
 
     @staticmethod
     def convert_input(input: V1ImpurityPredictorInput) -> ImpurityPredictorInput:

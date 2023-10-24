@@ -1,5 +1,5 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.site_selectivity.default import (
     SiteSelectivityInput,
@@ -9,7 +9,9 @@ from wrappers.site_selectivity.default import (
 
 
 class V1SelectivityInput(BaseModel):
-    smiles: str
+    smiles: str = Field(
+        description="SMILES string of target"
+    )
 
 
 class V1SelectivityAsyncReturn(BaseModel):

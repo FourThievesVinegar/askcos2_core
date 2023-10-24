@@ -1,6 +1,5 @@
 from adapters import register_adapter
-from fastapi import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.general_selectivity.controller import (
@@ -11,16 +10,44 @@ from wrappers.general_selectivity.controller import (
 
 
 class V1GeneralSelectivityInput(BaseModel):
-    reactants: str
-    product: str
-    reagents: str = ""
-    solvent: str = ""
-    mapped: bool = False
-    all_outcomes: bool = False
-    verbose: bool = True
-    mapper: Literal["Transformer", "WLN atom mapper"] = "Transformer"
-    no_map_reagents: bool = True
-    mode: Literal["GNN", "qm_GNN"] = "GNN"
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    product: str = Field(
+        description="SMILES string of product"
+    )
+    reagents: str | None = Field(
+        default="",
+        description="SMILES string of reagents"
+    )
+    solvent: str | None = Field(
+        default="",
+        description="SMILES string of solvent"
+    )
+    mapped: bool | None = Field(
+        default=False,
+        description="whether input is already atom mapped"
+    )
+    all_outcomes: bool | None = Field(
+        default=False,
+        description="whether to return all outcomes"
+    )
+    verbose: bool | None = Field(
+        default=True,
+        description="whether to return a json document"
+    )
+    mapper: Literal["Transformer", "WLN atom mapper"] | None = Field(
+        default="Transformer",
+        description="atom mapping backend"
+    )
+    no_map_reagents: bool | None = Field(
+        default=True,
+        description="do not map reagents"
+    )
+    mode: Literal["GNN", "qm_GNN"] | None = Field(
+        default="GNN",
+        description="which regioselectivity model to use"
+    )
 
 
 class V1GeneralSelectivityAsyncReturn(BaseModel):

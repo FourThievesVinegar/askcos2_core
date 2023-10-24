@@ -1,5 +1,5 @@
 from adapters import register_adapter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
 from wrappers.context_recommender.default_uncleaned import (
     ContextRecommenderInput,
@@ -22,11 +22,24 @@ def separate_names(smiles: str) -> tuple[str, str]:
 
 
 class V1ContextInput(BaseModel):
-    reactants: str
-    products: str
-    with_smiles: bool = False
-    return_scores: bool = False
-    num_results: int = 10
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    products: str = Field(
+        description="SMILES string of products"
+    )
+    with_smiles: bool = Field(
+        default=False,
+        description="whether to remove name-only predictions from results"
+    )
+    return_scores: bool = Field(
+        default=False,
+        description="whether to also return scores"
+    )
+    num_results: int = Field(
+        default=10,
+        description="max number of results to return"
+    )
 
 
 class V1ContextAsyncReturn(BaseModel):

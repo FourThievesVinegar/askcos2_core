@@ -1,28 +1,56 @@
 from adapters import register_adapter
-from pydantic import BaseModel
-from typing import Optional, Literal
+from pydantic import BaseModel, Field
+from typing import Literal
 from wrappers.registry import get_wrapper_registry
 from wrappers.forward.wldn5 import (
     ForwardWLDN5Input,
-    ForwardWLDN5Result,
     ForwardWLDN5Response
 )
 
 
 class V1ForwardInput(BaseModel):
-    reactants: str  #(str): SMILES string of reactants
-    reagents: Optional[str] = None #(str, optional): SMILES string of reagents (default='')
-    solvent: Optional[str] = None #(str, optional): SMILES string of solvent (default='')
-    training_set: Optional[str] = "uspto_500k" #(str, optional): model training set to use
-    model_version: Optional[Literal["wln_forward", "graph2smiles_forward_uspto_stereo",""]] = "" #(str, optional): model version to use for prediction (wln_forward (default) or graph2smiles_forward_uspto_stereo)
-    num_results: Optional[int] = 100 #(int, optional): max number of results to return (default=100)
-    atommap: Optional[bool] = False #(bool, optional): Flag to keep atom mapping from the prediction (default=False)
-    priority: Optional[int] = 1 #(int, optional): set priority for celery task (0 = low, 1 = normal (default), 2 = high)
+    reactants: str = Field(
+        description="SMILES string of reactants"
+    )
+    reagents: str | None = Field(
+        default=None,
+        description="SMILES string of reagents"
+    )
+    solvent: str | None = Field(
+        default=None,
+        description="SMILES string of solvent"
+    )
+    training_set: str | None = Field(
+        default="uspto_500k",
+        description="model training set to use"
+    )
+    model_version: Literal[
+        "wln_forward",
+        "graph2smiles_forward_uspto_stereo",
+        ""
+    ] | None = Field(
+        default="",
+        description="model version to use for prediction"
+    )
+    num_results: int | None = Field(
+        default=100,
+        description="max number of results to return"
+    )
+    atommap: bool | None = Field(
+        default=False,
+        description="Flag to keep atom mapping from the prediction"
+    )
+    priority: int | None = Field(
+        default=1,
+        description="set priority for celery task (0 = low, "
+                    "1 = normal (default), 2 = high)"
+    )
 
 
 class V1ForwardAsyncReturn(BaseModel):
     request: V1ForwardInput
     task_id: str
+
 
 class V1ForwardOutput(BaseModel):
     rank: int
@@ -34,6 +62,7 @@ class V1ForwardOutput(BaseModel):
 
 class V1ForwardResult(BaseModel):
     __root__: list[V1ForwardOutput]
+
 
 @register_adapter(
     name="v1_forward",
