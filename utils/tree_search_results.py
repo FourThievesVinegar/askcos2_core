@@ -139,7 +139,10 @@ class TreeSearchResultsController:
             )
         if result["result_state"] in ["completed", "ipp"]:
             result["_id"] = str(result["_id"])
-            result["result"] = standardize_result(result["result"])
+
+            if result["result_type"] == "tree_builder":
+                result["result"] = standardize_result(result["result"])
+
             result = TreeSearchSavedResults(**result)
 
             return result
