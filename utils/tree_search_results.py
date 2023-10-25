@@ -170,7 +170,7 @@ class TreeSearchResultsController:
             result.user = user.username
             result.shared_with = [user.username]
             result.result_type = "ipp"
-            result.result_state = "ipp"
+            result.result_state = "completed"
 
             if not result.result_id:
                 result.result_id = str(uuid.uuid4())
