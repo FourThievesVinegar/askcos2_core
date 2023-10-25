@@ -28,7 +28,7 @@ class PmiCalculatorOutput(BaseModel):
 
 
 class PmiCalculatorResponse(BaseResponse):
-    result: list[float]
+    result: list[float] | None
 
 
 @register_wrapper(
