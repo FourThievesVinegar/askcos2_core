@@ -54,6 +54,7 @@ for module, to_start in module_config["modules_to_start"].items():
 # Special treatment to route the tasks from forward and retro controllers too
 task_routes[f"askcos2_celery.tasks.forward*"] = {"queue": "forward_worker"}
 task_routes[f"askcos2_celery.tasks.retro*"] = {"queue": "retro_worker"}
+task_routes[f"askcos2_celery.tasks.tree_analysis*"] = {"queue": "tree_analysis_worker"}
 
 print(f"celery_imports: {imports}")
 print("celery_task_routes:")
