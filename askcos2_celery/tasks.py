@@ -1,5 +1,6 @@
-from celery import shared_task
+import json
 from adapters.registry import get_adapter_registry
+from celery import shared_task
 from wrappers.registry import get_wrapper_registry
 
 
@@ -157,9 +158,11 @@ def tree_analysis_task(module: str, input: dict, token: str) -> dict:
 
     # Reconstruct Input object from, and convert Output object to dict
     input = wrapper.input_class(**input)
-    response = wrapper.call_sync(input, token).dict()
+    response = wrapper.call_sync(input, token)
+    json_response = json.loads(response.body.decode("utf-8"))
+    json_response["status_code"] = response.status_code
 
-    return response
+    return json_response
 
 
 @shared_task
