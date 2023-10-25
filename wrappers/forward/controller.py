@@ -41,6 +41,7 @@ class ForwardOutput(BaseModel):
 
 
 class ForwardResult(BaseModel):
+    rank: int
     outcome: str
     score: float
     prob: float
@@ -159,15 +160,16 @@ class ForwardController(BaseWrapper):
                 normalized_scores = softmax(result_per_smi.scores)
                 result.append(
                     [{
+                        "rank": i + 1,
                         "outcome": outcome,
                         "score": score,
                         "prob": float(normalized_score),
                         "mol_wt": molecular_weight(outcome)
-                    } for outcome, score, normalized_score in zip(
+                    } for i, (outcome, score, normalized_score) in enumerate(zip(
                         result_per_smi.products,
                         result_per_smi.scores,
                         normalized_scores
-                    )]
+                    ))]
                 )
         elif backend == "wldn5":
             # list[list[dict]] -> list[list[dict]]
@@ -175,11 +177,12 @@ class ForwardController(BaseWrapper):
             for result_per_smi in wrapper_response.result:
                 result.append(
                     [{
+                        "rank": i + 1,
                         "outcome": raw_result.outcome.smiles,
                         "score": raw_result.score,
                         "prob": raw_result.prob,
                         "mol_wt": molecular_weight(raw_result.outcome.smiles)
-                    } for raw_result in result_per_smi]
+                    } for i, raw_result in enumerate(result_per_smi)]
                 )
         else:
             raise ValueError(f"Unsupported forward backend: {backend}!")
