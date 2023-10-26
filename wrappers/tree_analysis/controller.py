@@ -188,10 +188,14 @@ class TreeAnalysisController(BaseWrapper):
             )
             if not resp.status_code == 200:
                 return resp
+            status_code = 200
+
+        else:
+            status_code = 500
 
         return Response(
             content=json.dumps(output),
-            status_code=200,
+            status_code=status_code,
             media_type="application/json"
         )
 

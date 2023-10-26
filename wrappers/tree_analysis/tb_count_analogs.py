@@ -71,7 +71,7 @@ def _tb_count_analogs(
         trees = [tb_result["paths"][index]]
 
     output = {
-        "success": False,
+        "success": True,
         "error": None,
     }
 
