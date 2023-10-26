@@ -59,6 +59,10 @@ class CeleryTaskController:
                     resp["state"] = "FAILURE"
                     resp["failed"] = True
                     resp["message"] = "Task failed!"
+                elif "success" in output and not output["success"]:
+                    resp["state"] = "FAILURE"
+                    resp["failed"] = True
+                    resp["message"] = "Task failed!"
             elif state == states.FAILURE:
                 resp["output"] = str(result.result)     # This is the exception
                 status_code = 500
