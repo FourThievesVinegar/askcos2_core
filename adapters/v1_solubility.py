@@ -66,8 +66,6 @@ class V1SolubilityAdapter:
 
         return async_return
 
-    # def __call__(self, input: V1SolubilityInput) -> V1SolubilityResult:
-    #     return self.call_sync(input)
 
     @staticmethod
     def convert_input(input: V1SolubilityInput) -> LegacySolubilityInput:
@@ -77,6 +75,6 @@ class V1SolubilityAdapter:
     @staticmethod
     def convert_response(wrapper_response: LegacySolubilityResponse
                          ) -> V1SolubilityResult:
-        result = V1SolubilityResult(__root__=wrapper_response)
+        result = wrapper_response
 
         return result
