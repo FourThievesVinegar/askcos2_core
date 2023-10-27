@@ -51,7 +51,7 @@ module_config = {
 
     "atom_map_rxnmapper": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/rxnmapper.git",
-        "description": "Atom mapper based on the WLN model",
+        "description": "Wrapper around IBM RXNMapper",
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
@@ -65,7 +65,7 @@ module_config = {
 
     "atom_map_wln": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/wln.git",
-        "description": "Wrapper around IBM RXNMapper",
+        "description": "Atom mapper based on the WLN model",
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
