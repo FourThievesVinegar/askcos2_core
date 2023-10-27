@@ -343,7 +343,7 @@ class Buyables:
         if not user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="delete operation for buyables only permitted by superusers",
+                detail="upload operation for buyables only permitted by superusers",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
