@@ -38,7 +38,7 @@ class ExpandOneInput(LowerCamelAliasModel):
         description="threshold for the fast filter"
     )
     retro_rerank_backend: Literal["relevance_heuristic", "scscore"] | None = Field(
-        default="scscore",
+        default="relevance_heuristic",
         description="backend for retro rerank"
     )
     cluster_precursors: bool = Field(
