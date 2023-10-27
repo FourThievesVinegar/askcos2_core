@@ -17,6 +17,7 @@ class TemplateInput(LowerCamelAliasModel):
 
 TEMPLATE_ALIASES = {
     "bkms": "bkms_metabolic",
+    "pistachio:ringbreaker": "pistachio_ringbreaker",
     "reaxys_enzymatic": "reaxys_biocatalysis"
 }
 
