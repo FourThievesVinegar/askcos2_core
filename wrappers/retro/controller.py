@@ -161,6 +161,8 @@ class RetroController(BaseWrapper):
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:
+                if not result_per_smi.scores:
+                    continue
                 normalized_scores = softmax(result_per_smi.scores)
                 result.append(
                     [{
@@ -178,6 +180,8 @@ class RetroController(BaseWrapper):
             result = []
             for result_per_smi in wrapper_response.result:
                 # denominator = sum(result_per_smi.scores)  # we can re-normalize here?
+                if not result_per_smi.scores:
+                    continue
                 result.append(
                     [{
                         "outcome": outcome,
