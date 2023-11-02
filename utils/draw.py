@@ -18,7 +18,7 @@ class DrawerInput(LowerCamelAliasModel):
     transparent: bool = False
     draw_map: bool = False
     highlight: bool = False
-    reacting_atoms: list = None
+    reacting_atoms: list[float] = None
     reference: str = None
     align: bool = False
     annotate: bool = False
@@ -78,7 +78,7 @@ class Drawer:
     @staticmethod
     def get(
         query_params: Annotated[DrawerInput, Depends()],
-        reacting_atoms: Annotated[list | None, Query()] = None
+        reacting_atoms: Annotated[list[float] | None, Query()] = None
     ) -> Response:
         # hardcode; Depends() doesn't fully work with list or union fields
         # https://github.com/tiangolo/fastapi/issues/5719

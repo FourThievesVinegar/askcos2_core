@@ -4,6 +4,7 @@ import rdkit.Chem as Chem
 import rdkit.Chem.Draw as Draw
 import re
 import svgutils.transform
+import traceback as tb
 from PIL import Image
 from rdkit.Chem import rdAbbreviations, rdChemReactions, rdDepictor, rdFMCS
 from rdkit.Chem.Draw import rdMolDraw2D
@@ -535,7 +536,7 @@ def molecule_smiles_to_image(
             print(
                 "Unable to determine atom highlights using specified reacting atoms. Drawing without highlights."
             )
-            pass
+            tb.print_exc()
 
     return mol_to_image(
         mol,
