@@ -190,6 +190,8 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
+                "pistachio_23Q3",
+                "USPTO_STEREO",
                 "cas"
             ]
         }
@@ -206,6 +208,8 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
+                "pistachio_23Q3",
+                "USPTO_STEREO",
                 "cas"
             ]
         }
@@ -344,6 +348,8 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
+                "pistachio_23Q3",
+                "USPTO_FULL",
                 "cas"
             ]
         }
@@ -361,6 +367,8 @@ module_config = {
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
+                "pistachio_23Q3",
+                "USPTO_FULL",
                 "cas"
             ]
         }

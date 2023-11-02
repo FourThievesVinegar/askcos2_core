@@ -6,7 +6,7 @@ from wrappers.base import BaseResponse, BaseWrapper
 
 
 class ForwardG2SInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q3", "cas"] = Field(
+    model_name: Literal["pistachio_23Q3", "USPTO_STEREO", "cas"] = Field(
         default="pistachio_23Q3",
         description="model name for torchserve backend"
     )

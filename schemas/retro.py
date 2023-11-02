@@ -47,14 +47,16 @@ class RetroBackendOption(LowerCamelAliasModel):
         elif values["retro_backend"] == "augmented_transformer":
             if v not in [
                 "cas",
-                "pistachio_2023Q2"
+                "pistachio_2023Q2",
+                "USPTO_FULL"
             ]:
                 raise ValueError(
                     f"Unsupported retro_model_name {v} for augmented_transformer")
         elif values["retro_backend"] == "graph2smiles":
             if v not in [
                 "cas",
-                "pistachio_2023Q2"
+                "pistachio_2023Q2",
+                "USPTO_FULL"
             ]:
                 raise ValueError(
                     f"Unsupported retro_model_name {v} for graph2smiles")

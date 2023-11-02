@@ -130,13 +130,10 @@ def main():
             deployment_config = yaml.safe_load(f)
 
         # download module data, if any
-        if is_newly_cloned:
-            download_command = deployment_config["commands"].get("download", None)
-            if download_command:
-                print(f"Download command found, downloading data for {module}")
-                run_and_printchar(download_command.split(), cwd=output_dir)
-            else:
-                print(f"No download command found for {module}, skipping")
+        download_command = deployment_config["commands"].get("download", None)
+        if download_command:
+            print(f"Download command found, downloading any missing data for {module}")
+            run_and_printchar(download_command.split(), cwd=output_dir)
 
         # prepare commands for getting the images
         if enable_gpu and module_config[module]["deployment"].get("use_gpu"):
