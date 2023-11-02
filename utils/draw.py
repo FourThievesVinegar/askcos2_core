@@ -1,5 +1,5 @@
 import json
-from fastapi import Depends, Response
+from fastapi import Depends, Query, Response
 from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
 from utils import register_util
@@ -18,7 +18,7 @@ class DrawerInput(LowerCamelAliasModel):
     transparent: bool = False
     draw_map: bool = False
     highlight: bool = False
-    reacting_atoms: list[float] = None
+    reacting_atoms: list[int] = None
     reference: str = None
     align: bool = False
     annotate: bool = False
@@ -76,7 +76,14 @@ class Drawer:
         pass
 
     @staticmethod
-    def get(query_params: Annotated[DrawerInput, Depends()]) -> Response:
+    def get(
+        query_params: Annotated[DrawerInput, Depends()],
+        reacting_atoms: Annotated[list[int] | None, Query()] = None
+    ) -> Response:
+        # hardcode; Depends() doesn't fully work with list or union fields
+        # https://github.com/tiangolo/fastapi/issues/5719
+        query_params.reacting_atoms = reacting_atoms
+
         return draw(query_params.dict())
 
     @staticmethod
