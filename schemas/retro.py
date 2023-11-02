@@ -47,7 +47,7 @@ class RetroBackendOption(LowerCamelAliasModel):
         elif values["retro_backend"] == "augmented_transformer":
             if v not in [
                 "cas",
-                "pistachio_2023Q2",
+                "pistachio_23Q3",
                 "USPTO_FULL"
             ]:
                 raise ValueError(
@@ -55,7 +55,7 @@ class RetroBackendOption(LowerCamelAliasModel):
         elif values["retro_backend"] == "graph2smiles":
             if v not in [
                 "cas",
-                "pistachio_2023Q2",
+                "pistachio_23Q3",
                 "USPTO_FULL"
             ]:
                 raise ValueError(
