@@ -10,7 +10,9 @@ def get_util_registry():
     global _util_registry
     if _util_registry is None:
         default_path = "configs.module_config_full"
-        config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
         _util_registry = UtilRegistry(config_path=config_path)
         print(f"Loaded util configuration from {config_path}")
 

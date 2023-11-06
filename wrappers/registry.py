@@ -24,7 +24,9 @@ def get_wrapper_registry():
     global _wrapper_registry
     if _wrapper_registry is None:
         default_path = "configs.module_config_full"
-        config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
         _wrapper_registry = WrapperRegistry(config_path=config_path)
         print(f"Loaded wrapper configuration from {config_path}")
 

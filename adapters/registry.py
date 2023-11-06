@@ -10,7 +10,9 @@ def get_adapter_registry():
     global _adapter_registry
     if _adapter_registry is None:
         default_path = "configs.module_config_full"
-        config_path = os.environ.get("ASKCOS_CONFIG_PATH", default_path)
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
         _adapter_registry = AdapterRegistry(config_path=config_path)
         print(f"Loaded adapter configuration from {config_path}")
 

@@ -1,4 +1,3 @@
-import argparse
 import importlib
 import inspect
 import os
@@ -9,14 +8,6 @@ import yaml
 from datetime import datetime
 
 sys.path.append("")         # critical for importlib to work
-
-
-def get_parser():
-    parser = argparse.ArgumentParser("clone_repos")
-    parser.add_argument("--config", help="Path to the config file",
-                        type=str, default="configs/module_config_full.py")
-
-    return parser
 
 
 def run_and_printchar(args, cwd="."):
@@ -57,14 +48,12 @@ def main():
     if not os.path.exists(".env"):
         shutil.copy2(src=".env.example", dst=".env")
 
-    args, _ = get_parser().parse_known_args()
-    if args.config.endswith(".py"):
-        m = args.config[:-3]
-        m = m.replace("/", ".")
-        m = importlib.import_module(m)
-        module_config = getattr(m, "module_config")
-    else:
-        raise ValueError(f"Only .py configs are supported!")
+    default_path = "configs.module_config_full"
+    config_path = os.environ.get(
+        "MODULE_CONFIG_PATH", default_path
+    ).replace("/", ".").rstrip(".py")
+    print(f"Loading module_config from {config_path}")
+    module_config = importlib.import_module(config_path).module_config
     # module_config = validate(module_config) # TODO
 
     # set up the deployment directory
@@ -77,7 +66,7 @@ def main():
     if os.path.exists("./deployment/deployment_latest"):
         os.remove("./deployment/deployment_latest")
     os.symlink(os.path.basename(deployment_dir), "./deployment/deployment_latest")
-    shutil.copy2(args.config, deployment_dir)
+    shutil.copy2(os.environ.get("MODULE_CONFIG_PATH", default_path), deployment_dir)
 
     require_frontend = module_config["global"]["require_frontend"]
     runtime = module_config["global"]["container_runtime"]
@@ -119,7 +108,7 @@ def main():
             is_newly_cloned = True
 
         # load deployment config per repo, if specified
-        # FIXME: this assumes "deployment.yaml" does exist, which should be the case
+        # this assumes "deployment.yaml" does exist, which should be the case
         try:
             config_file = module_config[module]["deployment"]["deployment_config"]
         except KeyError:
