@@ -1,8 +1,12 @@
 docker:
-  cpu:
-    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
-    build: docker build -f Dockerfile -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 .
-    start: docker compose -f compose.yaml up -d app celery_workers
+  app:
+    image: ${ASKCOS_REGISTRY}/app:2.0
+    build: docker build -f Dockerfile_app -t ${ASKCOS_REGISTRY}/app:2.0 .
+    start: docker compose -f compose.yaml up -d app
+  celery:
+    image: ${ASKCOS_REGISTRY}/celery:2.0
+    build: docker build -f Dockerfile_celery -t ${ASKCOS_REGISTRY}/celery:2.0 .
+    start: docker compose -f compose.yaml up -d celery_workers
 
 singularity:
   cpu:

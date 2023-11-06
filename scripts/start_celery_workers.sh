@@ -10,7 +10,6 @@ for args in \
   10,retro_worker \
   1,site_selectivity_worker \
   10,tree_analysis_worker \
-  1,tree_optimizer_worker \
   10,tree_search_expand_one_worker \
   2,tree_search_mcts_worker; \
   do set -- $args;

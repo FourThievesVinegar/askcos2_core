@@ -14,7 +14,7 @@ services:
       - app
 
   app:
-    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    image: ${ASKCOS_REGISTRY}/app:2.0
     hostname: app
     restart: always
     env_file:
@@ -22,7 +22,6 @@ services:
     network_mode: host
     volumes:
       - "./data/db:/usr/local/askcos-data/db"
-    command: python app.py
     depends_on:
       - mongo
 
@@ -61,12 +60,11 @@ services:
     command: redis-server --port ${REDIS_PORT}
 
   celery_workers:
-    image: ${ASKCOS_REGISTRY}/askcos2_core:2.0
+    image: ${ASKCOS_REGISTRY}/celery:2.0
     restart: always
     env_file:
       - .env
     network_mode: host
-    command: sh scripts/start_celery_workers.sh
     depends_on:
       - rabbitmq
       - redis

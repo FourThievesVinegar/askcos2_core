@@ -35,3 +35,5 @@ RUN pip install \
 
 COPY . /ASKCOSv2/askcos2_core
 WORKDIR /ASKCOSv2/askcos2_core
+
+CMD ["sh", "scripts/start_celery_workers.sh"]

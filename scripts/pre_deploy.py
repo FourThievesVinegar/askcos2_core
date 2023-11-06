@@ -186,7 +186,15 @@ def main():
         core_deployment_config = yaml.safe_load(f)
 
     if image_policy == "build_all":
-        cmd = str(core_deployment_config[runtime]["cpu"]["build"])
+        cmd = str(core_deployment_config[runtime]["app"]["build"])
+        cmds = [
+            f"echo Building image for askcos2_core, runtime: {runtime}\n",
+            f"{cmd}\n",
+            "\n"
+        ]
+        cmds_get_images.extend(cmds)
+
+        cmd = str(core_deployment_config[runtime]["celery"]["build"])
         cmds = [
             f"echo Building image for askcos2_core, runtime: {runtime}\n",
             f"{cmd}\n",
@@ -196,9 +204,18 @@ def main():
     else:
         raise NotImplementedError
 
-    cmd = str(core_deployment_config[runtime]["cpu"]["start"])
+    cmd = str(core_deployment_config[runtime]["app"]["start"])
     cmds = [
-        f"echo Starting services for askcos2_core app and celery_workers, "
+        f"echo Starting services for askcos2_core app, "
+        f"runtime: {runtime}\n",
+        f"{cmd}\n",
+        "\n"
+    ]
+    cmds_start_services.extend(cmds)
+
+    cmd = str(core_deployment_config[runtime]["celery"]["start"])
+    cmds = [
+        f"echo Starting services for celery_workers, "
         f"runtime: {runtime}\n",
         f"{cmd}\n",
         "\n"
