@@ -455,7 +455,7 @@ module_config = {
             "ports_to_expose": [9732],
             "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
             "custom_prediction_url": "",
-            "timeout": 10,
+            "timeout": 60,
             "available_model_names": []
         }
     },
