@@ -123,6 +123,24 @@ class ExpandOneWrapper(BaseWrapper):
         "retrieve": ["GET"]
     }
 
+    def call_raw(self, input: ExpandOneInput) -> ExpandOneOutput:
+        cache_controller = get_util_registry().get_util(module="cache_controller")
+        try:
+            response = cache_controller.get(module_name=self.name, input=input)
+            if isinstance(response, dict):
+                response = ExpandOneOutput(**response)
+        except KeyError:
+            response = self.session_sync.post(
+                self.prediction_url,
+                json=input.dict(),
+                timeout=self.config["deployment"]["timeout"]
+            )
+            response = response.json()
+            response = ExpandOneOutput(**response)
+            cache_controller.add(module_name=self.name, input=input, response=response)
+
+        return response
+
     def call_sync(
         self,
         input: ExpandOneInput,
