@@ -66,7 +66,7 @@ class Drawer:
 
     Returns: SVG or PNG image of input SMILES
     """
-    prefixes = ["draw"]
+    prefixes = ["draw", "v2/draw"]
     methods_to_bind: dict[str, list[str]] = {
         "get": ["GET"],
         "post": ["POST"]
