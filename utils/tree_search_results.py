@@ -305,6 +305,7 @@ class TreeSearchResultsController:
 
         Method: GET
         """
+        resp = {"id": result_id, "url": None, "error": None, "message": None}
 
         user_controller = get_util_registry().get_util(module="user_controller")
         user = user_controller.get_current_user(token)
@@ -318,16 +319,22 @@ class TreeSearchResultsController:
             {"$set": {"public": True}}
         )
         if not res.matched_count:
-            content = {
-                "message": f"Result {result_id} not editable by user {user.username}!"
-            }
+            resp["error"] = f"Result {result_id} not editable by user {user.username}!"
+
             return Response(
-                content=json.dumps(content),
+                content=json.dumps(resp),
                 status_code=401,
                 media_type="application/json"
             )
         else:
-            return Response(content=f"Successfully make result public: {result_id}!")
+            resp["url"] = f"/results?shared={result_id}"
+            resp["message"] = f"Successfully make result public: {result_id}!"
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=200,
+                media_type="application/json"
+            )
 
     def unshare(self, result_id: str, token: Annotated[str, Depends(oauth2_scheme)]
                 ) -> Response:
@@ -367,6 +374,7 @@ class TreeSearchResultsController:
 
         Method: PUT
         """
+        resp = {"id": result_id, "result": None, "error": None, "message": None}
 
         user_controller = get_util_registry().get_util(module="user_controller")
         user = user_controller.get_current_user(token)
@@ -380,17 +388,39 @@ class TreeSearchResultsController:
             {"$push": {"shared_with": user.username}}
         )
         if not res.matched_count:
-            content = {
-                "message": f"Result {result_id} not found or is not public!"
-            }
+            resp["error"] = f"Result {result_id} not found or is not public!"
+
             return Response(
-                content=json.dumps(content),
+                content=json.dumps(resp),
                 status_code=404,
                 media_type="application/json"
             )
         else:
-            return Response(content=f"Successfully share result {result_id} for user: "
-                                    f"{user.username}!")
+            resp["message"] = f"Successfully share result {result_id} for user: " \
+                              f"{user.username}!"
+            result = self.retrieve(result_id=result_id, token=token)
+            resp["result"] = {
+                "id": result.result_id,
+                "state": result.result_state,
+                "description": result.description,
+                "created": result.created.strftime("%B %d, %Y %H:%M:%S %p UTC"),
+                "modified": result.modified.strftime("%B %d, %Y %H:%M:%S %p UTC"),
+                "type": result.result_type,
+                "public": result.public,
+                "tags": result.tags
+            }
+
+            if (
+                    result.result_type == "tree_builder"
+                    and result.result_state == "completed"
+            ):
+                resp["result"]["num_trees"] = result.num_trees
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=200,
+                media_type="application/json"
+            )
 
     def remove(self, result_id: str, token: Annotated[str, Depends(oauth2_scheme)]
                ) -> Response:
