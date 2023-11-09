@@ -55,7 +55,7 @@ class ContextGraphTest(unittest.TestCase):
 
         for response in [response_sync, response_async]:
             self.assertEqual(response["status_code"], 200)
-            self.assertIsInstance(response["result"], dict)
+            self.assertIsInstance(response["result"], list)
 
         # self.assertEqual(response_sync, response_async)
         # self.assertEqual(response_sync["result"][0], response_async["result"][0])

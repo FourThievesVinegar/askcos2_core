@@ -57,7 +57,7 @@ class ContextRecommenderWrapper(BaseWrapper):
 
         return task_id
 
-    async def retrieve(self, task_id: str) -> ContextRecommenderGraphOutput | None:
+    async def retrieve(self, task_id: str) -> ContextRecommenderGraphResponse | None:
         return await super().retrieve(task_id=task_id)
 
     @staticmethod
