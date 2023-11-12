@@ -33,7 +33,7 @@ class TreeSearchSavedResults(BaseModel):
     revision: int = 0
 
     target_smiles: str | None = None
-    num_trees: int = 0
+    num_trees: int | None = 0
 
     public: bool = False
     shared_with: list[str] = Field(default_factory=list)

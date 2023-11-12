@@ -129,12 +129,20 @@ def calculate_path_metadata(paths, graph):
         root_id = [v for v, d in path.in_degree() if d == 0][0]
         first_reaction_id = next(path.successors(root_id))
         first_reaction_smiles = path.nodes[first_reaction_id]["smiles"]
-        path.graph["first_step_score"] = graph.nodes[first_reaction_smiles][
-            "rxn_score_from_model"
-        ]
-        path.graph["first_step_plausibility"] = graph.nodes[first_reaction_smiles][
-            "plausibility"
-        ]
+
+        try:
+            path.graph["first_step_score"] = graph.nodes[first_reaction_smiles][
+                "rxn_score_from_model"
+            ]
+        except KeyError:
+            # for backward compatibility wit V1-imported results
+            path.graph["first_step_score"] = graph.nodes[first_reaction_smiles][
+                "template_score"
+            ]
+
+        path.graph["first_step_plausibility"] = graph.nodes[first_reaction_smiles].get(
+            "plausibility", 0.0
+        )
 
         all_reaction_ids = (
             n for n, d in path.nodes(data=True) if d["type"] == "reaction"
@@ -143,13 +151,27 @@ def calculate_path_metadata(paths, graph):
         all_reactions = [graph.nodes[smi] for smi in all_reaction_smiles]
         num_reactions = len(all_reactions)
         path.graph["num_reactions"] = num_reactions
-        path.graph["avg_score"] = (
-            sum(r["rxn_score_from_model"] for r in all_reactions) / num_reactions
-        )
+
+        try:
+            path.graph["avg_score"] = (
+                sum(r["rxn_score_from_model"] for r in all_reactions) / num_reactions
+            )
+        except KeyError:
+            # for backward compatibility wit V1-imported results
+            path.graph["avg_score"] = (
+                sum(r["template_score"] for r in all_reactions) / num_reactions
+            )
+
         path.graph["avg_plausibility"] = (
             sum(r["plausibility"] for r in all_reactions) / num_reactions
         )
-        path.graph["min_score"] = min(r["rxn_score_from_model"] for r in all_reactions)
+
+        try:
+            path.graph["min_score"] = min(r["rxn_score_from_model"] for r in all_reactions)
+        except KeyError:
+            # for backward compatibility wit V1-imported results
+            path.graph["min_score"] = min(r["template_score"] for r in all_reactions)
+
         path.graph["min_plausibility"] = min(r["plausibility"] for r in all_reactions)
 
         if "depth" not in path.graph:
