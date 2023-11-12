@@ -2,11 +2,14 @@ import json
 import traceback as tb
 from fastapi import Response
 from pydantic import BaseModel
+from rdchiral.initialization import rdchiralReactants, rdchiralReaction
+from rdchiral.main import rdchiralRun
 from rdkit import Chem
 from rdkit.Chem import Descriptors, rdDepictor
 from typing import Any
 from utils import register_util
 from utils.draw_impl import align_molecule
+from utils.registry import get_util_registry
 
 
 class SmilesInput(BaseModel):
@@ -64,7 +67,9 @@ class RDKitUtil:
         "canonicalize": ["POST"],
         "validate": ["POST"],
         "from_molfile": ["POST"],
-        "to_molfile": ["POST"]
+        "to_molfile": ["POST"],
+        "apply_one_template": ["POST"],
+        "apply_one_template_by_idx": ["POST"]
     }
 
     def __init__(self, util_config: dict[str, Any] = None):
@@ -235,3 +240,40 @@ class RDKitUtil:
             status_code=200,
             media_type="application/json"
         )
+
+    @staticmethod
+    def apply_one_template(smiles: str, reaction_smarts: str) -> str:
+        reaction_smarts_one = "(" + reaction_smarts.replace(">>", ")>>(") + ")"
+        rxn = rdchiralReaction(str(reaction_smarts_one))
+        prod = rdchiralReactants(smiles)
+
+        try:
+            reactants = rdchiralRun(rxn, prod, return_mapped=False)
+        except:
+            return ""
+
+        if not reactants:
+            return ""
+
+        reactant = reactants[0]
+
+        return reactant
+
+    def apply_one_template_by_idx(
+        self,
+        smiles: str,
+        template_idx: str,
+        template_set: str
+    ) -> str:
+        template_controller = get_util_registry().get_util(module="template")
+        reaction_smarts = template_controller.find_one_by_id(
+            _id=template_idx
+        )["reaction_smarts"]
+
+        try:
+            return self.apply_one_template(
+                smiles=smiles,
+                reaction_smarts=reaction_smarts
+            )
+        except:
+            return ""
