@@ -1,7 +1,7 @@
 import io
 import json
 import pandas as pd
-from fastapi import Depends, Form, HTTPException, Response, status, UploadFile
+from fastapi import Depends, Form, HTTPException, Query, Response, status, UploadFile
 from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
@@ -89,7 +89,7 @@ class Buyables:
     def list_buyables(
         self,
         query_params: Annotated[SearchInput, Depends()],
-        source: str = None
+        source: Annotated[list[str] | None, Query()] = None
     ) -> SearchResponse:
         # hardcode; Depends() doesn't fully work with list or union fields
         # https://github.com/tiangolo/fastapi/issues/5719
