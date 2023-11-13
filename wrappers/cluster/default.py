@@ -15,7 +15,7 @@ class ClusterInput(LowerCamelAliasModel):
         example=["CCC.CCC", "CCCC.CC"]
     )
     feature: Literal["original", "outcomes", "all"] = "original"
-    cluster_method: Literal["kmeans", "hdbscan", "rxn_class"] = "kmeans"
+    cluster_method: Literal["kmeans", "hdbscan", "rxn_class"] = "rxn_class"
     fp_type: Literal["morgan"] = Field(
         default="morgan",
         description="fingerprint type"
