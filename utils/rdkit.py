@@ -262,12 +262,13 @@ class RDKitUtil:
     def apply_one_template_by_idx(
         self,
         smiles: str,
-        template_idx: str,
+        template_idx: int,
         template_set: str
     ) -> str:
         template_controller = get_util_registry().get_util(module="template")
-        reaction_smarts = template_controller.find_one_by_id(
-            _id=template_idx
+        reaction_smarts = template_controller.find_one_by_idx(
+            template_idx=template_idx,
+            template_set=template_set
         )["reaction_smarts"]
 
         try:

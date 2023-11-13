@@ -55,6 +55,14 @@ class Template:
 
         return transform
 
+    def find_one_by_idx(self, template_idx: int, template_set: str) -> dict | None:
+        transform = self.collection.find_one({
+            "index": template_idx,
+            "template_set": template_set
+        })
+
+        return transform
+
     def retrieve(self, pk: str) -> Response:
         """Return single template entry by mongo _id."""
         resp = {"error": None, "template": None}
