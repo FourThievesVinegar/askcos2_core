@@ -23,6 +23,11 @@ class MolfileInput(BaseModel):
     isomericSmiles: bool = True
 
 
+class RDKitAsyncReturn(BaseModel):
+    request: dict
+    task_id: str
+
+
 def molecular_weight(smiles: str) -> float:
     """
     Calculate exact molecular weight for the given SMILES string
@@ -242,7 +247,7 @@ class RDKitUtil:
         )
 
     @staticmethod
-    def apply_one_template(smiles: str, reaction_smarts: str) -> str:
+    def apply_one_template(smiles: str, reaction_smarts: str) -> list[str]:
         reaction_smarts_one = "(" + reaction_smarts.replace(">>", ")>>(") + ")"
         rxn = rdchiralReaction(str(reaction_smarts_one))
         prod = rdchiralReactants(smiles)
@@ -250,21 +255,19 @@ class RDKitUtil:
         try:
             reactants = rdchiralRun(rxn, prod, return_mapped=False)
         except:
-            return ""
+            return []
 
         if not reactants:
-            return ""
+            return []
 
-        reactant = reactants[0]
+        return reactants
 
-        return reactant
-
-    def apply_one_template_by_idx(
+    def apply_one_template_by_idx_sync(
         self,
         smiles: str,
         template_idx: int,
         template_set: str
-    ) -> str:
+    ) -> list[str]:
         template_controller = get_util_registry().get_util(module="template")
         reaction_smarts = template_controller.find_one_by_idx(
             template_idx=template_idx,
@@ -277,4 +280,29 @@ class RDKitUtil:
                 reaction_smarts=reaction_smarts
             )
         except:
-            return ""
+            return []
+
+    @staticmethod
+    async def apply_one_template_by_idx(
+        smiles: str,
+        template_idx: int,
+        template_set: str,
+        priority: int = 0
+    ) -> RDKitAsyncReturn:
+        from askcos2_celery.tasks import rdkit_apply_one_template_by_idx_task
+
+        async_result = rdkit_apply_one_template_by_idx_task.apply_async(
+            args=(smiles, template_idx, template_set), priority=priority)
+        task_id = async_result.id
+
+        request = {
+            "smiles": smiles,
+            "template_idx": template_idx,
+            "template_set": template_set
+        }
+        async_return = RDKitAsyncReturn(
+            request=request,
+            task_id=task_id
+        )
+
+        return async_return

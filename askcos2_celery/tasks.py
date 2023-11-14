@@ -1,6 +1,7 @@
 import json
 from adapters.registry import get_adapter_registry
 from celery import shared_task
+from utils.registry import get_util_registry
 from wrappers.registry import get_wrapper_registry
 
 
@@ -185,5 +186,32 @@ def tree_search_mcts_task(module: str, input: dict, token: str) -> dict:
     # Reconstruct Input object from, and convert Output object to dict
     input = wrapper.input_class(**input)
     response = wrapper.call_sync(input, token).dict()
+
+    return response
+
+
+@shared_task
+def rdkit_apply_one_template_by_idx_task(
+    smiles: str,
+    template_idx: int,
+    template_set: str
+) -> list[dict]:
+    """Celery tasks must have json serializable inputs/outputs"""
+    util = get_util_registry().get_util(module="rdkit")
+
+    reactants = util.apply_one_template_by_idx_sync(
+        smiles=smiles,
+        template_idx=template_idx,
+        template_set=template_set
+    )
+
+    response = [
+        {
+            "smiles": smiles,
+            "template_idx": template_idx,
+            "precursors": reactant.split("."),
+            "ffscore": 0.99
+        } for reactant in reactants
+    ]
 
     return response
