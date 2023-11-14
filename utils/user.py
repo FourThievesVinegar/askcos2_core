@@ -29,6 +29,7 @@ class UserController:
     methods_to_bind: dict[str, list[str]] = {
         "register": ["POST"],
         "update": ["POST"],
+        "reset_password": ["POST"],
         "delete": ["DELETE"],
         "enable": ["GET"],
         "disable": ["GET"],
@@ -113,7 +114,6 @@ class UserController:
     def update(
         self,
         username: str,
-        password: str,
         email: str = None,
         full_name: str = None,
         disabled: bool = False,
@@ -127,11 +127,10 @@ class UserController:
                 detail="update operation only permitted by superusers",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        hashed_password = pwd_context.hash(password)
+
         self.collection.update_one(
             {"username": username},
             {"$set": {
-                "hashed_password": hashed_password,
                 "email": email,
                 "full_name": full_name,
                 "disabled": disabled,
@@ -140,6 +139,30 @@ class UserController:
         )
 
         return Response(content=f"Successfully update records for {username}!")
+
+    def reset_password(
+        self,
+        username: str,
+        password: str,
+        token: Annotated[str, Depends(oauth2_scheme)] = None
+    ) -> Response:
+        user = self.get_current_user(token)
+        if user.username == user or user.is_superuser:
+            hashed_password = pwd_context.hash(password)
+            self.collection.update_one(
+                {"username": username},
+                {"$set": {
+                    "hashed_password": hashed_password
+                }}
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="password reset only permitted by the owner or superusers",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return Response(content=f"Successfully reset the password for {username}!")
 
     def delete(
         self,
