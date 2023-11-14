@@ -29,7 +29,7 @@ class TreeSearchSavedResults(BaseModel):
     tags: list[str] | str | None = Field(default_factory=list)
     check_date: str | None = None
     result_state: constr(max_length=64) = None
-    result_type: Literal["tree_builder", "ipp"] = "tree_builder"
+    result_type: str = "tree_builder"
     revision: int = 0
 
     target_smiles: str | None = None
