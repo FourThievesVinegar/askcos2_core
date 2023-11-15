@@ -8,10 +8,11 @@ services:
       - './askcos.ssl.cert:/etc/ssl/certs/askcos.ssl.cert'
       - './askcos.ssl.key:/etc/ssl/private/askcos.ssl.key'
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     depends_on:
       - app
+      - celery_workers
 
   app:
     image: ${ASKCOS_REGISTRY}/app:2.0

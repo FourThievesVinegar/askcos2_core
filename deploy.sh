@@ -172,14 +172,28 @@ diff-env() {
   fi
 }
 
-copy-https-conf() {
-  echo "Using https nginx configuration."
-  cp nginx.https.conf nginx.conf
-  echo
-  # Create SSL
+copy-nginx-conf() {
+  # always create the cert if not exist, even for http
+  # the cert and key files are volume mapped by docker compose, so creating them as files is more idiot-proof
+  # otherwise they might be created as directories
   if [ ! -f "askcos.ssl.cert" ]; then
-    echo "Creating SSL certificates."
+    echo "Creating self-signed SSL certificates."
     openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=US/ST=MA/L=BOS/O=askcos/CN=askcos.$RANDOM.com" -keyout askcos.ssl.key -out askcos.ssl.cert
+    echo
+  fi
+
+  if [ -f "nginx.conf" ]; then
+    echo "Found nginx config at ./nginx.conf"
+    return
+  fi
+
+  if [ "$PROTOCOL" = "http" ]; then
+    echo "Using default http nginx configuration."
+    cp nginx.http.conf nginx.conf
+    echo
+  elif [ "$PROTOCOL" = "https" ]; then
+    echo "Using default https nginx configuration."
+    cp nginx.https.conf nginx.conf
     echo
   fi
 }
@@ -387,21 +401,6 @@ seed-db() {
   echo
 }
 
-generate-deployment-scripts-in-docker() {
-  if [ -z "${ASKCOS_REGISTRY}" ]; then
-    export ASKCOS_REGISTRY=registry.gitlab.com/mlpds_mit/askcosv2
-  fi
-
-  echo "Building image for askcos2_core, runtime: docker"
-  docker build -f Dockerfile -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 .
-
-  docker run --rm \
-    -e ASKCOS2_CORE_DIR="$PWD" \
-    -v "${PWD%/*}":/ASKCOSv2 \
-    -t ${ASKCOS_REGISTRY}/askcos2_core:2.0 \
-    python scripts/pre_deploy.py
-}
-
 generate-deployment-scripts() {
   python scripts/pre_deploy.py
 }
@@ -460,7 +459,7 @@ backup() {
   mkdir -p "${BACKUP_DIR}"
   echo "Backing up data to ${BACKUP_DIR}"
   echo "This may take a few minutes..."
-  export_volume mongo_data "${BACKUP_DIR}" mongo_data.tar.gz
+  export_volume askcosv2_mongo_data "${BACKUP_DIR}" mongo_data.tar.gz
   echo "Backup complete."
 }
 
@@ -470,7 +469,7 @@ restore() {
   fi
   echo "Restoring data from ${BACKUP_DIR}"
   echo "This may take a few minutes..."
-  import_volume mongo_data "${BACKUP_DIR}" mongo_data.tar.gz
+  import_volume askcosv2_mongo_data "${BACKUP_DIR}" mongo_data.tar.gz
   echo "Restore complete."
 }
 
@@ -502,7 +501,7 @@ else
         $arg
         ;;
       pre-deploy)
-        copy-https-conf
+        copy-nginx-conf
         diff-env
         generate-deployment-scripts
         get-images
@@ -512,7 +511,7 @@ else
         ;;
       deploy)
         # Normal first deployment, do everything (pre-deploy + start-backend-services)
-        copy-https-conf
+        copy-nginx-conf
         diff-env
         generate-deployment-scripts
         get-images
@@ -523,7 +522,7 @@ else
         ;;
       update)
         # Update an existing configuration, database seeding is not performed
-        copy-https-conf
+        copy-nginxnginxnginx-conf
         diff-env
         generate-deployment-scripts
         get-images
