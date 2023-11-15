@@ -19,7 +19,6 @@ module_config = {
         "reaction_classification": True,
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
-        "retro_graph2smiles": True,
         "scscore": True,
         "site_selectivity": True,
         "tree_search_expand_one": True,
@@ -342,24 +341,6 @@ module_config = {
             "use_gpu": False,
             "ports_to_expose": [9420, 9421, 9422],
             "default_prediction_url": "http://0.0.0.0:9420/predictions",
-            "custom_prediction_url": "",
-            "timeout": 10,
-            "available_model_names": [
-                "pistachio_23Q3",
-                "USPTO_FULL"
-            ]
-        }
-    },
-
-    "retro_graph2smiles": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/graph2smiles.git",
-        "description":
-            "One-step retrosynthesis model using the Graph2SMILES model",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "use_gpu": False,
-            "ports_to_expose": [9430, 9431, 9432],
-            "default_prediction_url": "http://0.0.0.0:9430/predictions",
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": [
