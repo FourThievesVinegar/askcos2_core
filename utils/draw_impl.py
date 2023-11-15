@@ -113,7 +113,7 @@ def get_scaled_drawer(mol, svg=True, transparent=True, padding=1.0, options=None
     xrange, yrange = get_size(mol)
 
     # Lower bound on size for small molecules
-    xrange = max(xrange, 1.5 + 0.75 * xrange) + padding
+    xrange = max(xrange, 1.5 + 0.75 * xrange) + padding + 2.0
     yrange = max(yrange, 1.5) + padding
     # print(xrange, yrange)
 
