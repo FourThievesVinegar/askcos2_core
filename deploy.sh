@@ -498,9 +498,9 @@ else
   for arg in "$@"
   do
     case "$arg" in
-      clean-data | start-db-services | save-db | seed-db | copy-https-conf | pull-images | \
+      clean-data | start-db-services | save-db | seed-db | copy-nginx-conf | pull-images | \
       start-web-services | start-ml-servers | start-celery-workers | set-db-defaults | count-mongo-docs | \
-      backup | restore | index-db | diff-env | post-update-message | old-messages | start-cpp-treebuilder-experimental )
+      backup | restore | index-db | diff-env | post-update-message | old-messages )
         # This is a defined function, so execute it
         $arg
         ;;
@@ -526,7 +526,7 @@ else
         ;;
       update)
         # Update an existing configuration, database seeding is not performed
-        copy-nginxnginxnginx-conf
+        copy-nginx-conf
         diff-env
         generate-deployment-scripts
         get-images
