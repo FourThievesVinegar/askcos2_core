@@ -32,7 +32,8 @@ class UserController:
         "delete": ["DELETE"],
         "enable": ["GET"],
         "disable": ["GET"],
-        "get_all_users": ["GET"]
+        "get_all_users": ["GET"],
+        "am_i_superuser": ["GET"]
     }
 
     def __init__(self, util_config: dict[str, Any]):
@@ -79,6 +80,12 @@ class UserController:
             raise HTTPException(status_code=400, detail="Disabled user")
 
         return user
+
+    def am_i_superuser(self, token: Annotated[str, Depends(oauth2_scheme)]
+                      ) -> bool:
+        user = self.get_current_user(token=token)
+
+        return user.is_superuser
 
     def register(
         self,
