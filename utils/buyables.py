@@ -19,6 +19,7 @@ class Buyable(BaseModel):
     id: str = Field(default=None, alias="_id")
     smiles: str = None
     ppg: float = 0.0
+    lead_time: str = None
     source: str = ""
     properties: list[BuyableProperty] = None
 

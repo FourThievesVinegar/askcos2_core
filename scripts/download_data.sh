@@ -10,6 +10,20 @@ if [ ! -f ./data/db/buyables/buyables.json.gz ]; then
     echo "buyables.json.gz Downloaded."
 fi
 
+if [ ! -f ./data/db/buyables/chembridge_buyables.json.gz ]; then
+    echo "./data/db/buyables/chembridge_buyables.json.gz not found. Downloading.."
+    wget -q --show-progress -O data/db/buyables/chembridge_buyables.json.gz \
+      "https://www.dropbox.com/scl/fi/gd4sxio01q9nnmgvg1qzk/chembridge_buyables.json.gz?rlkey=8kg181gyckgorlip41w79k31l&dl=1"
+    echo "chembridge_buyables.json.gz Downloaded."
+fi
+
+if [ ! -f ./data/db/buyables/mcule_buyables_fd2.json.gz ]; then
+    echo "./data/db/buyables/mcule_buyables_fd2.json.gz not found. Downloading.."
+    wget -q --show-progress -O data/db/buyables/mcule_buyables_fd2.json.gz \
+      "https://www.dropbox.com/scl/fi/3hinak5xhxxbnd7p8uha4/mcule_buyables_fd2.json.gz?rlkey=fuupri57oophxkn9widmmc1od&dl=1"
+    echo "mcule_buyables_fd2.json.gz Downloaded."
+fi
+
 mkdir -p ./data/db/historian
 if [ ! -f ./data/db/historian/chemicals.json.gz ]; then
     echo "./data/db/historian/chemicals.json.gz not found. Downloading.."

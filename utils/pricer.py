@@ -166,7 +166,9 @@ class Pricer:
 
         query = {}
         tanimoto_similarities = None
-        keys_to_keep = ["_id", "smiles", "ppg", "source", "properties", "tanimoto"]
+        keys_to_keep = [
+            "_id", "smiles", "ppg", "lead_time", "source", "properties", "tanimoto"
+        ]
         db_comparison_map = {
             ">": "$gt", ">=": "$gte", "<": "$lt", "<=": "$lte", "==": "$eq"
         }
@@ -444,8 +446,9 @@ class MongoPricer:
                 # keeping only these fields. Once the mols are computed, serialization
                 # becomes an issue.
                 result = {
-                    k: v for k, v in result.items()
-                    if k in ["_id", "smiles", "ppg", "source", "properties"]
+                    k: v for k, v in result.items() if k in [
+                        "_id", "smiles", "ppg", "lead_time", "source", "properties"
+                    ]
                 }
             return result
         else:
@@ -478,7 +481,7 @@ class MongoPricer:
         for doc in cursor:
             result[str(doc.pop("_id"))] = {
                 k: v for k, v in doc.items()
-                if k in ["smiles", "ppg", "source", "properties"]
+                if k in ["smiles", "ppg", "lead_time", "source", "properties"]
             }
 
         return result
