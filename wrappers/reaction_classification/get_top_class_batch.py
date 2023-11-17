@@ -35,12 +35,33 @@ class GetTopClassBatchWrapper(BaseWrapper):
 
     def call_raw(self, input: GetTopClassBatchInput
                  ) -> GetTopClassBatchOutput:
-        response = self.session_sync.post(
-            f"{self.prediction_url}/get_top_class_batch",
-            json=input.dict(),
-            timeout=self.config["deployment"]["timeout"]
-        )
-        output = response.json()
+        minibatch_size = 5
+        minibatch_results = []
+
+        for i in range(0, len(input.smiles), minibatch_size):
+            minibatch_input = {
+                "smiles": input.smiles[i:i+minibatch_size],
+                "level": input.level,
+                "threshold": input.threshold
+            }
+            response = self.session_sync.post(
+                f"{self.prediction_url}/get_top_class_batch",
+                json=minibatch_input,
+                timeout=self.config["deployment"]["timeout"]
+            )
+            minibatch_result = response.json()["results"]
+            error = response.json()["error"]
+            status = response.json()["status"]
+
+            if error:
+                break
+            minibatch_results.extend(minibatch_result)
+
+        output = {
+            "status": status,
+            "error": error,
+            "results": minibatch_results
+        }
         output = GetTopClassBatchOutput(**output)
 
         return output
@@ -62,11 +83,20 @@ class GetTopClassBatchWrapper(BaseWrapper):
     @staticmethod
     def convert_output_to_response(output: GetTopClassBatchOutput
                                    ) -> GetTopClassBatchResponse:
-        response = {
-            "status_code": 200,
-            "message": "",
-            "result": output.results
-        }
-        response = GetTopClassBatchResponse(**response)
+        if output.status == "SUCCESS":
+            status_code = 200
+            message = ""
+            result = output.results
+        else:
+            status_code = 500
+            message = f"Backend error encountered in get_top_class_batch " \
+                      f"with the following error message {output.error}"
+            result = None
+
+        response = GetTopClassBatchResponse(
+            status_code=status_code,
+            message=message,
+            result=result
+        )
 
         return response

@@ -3,14 +3,14 @@ IFS=","
 for args in \
   2,context_recommender_worker \
   1,evaluate_reactions_worker \
-  10,forward_worker \
+  2,forward_worker \
   1,general_selectivity_worker \
   1,impurity_predictor_worker \
   1,pathway_ranker_worker \
-  10,retro_worker \
+  2,retro_worker \
   1,site_selectivity_worker \
-  10,tree_analysis_worker \
-  10,tree_search_expand_one_worker \
+  2,tree_analysis_worker \
+  2,tree_search_expand_one_worker \
   2,tree_search_mcts_worker; \
   do set -- $args;
   CONCURRENCY=$1;
