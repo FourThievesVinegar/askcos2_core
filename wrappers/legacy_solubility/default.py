@@ -153,7 +153,8 @@ class LegacySolubilityWrapper(BaseWrapper):
     def call_raw(self, input: LegacySolubilityInput) -> LegacySolubilityOutput:
         input_dict = {}
         for k in LegacySolubilityTask.__fields__.keys():
-            input_dict[f"{k}_list"] = [getattr(task, k) for task in input.task_list]
+            input_dict[f"{k}_list"] = [getattr(task, k) for task in input.task_list
+                                       if task.solvent]
 
         response = self.session_sync.post(
             self.prediction_url,
