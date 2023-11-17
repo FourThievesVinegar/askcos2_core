@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -7,7 +8,7 @@ from pydantic import BaseModel
 from typing import Annotated
 from utils.registry import get_util_registry
 
-SECRET_KEY = "1d21d866fe6c71df2e2ab948e3d7d6bcf369c3d0f1f99d71570dc48365856c49"
+SECRET_KEY = os.environ.get("OAUTH2_SECRET_KEY", "")
 ALGORITHM = "HS256"
 # ACCESS_TOKEN_EXPIRE_MINUTES = 60
 ACCESS_TOKEN_EXPIRE_MINUTES = 43200

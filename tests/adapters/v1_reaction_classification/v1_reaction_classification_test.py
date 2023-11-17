@@ -15,8 +15,8 @@ class V1ReactionClassificationTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
-        cls.v1_username = "askcos"
-        cls.v1_password = "MML4chem"
+        cls.v1_username = os.environ.get("V1_USERNAME", "askcos")
+        cls.v1_password = os.environ.get("V1_PASSWORD", "")
 
         cls.v1_reaction_classification_url = "https://askcos-demo.mit.edu/api/v2/reaction-classification/"
         cls.v1_celery_url = "https://askcos-demo.mit.edu/api/v2/celery/task"

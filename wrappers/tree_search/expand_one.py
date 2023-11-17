@@ -154,24 +154,32 @@ class ExpandOneWrapper(BaseWrapper):
         # banned_chemicals handling, requires login token
         if not input.banned_chemicals:
             input.banned_chemicals = []
-        banned_chemicals_controller = get_util_registry().get_util(
-            module="banned_chemicals"
-        )
-        user_banned_chemicals = banned_chemicals_controller.get(token=token).__root__
-        user_banned_chemicals = [entry.smiles for entry in user_banned_chemicals
-                                 if entry.active]
-        input.banned_chemicals.extend(user_banned_chemicals)
+
+        try:
+            banned_chemicals_controller = get_util_registry().get_util(
+                module="banned_chemicals"
+            )
+            user_banned_chemicals = banned_chemicals_controller.get(token=token).__root__
+            user_banned_chemicals = [entry.smiles for entry in user_banned_chemicals
+                                     if entry.active]
+            input.banned_chemicals.extend(user_banned_chemicals)
+        except:
+            pass
 
         # banned_chemicals handling, requires login token
         if not input.banned_reactions:
             input.banned_reactions = []
-        banned_reactions_controller = get_util_registry().get_util(
-            module="banned_reactions"
-        )
-        user_banned_reactions = banned_reactions_controller.get(token=token).__root__
-        user_banned_reactions = [entry.smiles for entry in user_banned_reactions
-                                 if entry.active]
-        input.banned_reactions.extend(user_banned_reactions)
+
+        try:
+            banned_reactions_controller = get_util_registry().get_util(
+                module="banned_reactions"
+            )
+            user_banned_reactions = banned_reactions_controller.get(token=token).__root__
+            user_banned_reactions = [entry.smiles for entry in user_banned_reactions
+                                     if entry.active]
+            input.banned_reactions.extend(user_banned_reactions)
+        except:
+            pass
 
         # actual backend call
         output = self.call_raw(input=input)

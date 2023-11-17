@@ -1,6 +1,9 @@
+import os
+import uuid
 from configs import db_config
 from fastapi import Depends, HTTPException, Response, status
 from jose import JWTError, jwt
+from keycloak import KeycloakOpenID
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
 from typing import Annotated, Any
@@ -34,6 +37,9 @@ class UserController:
         "enable": ["GET"],
         "disable": ["GET"],
         "get_all_users": ["GET"],
+        "get_current_user": ["GET"],
+        "promote": ["GET"],
+        "demote": ["GET"],
         "am_i_superuser": ["GET"]
     }
 
@@ -57,10 +63,38 @@ class UserController:
             self.collection = self.client[database][collection]
             self.db = self.client[database]
 
-    def get_user_by_name(self, username: str) -> User:
+        # create default admin account if there's none
+        users = self.collection.find()
+        users = [User(**u) for u in users]
+        if not any(u.is_superuser for u in users):
+            self.register(
+                username="admin",
+                password="reallybadpassword"
+            )
+
+        server_url = os.environ.get("KEYCLOAK_SERVER_URL", "")
+        realm_name = os.environ.get("KEYCLOAK_REALM_NAME", "")
+        client_id = os.environ.get("KEYCLOAK_CLIENT_ID", "")
+        client_secret_key = os.environ.get("KEYCLOAK_CLIENT_SECRET_KEY", "")
+
+        if server_url:
+            self.keycloak_openid = KeycloakOpenID(
+                server_url=server_url,
+                realm_name=realm_name,
+                client_id=client_id,
+                client_secret_key=client_secret_key
+            )
+            self.keycloak_public_key = "-----BEGIN PUBLIC KEY-----\n" + \
+                                       self.keycloak_openid.public_key() + \
+                                       "\n-----END PUBLIC KEY-----"
+
+    def get_user_by_name(self, username: str) -> User | None:
         query = {"username": username}
-        user = self.collection.find_one(query)
-        user = User(**user)
+        try:
+            user = self.collection.find_one(query)
+            user = User(**user)
+        except:
+            user = None
 
         return user
 
@@ -70,20 +104,45 @@ class UserController:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
-                raise credentials_exception
-        except JWTError:
-            raise credentials_exception
+                raise JWTError
+            user = self.get_user_by_name(username=username)
 
-        user = self.get_user_by_name(username=username)
+        except JWTError:
+            # second try for keycloak
+            try:
+                options = {
+                    "verify_signature": True,
+                    "verify_aud": False,
+                    "verify_exp": False
+                }
+                token_info = self.keycloak_openid.decode_token(
+                    token=token,
+                    key=self.keycloak_public_key,
+                    options=options
+                )
+                username = token_info["preferred_username"] + "_sso"
+                user = self.get_user_by_name(username=username)
+                # automatically register in mongo if user doesn't exist
+                if user is None:
+                    self.register(
+                        username=username,
+                        password=str(uuid.uuid4())
+                    )
+                    user = self.get_user_by_name(username=username)
+
+            except:
+                raise credentials_exception
+
         if user is None:
             raise credentials_exception
+
         if user.disabled:
             raise HTTPException(status_code=400, detail="Disabled user")
 
         return user
 
     def am_i_superuser(self, token: Annotated[str, Depends(oauth2_scheme)]
-                      ) -> bool:
+                       ) -> bool:
         user = self.get_current_user(token=token)
 
         return user.is_superuser
@@ -124,26 +183,25 @@ class UserController:
         email: str = None,
         full_name: str = None,
         disabled: bool = False,
-        is_superuser: bool = False,
         token: Annotated[str, Depends(oauth2_scheme)] = None
     ) -> Response:
         user = self.get_current_user(token)
-        if not user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="update operation only permitted by superusers",
-                headers={"WWW-Authenticate": "Bearer"},
+        if user.username == username or user.is_superuser:
+            self.collection.update_one(
+                {"username": username},
+                {"$set": {
+                    "email": email,
+                    "full_name": full_name,
+                    "disabled": disabled
+                }}
             )
 
-        self.collection.update_one(
-            {"username": username},
-            {"$set": {
-                "email": email,
-                "full_name": full_name,
-                "disabled": disabled,
-                "is_superuser": is_superuser
-            }}
-        )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="update operation only permitted by the owner superusers",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
         return Response(content=f"Successfully update records for {username}!")
 
@@ -154,7 +212,7 @@ class UserController:
         token: Annotated[str, Depends(oauth2_scheme)] = None
     ) -> Response:
         user = self.get_current_user(token)
-        if user.username == user or user.is_superuser:
+        if user.username == username or user.is_superuser:
             hashed_password = pwd_context.hash(password)
             self.collection.update_one(
                 {"username": username},
@@ -171,16 +229,62 @@ class UserController:
 
         return Response(content=f"Successfully reset the password for {username}!")
 
+    def promote(
+        self,
+        username: str,
+        token: Annotated[str, Depends(oauth2_scheme)] = None
+    ) -> Response:
+        user = self.get_current_user(token)
+        if user.is_superuser:
+            self.collection.update_one(
+                {"username": username},
+                {"$set": {
+                    "is_superuser": True
+                }}
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="make superuser only permitted by superusers",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return Response(content=f"Successfully reset the password for {username}!")
+
+    def demote(
+        self,
+        username: str,
+        token: Annotated[str, Depends(oauth2_scheme)] = None
+    ) -> Response:
+        user = self.get_current_user(token)
+        if user.is_superuser:
+            self.collection.update_one(
+                {"username": username},
+                {"$set": {
+                    "is_superuser": False
+                }}
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="remove superuser only permitted by superusers",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return Response(content=f"Successfully reset the password for {username}!")
+
     def delete(
         self,
         username: str,
         token: Annotated[str, Depends(oauth2_scheme)]
     ) -> Response:
         user = self.get_current_user(token)
-        if not user.is_superuser:
+        if user.username == username or user.is_superuser:
+            self.collection.delete_one({"username": username})
+        else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="delete operation only permitted by superusers",
+                detail="delete operation only permitted by the owner or superusers",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         self.collection.delete_one({"username": username})
