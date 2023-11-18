@@ -106,9 +106,17 @@ class V1GeneralSelectivityAdapter:
         else:
             raise ValueError(f"Unsupported mode {input.mode}")
 
+        spectator = ""
+        if input.reagents and input.solvent:
+            spectator = f"{input.reagents}.{input.solvent}"
+        elif input.reagents:
+            spectator = input.reagents
+        elif input.solvent:
+            spectator = input.solvent
+
         wrapper_input = GeneralSelectivityInput(
             backend=backend,
-            smiles=input.reactants + ">" + input.reagents + ">" + input.product,
+            smiles=f"{input.reactants}>{spectator}>{input.product}",
             atom_map_backend=atom_map_backend,
             mapped=input.mapped,
             all_outcomes=input.all_outcomes,
@@ -122,7 +130,8 @@ class V1GeneralSelectivityAdapter:
                          ) -> V1GeneralSelectivityResult:
         if not wrapper_response.status_code == 200:
             # reverse parse the exception in string format
-            e = eval(wrapper_response.message.split("\n")[-3].strip())
+            e = wrapper_response.message.split("\n")[-2].strip()
+
             raise ValueError(e)
 
         result = wrapper_response.result
