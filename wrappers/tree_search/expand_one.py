@@ -87,7 +87,9 @@ class RetroResult(BaseModel):
     group_name: str | None
     mapped_smiles: str | None
     reacting_atoms: list[int] | None
+
     selec_error: bool | None
+    outcomes: str | None
     mapped_outcomes: str | None
     mapped_precursors: str | None
 
