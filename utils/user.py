@@ -24,6 +24,7 @@ class User(BaseModel):
     full_name: str | None = None
     disabled: bool = False
     is_superuser: bool = False
+    last_login: str | None = None
 
 
 @register_util(name="user_controller")
@@ -204,6 +205,20 @@ class UserController:
             )
 
         return Response(content=f"Successfully update records for {username}!")
+
+    def update_last_login(
+        self,
+        username: str,
+        last_login: str,
+    ) -> Response:
+        self.collection.update_one(
+            {"username": username},
+            {"$set": {
+                "last_login": last_login
+            }}
+        )
+
+        return Response(content=f"Successfully reset the password for {username}!")
 
     def reset_password(
         self,

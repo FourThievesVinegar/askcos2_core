@@ -66,6 +66,12 @@ async def login_for_access_token(
             detail="Incorrect password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    user_controller.update_last_login(
+        username=user.username,
+        last_login=datetime.strftime(datetime.now(), "%Y-%m-%dT%H:%M:%S.%fZ")
+    )
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username},
