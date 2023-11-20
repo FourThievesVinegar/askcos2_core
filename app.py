@@ -1,8 +1,10 @@
 import os
 import uvicorn
 from adapters.registry import get_adapter_registry
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter as FastAPIRouter
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Any, Callable
 from utils import oauth2
 from utils.registry import get_util_registry
 from wrappers.registry import get_wrapper_registry
@@ -10,6 +12,34 @@ from wrappers.registry import get_wrapper_registry
 adapter_registry = get_adapter_registry()
 util_registry = get_util_registry()
 wrapper_registry = get_wrapper_registry()
+
+
+class APIRouter(FastAPIRouter):
+    def add_api_route(
+        self,
+        path: str,
+        endpoint: Callable,
+        *,
+        include_in_schema: bool = True,
+        **kwargs: Any
+    ) -> None:
+        if path.endswith("/"):
+            path = path[:-1]
+
+        super().add_api_route(
+            path=path,
+            endpoint=endpoint,
+            include_in_schema=include_in_schema,
+            **kwargs
+        )
+
+        alternate_path = path + "/"
+        super().add_api_route(
+            path=alternate_path,
+            endpoint=endpoint,
+            include_in_schema=False,
+            **kwargs
+        )
 
 
 app = FastAPI(
