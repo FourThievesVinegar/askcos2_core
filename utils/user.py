@@ -69,8 +69,9 @@ class UserController:
         users = [User(**u) for u in users]
         if not any(u.is_superuser for u in users):
             self.register(
-                username="admin",
-                password="reallybadpassword"
+                username="askcos_admin",
+                password="reallybadpassword",
+                is_superuser=True
             )
 
         server_url = os.environ.get("KEYCLOAK_SERVER_URL", "")

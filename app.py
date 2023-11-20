@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from adapters.registry import get_adapter_registry
 from fastapi import APIRouter, FastAPI
@@ -83,7 +84,7 @@ for adapter in adapter_registry:
     prefix_with_hyphen = adapter.prefix.replace("_", "-")
     router = APIRouter(prefix=f"/api/{prefix_with_hyphen}")
     if adapter.name in ["v1_celery_task"]:
-        path = "/{task_id}"
+        path = "/{task_id}/"
     else:
         path = "/"
     include_in_schema = adapter.name not in ["v1_descriptors"]
@@ -133,4 +134,10 @@ for util in util_registry:
         app.include_router(router)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=9100)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=9100,
+        ssl_certfile=os.environ.get("ASKCOS_SSL_CERT_FILE"),
+        ssl_keyfile=os.environ.get("ASKCOS_SSL_KEY_FILE")
+    )
