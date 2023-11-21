@@ -155,9 +155,16 @@ class UserController:
         password: str,
         email: str = None,
         full_name: str = None,
-        disabled: bool = False,
-        is_superuser: bool = False
+        disabled: bool = False
     ) -> Response:
+        if not username.replace('_', '').isalnum():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid username: {username}! "
+                       f"Only numbers, letters and underscores are allowed.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         if self.collection.find_one({"username": username}):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -172,7 +179,7 @@ class UserController:
             "email": email,
             "full_name": full_name,
             "disabled": disabled,
-            "is_superuser": is_superuser
+            "is_superuser": False
         }
         User(**doc)         # data validation, if any
         self.collection.insert_one(doc)
