@@ -88,8 +88,11 @@ class LegacySolubilityOutput(BaseModel):
     uncertainty_log_s_298: list[str | float | None] = Field(
         alias="uncertainty logS298 [log10(mol/L)]")
     dh_solv_298: list[str | float | None] = Field(alias="dHsolv298 [kcal/mol]")
+    dg_solv_298: list[str | float | None] = Field(alias="dGsolv298 [kcal/mol]")
     uncertainty_dh_solv_298: list[str | float | None] = Field(
         alias="uncertainty dHsolv298 [kcal/mol]")
+    uncertainty_dg_solv_298: list[str | float | None] = Field(
+        alias="uncertainty dGsolv298 [kcal/mol]")
     E: list[str | float | None]
     S: list[str | float | None]
     A: list[str | float | None]
@@ -122,8 +125,11 @@ class LegacySolubilityResult(BaseModel):
     uncertainty_log_s_298: str | float | None = Field(
         alias="uncertainty logS298 [log10(mol/L)]")
     dh_solv_298: str | float | None = Field(alias="dHsolv298 [kcal/mol]")
+    dg_solv_298: str | float | None = Field(alias="dGsolv298 [kcal/mol]")
     uncertainty_dh_solv_298: str | float | None = Field(
         alias="uncertainty dHsolv298 [kcal/mol]")
+    uncertainty_dg_solv_298: str | float | None = Field(
+        alias="uncertainty dGsolv298 [kcal/mol]")
     E: str | float | None
     S: str | float | None
     A: str | float | None
