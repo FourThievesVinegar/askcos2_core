@@ -112,7 +112,7 @@ def draw(data: dict) -> Response:
         try:
             response = method(data)
         except Exception:
-            response = method(data)
+            continue
         else:
             return response
     else:
