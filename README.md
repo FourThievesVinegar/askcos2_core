@@ -20,7 +20,7 @@ The core FastAPI app (a.k.a. the API gateway) for ASKCOSv2. The functional modul
 
 Please note that \>= 32 GB of RAM is highly recommended for the full deployment of ASKCOS. If memory size is a constraint, please check out **04-Deployment** for customizing a local deployment (e.g., backend only, or minimalist deployment to use only the retrosynthesis functionality).
 
-## Getting started
+### Deployment commands
 
 ```shell
 $ mkdir ASKCOSv2
