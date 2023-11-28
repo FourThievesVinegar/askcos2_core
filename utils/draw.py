@@ -1,4 +1,5 @@
 import json
+import traceback as tb
 from fastapi import Depends, Query, Response
 from schemas.base import LowerCamelAliasModel
 from typing import Annotated, Any, Literal
@@ -98,7 +99,7 @@ def draw(data: dict) -> Response:
     input_type = data.get("input_type")
 
     if input_type == "chemical" or ">" not in data.get("smiles"):
-        methods = [draw_chemical]
+        methods = [draw_chemical, draw_template]
     elif input_type == "reaction":
         methods = [draw_reaction]
     elif input_type == "template":
@@ -112,6 +113,7 @@ def draw(data: dict) -> Response:
         try:
             response = method(data)
         except Exception:
+            # tb.print_exc()
             continue
         else:
             return response

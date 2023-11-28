@@ -741,6 +741,12 @@ def template_smarts_to_image(
         PIL.Image instance if svg=False and return_png=False
         bytes if svg=False and return_png=True
     """
+    substructure = False
+    if ">" not in smarts:
+        # hack to draw half-template
+        smarts = smarts + ">>"
+        substructure = True
+
     # Adjust scale and font size for clearer template drawings
     options = kwargs.get("options") or get_options(fixedBondLength=30)
     kwargs["options"] = options
@@ -759,7 +765,7 @@ def template_smarts_to_image(
 
     if highlight:
         atom_frag_map = {}
-        if retro:
+        if retro and not substructure:
             for i in range(rxn.GetNumProductTemplates()):
                 mol = rxn.GetProductTemplate(i)
                 determine_highlight_colors(mol, atom_frag_map, i)
@@ -788,7 +794,8 @@ def template_smarts_to_image(
             )
         )
 
-    images.append(draw_arrow(retro=retro, svg=svg, transparent=transparent))
+    if not substructure:
+        images.append(draw_arrow(retro=retro, svg=svg, transparent=transparent))
 
     for j in range(rxn.GetNumProductTemplates()):
         mol = rxn.GetProductTemplate(j)
