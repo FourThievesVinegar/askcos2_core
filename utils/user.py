@@ -68,10 +68,9 @@ class UserController:
         users = self.collection.find()
         users = [User(**u) for u in users]
         if not any(u.is_superuser for u in users):
-            self.register(
+            self.register_superuser(
                 username="askcos_admin",
-                password="reallybadpassword",
-                is_superuser=True
+                password="reallybadpassword"
             )
 
         server_url = os.environ.get("KEYCLOAK_SERVER_URL", "")
@@ -185,6 +184,25 @@ class UserController:
         self.collection.insert_one(doc)
 
         return Response(content=f"Successfully register user: {username}!")
+
+    def register_superuser(
+        self,
+        username: str,
+        password: str,
+    ) -> Response:
+        hashed_password = pwd_context.hash(password)
+        doc = {
+            "username": username,
+            "hashed_password": hashed_password,
+            "email": None,
+            "full_name": None,
+            "disabled": False,
+            "is_superuser": True
+        }
+        User(**doc)         # data validation, if any
+        self.collection.insert_one(doc)
+
+        return Response(content=f"Successfully register superuser: {username}!")
 
     def update(
         self,
