@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from pymongo import errors, MongoClient
 from typing import Annotated, Any
 from utils import register_util
+from utils.custom_auth import CustomAuthAPI
 from utils.oauth2 import (
     ALGORITHM,
     credentials_exception,
@@ -89,6 +90,10 @@ class UserController:
                                        self.keycloak_openid.public_key() + \
                                        "\n-----END PUBLIC KEY-----"
 
+        custom_auth_url = os.environ.get("CUSTOM_AUTH_URL")
+        if custom_auth_url:
+            self.custom_auth_api = CustomAuthAPI(custom_auth_url)
+
     def get_user_by_name(self, username: str) -> User | None:
         query = {"username": username}
         try:
@@ -132,7 +137,21 @@ class UserController:
                     user = self.get_user_by_name(username=username)
 
             except:
-                raise credentials_exception
+                # third try for custom auth
+                try:
+                    username = self.custom_auth_api.decode(token)
+                    if username is None:
+                        raise credentials_exception
+                    user = self.get_user_by_name(username=username)
+                    # automatically register in mongo if user doesn't exist
+                    if user is None:
+                        self.register(
+                            username=username,
+                            password=str(uuid.uuid4())
+                        )
+                        user = self.get_user_by_name(username=username)
+                except:
+                    raise credentials_exception
 
         if user is None:
             raise credentials_exception
