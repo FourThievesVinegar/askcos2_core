@@ -28,7 +28,9 @@ READABLE_NAMES = {
     "tree_search_expand_one_worker":
         "IPP One-Step Expansion Worker",
     "tree_search_mcts_worker":
-        "MCTS Worker (Tree Builder Coordinator equivalent)"
+        "MCTS Worker (Tree Builder Coordinator equivalent)",
+    "tree_search_retro_star_worker":
+        "Retro* Worker (Tree Builder Coordinator equivalent)"
 }
 
 # Note: cannot use guest for authenticating with broker unless on localhost

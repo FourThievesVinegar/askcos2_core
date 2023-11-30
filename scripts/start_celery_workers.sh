@@ -11,7 +11,8 @@ for args in \
   1,site_selectivity_worker \
   2,tree_analysis_worker \
   2,tree_search_expand_one_worker \
-  2,tree_search_mcts_worker; \
+  2,tree_search_mcts_worker \
+  2,tree_search_retro_star_worker; \
   do set -- $args;
   CONCURRENCY=$1;
   QUEUE_NAME=$2;
