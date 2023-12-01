@@ -191,6 +191,18 @@ def tree_search_mcts_task(module: str, input: dict, token: str) -> dict:
 
 
 @shared_task
+def tree_search_retro_star_task(module: str, input: dict, token: str) -> dict:
+    """Celery tasks must have json serializable inputs/outputs"""
+    wrapper = get_wrapper_registry().get_wrapper(module=module)
+
+    # Reconstruct Input object from, and convert Output object to dict
+    input = wrapper.input_class(**input)
+    response = wrapper.call_sync(input, token).dict()
+
+    return response
+
+
+@shared_task
 def rdkit_apply_one_template_by_idx_task(
     smiles: str,
     template_idx: int,

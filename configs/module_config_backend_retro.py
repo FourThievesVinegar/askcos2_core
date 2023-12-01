@@ -23,6 +23,7 @@ module_config = {
         "site_selectivity": False,
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
+        "tree_search_retro_star": True,
         "legacy_descriptors": False,
         "legacy_solubility": False
     },
@@ -405,6 +406,21 @@ module_config = {
             "use_gpu": False,
             "ports_to_expose": [9311],
             "default_prediction_url": "http://0.0.0.0:9311/get_buyable_paths",
+            "custom_prediction_url": "",
+            "timeout": 1200,
+            "available_model_names": []
+        }
+    },
+
+    "tree_search_retro_star": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/retro_star.git",
+        "description":
+            "The controller for the Retro* planner",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9321],
+            "default_prediction_url": "http://0.0.0.0:9321/get_buyable_paths",
             "custom_prediction_url": "",
             "timeout": 1200,
             "available_model_names": []
