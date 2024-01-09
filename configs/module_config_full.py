@@ -19,6 +19,7 @@ module_config = {
         "reaction_classification": True,
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
+        "retro_retrosim": True,
         "scscore": True,
         "site_selectivity": True,
         "tree_search_expand_one": True,
@@ -348,6 +349,22 @@ module_config = {
                 "pistachio_23Q3",
                 "USPTO_FULL"
             ]
+        }
+    },
+
+    "retro_retrosim": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/retrosim.git",
+        "description":
+            "One-step retrosynthesis model using the Retrosim model",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9441],
+            "default_prediction_url": "http://0.0.0.0:9441/retrosim",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_model_names": []
+
         }
     },
 
