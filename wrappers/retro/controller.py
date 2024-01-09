@@ -8,6 +8,7 @@ from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.retro.augmented_transformer import RetroATInput, RetroATResponse
 from wrappers.retro.graph2smiles import RetroG2SInput, RetroG2SResponse
 from wrappers.retro.template_relevance import RetroTemplRelInput, RetroTemplRelResponse
+from wrappers.retro.retrosim import RetroRSimInput, RetroRSimResponse
 from wrappers.registry import get_wrapper_registry
 
 
@@ -19,7 +20,7 @@ class AttributeFilter(BaseModel):
 
 class RetroInput(LowerCamelAliasModel):
     backend: Literal[
-        "augmented_transformer", "graph2smiles", "template_relevance"
+        "augmented_transformer", "graph2smiles", "template_relevance", "retrosim"
     ] = Field(
         default="template_relevance",
         description="backend for one-step retrosynthesis"
@@ -47,6 +48,16 @@ class RetroInput(LowerCamelAliasModel):
         description="template attribute filter to apply before template application; "
                     "used for template_relevance only",
         example=[]
+    )
+    threshold: int = Field(
+        default=0.3,
+        description="threshold for similarity; "
+                    "used for retrosim only"
+    )
+    top_k: int = Field(
+        default=10,
+        description="filter for k results returned; "
+                    "used for retrosim only"
     )
 
 
@@ -77,7 +88,8 @@ class RetroController(BaseWrapper):
     backend_wrapper_names = {
         "augmented_transformer": "retro_augmented_transformer",
         "graph2smiles": "retro_graph2smiles",
-        "template_relevance": "retro_template_relevance"
+        "template_relevance": "retro_template_relevance",
+        "retrosim": "retro_retrosim"
     }
 
     def __init__(self):
@@ -125,7 +137,7 @@ class RetroController(BaseWrapper):
     @staticmethod
     def convert_input(
         input: RetroInput, backend: str
-    ) -> RetroATInput | RetroG2SInput | RetroTemplRelInput:
+    ) -> RetroATInput | RetroG2SInput | RetroTemplRelInput | RetroRSimInput:
         if backend == "augmented_transformer":
             wrapper_input = RetroATInput(
                 model_name=input.model_name,
@@ -144,6 +156,12 @@ class RetroController(BaseWrapper):
                 max_cum_prob=input.max_cum_prob,
                 attribute_filter=input.attribute_filter
             )
+        elif backend == "retrosim":
+            wrapper_input = RetroRSimInput(
+                smiles=input.smiles,
+                threshold=input.threshold,
+                top_k=input.top_k
+            )
         else:
             raise ValueError(f"Unsupported retro backend: {backend}!")
 
@@ -152,12 +170,12 @@ class RetroController(BaseWrapper):
     @staticmethod
     def convert_response(
         wrapper_response:
-            RetroATResponse | RetroG2SResponse | RetroTemplRelResponse,
+            RetroATResponse | RetroG2SResponse | RetroTemplRelResponse | RetroRSimResponse,
         backend: str
     ) -> RetroResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
-        if backend in ["augmented_transformer", "graph2smiles"]:
+        if backend in ["augmented_transformer", "graph2smiles", "retrosim"]:
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:

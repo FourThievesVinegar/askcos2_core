@@ -118,7 +118,7 @@ def sim_search_aggregate(
     except ZeroDivisionError:
         fp_max = float("inf")
     req_common_count = qfp_count - fp_min + 1
-    if count_collection:
+    if count_collection is not None:
         req_common_bits = [
             count["_id"]
             for count in count_collection.find({"_id": {"$in": qfp}})
