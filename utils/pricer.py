@@ -231,7 +231,13 @@ class Pricer:
             search_result = sorted(
                 search_result, key=lambda x: x["tanimoto"], reverse=True
             )
-            print(search_result)
+            def key_switch(item):
+                tanimoto = item["tanimoto"]
+                item["similarity"] = tanimoto
+                del item["tanimoto"]
+                return item
+            search_result = list(map(key_switch, search_result))
+            # print(search_result)
 
         return search_result
 

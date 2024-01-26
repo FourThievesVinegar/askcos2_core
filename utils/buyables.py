@@ -22,6 +22,7 @@ class Buyable(BaseModel):
     lead_time: str = None
     source: str = ""
     properties: list[BuyableProperty] = None
+    similarity: float = None
 
 
 class PropertyCriteria(BaseModel):
