@@ -26,6 +26,8 @@ class CacheController:
         except errors.ServerSelectionTimeoutError:
             raise ValueError("Cannot connect to mongodb for cache")
         else:
+            # reset the db from the Mongo side as well
+            self.client.drop_database(database)
             self.db = self.client[database]
 
     def get(self, module_name: str, input: BaseModel) -> dict:
