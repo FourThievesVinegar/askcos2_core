@@ -36,10 +36,12 @@ class CacheController:
         input_hash = json.dumps(jsonable_encoder(input))
         _id = cache_map[input_hash]
 
-        # the part below *should* be problem free
-        collection = self.db[module_name]
-        response = collection.find_one(_id)
-        del response["_id"]
+        try:
+            collection = self.db[module_name]
+            response = collection.find_one(_id)
+            del response["_id"]
+        except:     # weird bug; may be due to lag for async mongo deletion?
+            raise KeyError
 
         return response
 
