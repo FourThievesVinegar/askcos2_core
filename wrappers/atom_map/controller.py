@@ -27,7 +27,7 @@ class AtomMapOutput(BaseModel):
 
 
 class AtomMapResponse(BaseResponse):
-    result: list[str] | None
+    result: list[str | None] | None
 
 
 @register_wrapper(
@@ -103,10 +103,12 @@ class AtomMapController(BaseWrapper):
             result = wrapper_response.result
         elif backend == "rxnmapper":
             # list[RXNMapperResult] -> list[str]
-            try:
-                result = [r.mapped_rxn for r in wrapper_response.result]
-            except TypeError:
-                result = None
+            result = []
+            for r in wrapper_response.result:
+                try:
+                    result.append(r.mapped_rxn)
+                except TypeError:
+                    result.append(None)
         else:
             raise ValueError(f"Unsupported atom map backend: {backend}!")
 
