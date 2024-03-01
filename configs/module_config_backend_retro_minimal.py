@@ -175,7 +175,8 @@ module_config = {
         },
         "wrapper_names": [
             "fast_filter",
-            "fast_filter_with_threshold"
+            "fast_filter_with_threshold",
+            "fast_filter_batch"
         ]
     },
 
