@@ -34,10 +34,19 @@ class FastFilterWThresholdWrapper(BaseWrapper):
     """Wrapper class for Fast Filter with Threshold"""
     prefixes = ["fast_filter/with_threshold"]
 
+    def call_raw(self, input: FastFilterWThresholdInput) -> FastFilterWThresholdOutput:
+        response = self.session_sync.post(
+            f"{self.prediction_url}/filter_with_threshold",
+            json=input.dict(),
+            timeout=self.config["deployment"]["timeout"]
+        )
+        output = response.json()
+        output = FastFilterWThresholdOutput(**output)
+
+        return output
+
     def call_sync(self, input: FastFilterWThresholdInput
                   ) -> FastFilterWThresholdResponse:
-        if not self.prediction_url.endswith("filter_with_threshold"):
-            self.prediction_url = f"{self.prediction_url}/filter_with_threshold"
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 

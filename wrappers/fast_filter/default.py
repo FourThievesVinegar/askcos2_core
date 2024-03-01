@@ -48,13 +48,21 @@ class FastFilterWrapper(BaseWrapper):
     """Wrapper class for Fast Filter"""
     prefixes = ["fast_filter"]
 
+    def call_raw(self, input: FastFilterInput) -> FastFilterOutput:
+        response = self.session_sync.post(
+            f"{self.prediction_url}/fast_filter_evaluate",
+            json=input.dict(),
+            timeout=self.config["deployment"]["timeout"]
+        )
+        output = response.json()
+        output = FastFilterOutput(**output)
+
+        return output
+
     def call_sync(self, input: FastFilterInput) -> FastFilterResponse:
         """
         Endpoint for synchronous call to the fast filter.
         """
-        if not self.prediction_url.endswith("fast_filter_evaluate"):
-            self.prediction_url = f"{self.prediction_url}/fast_filter_evaluate"
-            # this creates an infinite stacking loop w/o if statement
         output = self.call_raw(input=input)
         response = self.convert_output_to_response(output)
 
