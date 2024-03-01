@@ -2,11 +2,10 @@ from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
-from wrappers.scscore.default import SCScoreInput, SCScoreOutput
 
 
 class SCScoreBatchInput(LowerCamelAliasModel):
-    smiles_list: list[str] = Field(
+    smiles: list[str] = Field(
         description="list of SMILES for SCScore calculation. "
                     "Can be multi-molecule (separated by .), in which case "
                     "the max SCScore among the molecules will be returned",
@@ -27,17 +26,21 @@ class SCScoreBatchResponse(BaseResponse):
 @register_wrapper(
     name="scscore_batch",
     input_class=SCScoreBatchInput,
-    output_class=SCScoreOutput,
+    output_class=SCScoreBatchOutput,
     response_class=SCScoreBatchResponse
 )
-class SCScoreWrapper(BaseWrapper):
+class SCScoreBatchWrapper(BaseWrapper):
     """Wrapper class for SCScore"""
     prefixes = ["scscore/batch"]
 
     def call_raw(self, input: SCScoreBatchInput) -> SCScoreBatchOutput:
+        json = input.dict()
+        # aliasing, for backward compatibility (with frontend calls)
+        json["smiles_list"] = json.pop("smiles")
+
         response = self.session_sync.post(
             f"{self.prediction_url}_batch",
-            json=input.dict(),
+            json=json,
             timeout=self.config["deployment"]["timeout"]
         )
         output = response.json()
@@ -53,7 +56,7 @@ class SCScoreWrapper(BaseWrapper):
         output = self.call_raw(input=input)
         results = {
             smi: score
-            for smi, score in zip(input.smiles_list, output.results)
+            for smi, score in zip(input.smiles, output.results)
         }
         response = self.convert_results_to_response(results)
 
@@ -72,7 +75,6 @@ class SCScoreWrapper(BaseWrapper):
     @staticmethod
     def convert_results_to_response(results: dict[str, float]
                                     ) -> SCScoreBatchResponse:
-
         response = SCScoreBatchResponse(
             status_code=200,
             message="",
