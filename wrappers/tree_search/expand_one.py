@@ -245,7 +245,7 @@ class ExpandOneWrapper(BaseWrapper):
                       f"with the following error message {output.error}"
             result = None
 
-        if input.group_by_strategy:
+        if output.status == "SUCCESS" and input.group_by_strategy:
             grouped_results = {}
             for i, strategy in enumerate(input.retro_backend_options):
                 grouped_result = []

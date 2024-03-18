@@ -23,11 +23,11 @@ class RXNMapperResult(BaseModel):
 class AtomMapRXNMapperOutput(BaseModel):
     error: str
     status: str
-    results: list[list[RXNMapperResult]]
+    results: list[list[RXNMapperResult | None]]
 
 
 class AtomMapRXNMapperResponse(BaseResponse):
-    result: list[RXNMapperResult] | None
+    result: list[RXNMapperResult | None] | None
 
 
 @register_wrapper(

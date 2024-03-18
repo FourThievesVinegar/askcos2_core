@@ -2,7 +2,10 @@ import os
 import uvicorn
 from adapters.registry import get_adapter_registry
 from fastapi import APIRouter as FastAPIRouter
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Callable
 from utils import oauth2
@@ -56,6 +59,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# overwritten erro-handling function
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors(),
+                "body": exc.body,
+                "string_error": str(exc)}),
+    )
 
 router = APIRouter(prefix="/api/admin")
 router.add_api_route(

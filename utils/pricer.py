@@ -2,11 +2,12 @@ import os
 import pandas as pd
 from bson import Binary, ObjectId
 from configs import db_config
+from fastapi import Query
 from pymongo import errors, MongoClient
 from pymongo.collection import ReturnDocument
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from typing import Any
+from typing import Annotated, Any
 from utils import register_util
 from utils.similarity_search_utils import sim_search, sim_search_aggregate
 
@@ -70,7 +71,7 @@ class Pricer:
     def lookup_smiles(
         self,
         smiles: str,
-        source: list[str] | str | None = None,
+        source: Annotated[list[str] | None, Query()] = None,
         canonicalize: bool = True,
         isomeric_smiles: bool = True
     ) -> dict | None:
@@ -231,7 +232,14 @@ class Pricer:
             search_result = sorted(
                 search_result, key=lambda x: x["tanimoto"], reverse=True
             )
-            print(search_result)
+
+            def key_switch(item):
+                tanimoto = item["tanimoto"]
+                item["similarity"] = tanimoto
+                del item["tanimoto"]
+                return item
+            search_result = list(map(key_switch, search_result))
+            # print(search_result)
 
         return search_result
 

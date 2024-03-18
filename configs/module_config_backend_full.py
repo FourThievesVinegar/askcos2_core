@@ -175,7 +175,8 @@ module_config = {
         },
         "wrapper_names": [
             "fast_filter",
-            "fast_filter_with_threshold"
+            "fast_filter_with_threshold",
+            "fast_filter_batch"
         ]
     },
 
@@ -392,7 +393,7 @@ module_config = {
             "ports_to_expose": [9301],
             "default_prediction_url": "http://0.0.0.0:9301/get_outcomes",
             "custom_prediction_url": "",
-            "timeout": 30,
+            "timeout": 100,
             "available_model_names": []
         }
     },
