@@ -1,36 +1,36 @@
 module_config = {
     "modules_to_start": {
-        "atom_map_indigo": True,
-        "atom_map_rxnmapper": True,
-        "atom_map_wln": True,
-        "cluster": True,
-        "context_recommender": True,
-        "count_analogs": True,
-        "descriptors": True,
-        "evaluate_reactions": True,
-        "fast_filter": True,
-        "forward_augmented_transformer": True,
-        "forward_graph2smiles": True,
-        "forward_wldn5": True,
-        "general_selectivity": True,
-        "impurity_predictor": True,
-        "pathway_ranker": True,
-        "pmi_calculator": True,
-        "reaction_classification": True,
-        "retro_template_relevance": True,
-        "retro_augmented_transformer": True,
+        "atom_map_indigo": False,
+        "atom_map_rxnmapper": False,
+        "atom_map_wln": False,
+        "cluster": False,
+        "context_recommender": False,
+        "count_analogs": False,
+        "descriptors": False,
+        "evaluate_reactions": False,
+        "fast_filter": False,
+        "forward_augmented_transformer": False,
+        "forward_graph2smiles": False,
+        "forward_wldn5": False,
+        "general_selectivity": False,
+        "impurity_predictor": False,
+        "pathway_ranker": False,
+        "pmi_calculator": False,
+        "reaction_classification": False,
+        "retro_template_relevance": False,
+        "retro_augmented_transformer": False,
         "retro_retrosim": True,
-        "scscore": True,
-        "site_selectivity": True,
-        "tree_search_expand_one": True,
-        "tree_search_mcts": True,
-        "tree_search_retro_star": True,
-        "legacy_descriptors": True,
-        "legacy_solubility": True
+        "scscore": False,
+        "site_selectivity": False,
+        "tree_search_expand_one": False,
+        "tree_search_mcts": False,
+        "tree_search_retro_star": False,
+        "legacy_descriptors": False,
+        "legacy_solubility": False
     },
 
     "global": {
-        "require_frontend": True,
+        "require_frontend": False,
         "container_runtime": "docker",
         "image_policy": "build_all",
         "enable_gpu": False
@@ -356,16 +356,14 @@ module_config = {
     "retro_retrosim": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/retrosim.git",
         "description":
-            "One-step retrosynthesis model using the Retrosim model",
+            "One-step retrosynthesis model using the retrosim model",
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
             "ports_to_expose": [9441],
-            "default_prediction_url": "http://0.0.0.0:9441/retrosim",
+            "default_prediction_url": "http://0.0.0.0:9441/predictions",
             "custom_prediction_url": "",
             "timeout": 10,
-            "available_model_names": []
-
         }
     },
 
