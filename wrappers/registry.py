@@ -43,27 +43,18 @@ class WrapperRegistry:
             if to_start:
                 wrapper_config = module_config[module]
 
-                if module.startswith("atom_map") and \
-                        "atom_map_controller" not in self._wrappers:
-                    controller_class = WRAPPER_CLASSES["atom_map_controller"]
-                    self._wrappers["atom_map_controller"] = controller_class()
-
-                elif module.startswith("forward") and \
-                        "forward_controller" not in self._wrappers:
-                    controller_class = WRAPPER_CLASSES["forward_controller"]
-                    self._wrappers["forward_controller"] = controller_class()
-
-                elif module.startswith("general_selectivity") and \
-                        "general_selectivity_controller" not in self._wrappers:
-                    controller_class = \
-                        WRAPPER_CLASSES["general_selectivity_controller"]
-                    self._wrappers["general_selectivity_controller"] = \
-                        controller_class()
-
-                elif module.startswith("retro") and \
-                        "retro_controller" not in self._wrappers:
-                    controller_class = WRAPPER_CLASSES["retro_controller"]
-                    self._wrappers["retro_controller"] = controller_class()
+                for controller_prefix in [
+                    "atom_map",
+                    "forward",
+                    "general_selectivity",
+                    "retro",
+                    "tree_search"
+                ]:
+                    controller_name = f"{controller_prefix}_controller"
+                    if module.startswith(controller_prefix) and \
+                            controller_name not in self._wrappers:
+                        controller_class = WRAPPER_CLASSES[controller_name]
+                        self._wrappers[controller_name] = controller_class()
 
                 # Moved the wrapper binding behind controller so that the
                 # controller doc appears first in the API doc
