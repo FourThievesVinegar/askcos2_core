@@ -1,7 +1,13 @@
+import re
 import uuid
+from datetime import datetime
+from fastapi import Depends
 from pydantic import BaseModel, Field
 from schemas.base import LowerCamelAliasModel
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
+from utils.oauth2 import oauth2_scheme
+from utils.registry import get_util_registry
+from utils.tree_search_results import TreeSearchSavedResults
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 from wrappers.registry import get_wrapper_registry
@@ -78,6 +84,14 @@ class TreeSearchResponse(BaseResponse):
 class TreeSearchController(BaseWrapper):
     """Tree Search Controller"""
     prefixes = ["tree_search/controller", "tree_search"]
+    methods_to_bind: dict[str, list[str]] = {
+        "get_config": ["GET"],
+        "get_doc": ["GET"],
+        "call_sync": ["POST"],
+        "call_sync_without_token": ["POST"],
+        "call_async": ["POST"],
+        "retrieve": ["GET"]
+    }
     backend_wrapper_names = {
         "mcts": "tree_search_mcts",
         "retro_star": "tree_search_retro_star"
@@ -86,7 +100,11 @@ class TreeSearchController(BaseWrapper):
     def __init__(self):
         pass        # TODO: proper inheritance
 
-    def call_sync(self, input: TreeSearchInput) -> TreeSearchResponse:
+    def call_sync(
+        self,
+        input: TreeSearchInput,
+        token: Annotated[str, Depends(oauth2_scheme)]
+    ) -> TreeSearchResponse:
         """
         Endpoint for synchronous call to the tree search controller,
         which dispatches the call to respective tree search backend service
@@ -95,21 +113,84 @@ class TreeSearchController(BaseWrapper):
         wrapper = get_wrapper_registry().get_wrapper(module=module)
 
         wrapper_input = self.convert_input(
-            input=input, backend=input.backend)
-        wrapper_response = wrapper.call_sync(wrapper_input)
+            input=input,
+            backend=input.backend
+        )
+        wrapper_response = wrapper.call_sync(
+            wrapper_input,
+            token=token
+        )
         response = self.convert_response(
-            wrapper_response=wrapper_response, backend=input.backend)
+            wrapper_response=wrapper_response,
+            backend=input.backend
+        )
 
         return response
 
-    async def call_async(self, input: TreeSearchInput, priority: int = 0) -> str:
+    def call_sync_without_token(self, input: TreeSearchInput) -> TreeSearchResponse:
+        """
+        Endpoint for synchronous call to the tree search controller.
+        Skip login at the expense of losing access to user banned lists.
+        """
+        module = self.backend_wrapper_names[input.backend]
+        wrapper = get_wrapper_registry().get_wrapper(module=module)
+
+        wrapper_input = self.convert_input(
+            input=input,
+            backend=input.backend
+        )
+        wrapper_response = wrapper.call_sync_without_token(
+            wrapper_input
+        )
+        response = self.convert_response(
+            wrapper_response=wrapper_response,
+            backend=input.backend
+        )
+
+        return response
+
+    async def call_async(
+        self,
+        input: TreeSearchInput,
+        token: Annotated[str, Depends(oauth2_scheme)],
+        priority: int = 0
+    ) -> str:
         """
         Endpoint for asynchronous call to the tree search controller,
         which dispatches the call to respective tree search backend service
         """
+        user_controller = get_util_registry().get_util(module="user_controller")
+        user = user_controller.get_current_user(token)
+
+        input.run_async = True
+        input.result_id = str(uuid.uuid4())
+        # Note that we can't use task_id as the result_id,
+        # as it needs to be known beforehand
+        settings = input.dict()
+        settings = {k: v for k, v in settings.items() if "option" in k}
+
+        saved_results = TreeSearchSavedResults(
+            user=user.username,
+            target_smiles=input.smiles,
+            description=input.description,
+            created=datetime.now(),
+            modified=datetime.now(),
+            result_id=input.result_id,
+            result_state="pending",
+            result_type="tree_builder",
+            result=None,
+            settings=settings,
+            tags=[tag.strip() for tag in re.split(r"[,;]", input.tags)],
+            shared_with=[user.username]
+        )
+        results_controller = get_util_registry().get_util(
+            module="tree_search_results_controller"
+        )
+        results_controller.create(result=saved_results, token=token)
+
         from askcos2_celery.tasks import tree_search_task
         async_result = tree_search_task.apply_async(
-            args=(self.name, input.dict()), priority=priority)
+            args=(self.name, input.dict(), token), priority=priority)
         task_id = async_result.id
 
         return task_id
