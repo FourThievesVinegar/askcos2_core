@@ -30,7 +30,9 @@ READABLE_NAMES = {
     "tree_search_mcts_worker":
         "MCTS Worker (Tree Builder Coordinator equivalent)",
     "tree_search_retro_star_worker":
-        "Retro* Worker (Tree Builder Coordinator equivalent)"
+        "Retro* Worker (Tree Builder Coordinator equivalent)",
+    "tree_search_worker":
+        "Generic Worker for Tree Search"
 }
 
 # Note: cannot use guest for authenticating with broker unless on localhost
