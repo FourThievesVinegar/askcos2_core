@@ -40,7 +40,8 @@ query_template = {
         "max_depth": 6,
         "max_iterations": 500,
         "exploration_weight": 1,
-        "return_first": True
+        "return_first": True,
+        "use_value_network": False
     },
     "enumerate_paths_options": {
         "path_format": "json",
@@ -72,7 +73,7 @@ def main():
         data = copy.deepcopy(query_template)
         data["smiles"] = smi.strip()
         resp = requests.post(
-            url=f"http://{HOST}:{PORT}/api/tree-search/mcts/call-sync-without-token",
+            url=f"http://{HOST}:{PORT}/api/tree-search/retro-star/call-sync-without-token",
             json=data
         ).json()
         first_path_time = resp["result"]["stats"]["first_path_time"]
