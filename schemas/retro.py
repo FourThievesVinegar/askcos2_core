@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 class RetroBackendOption(LowerCamelAliasModel):
     retro_backend: Literal[
-        "augmented_transformer", "graph2smiles", "template_relevance"
+        "augmented_transformer", "graph2smiles", "template_relevance", "retrosim"
     ] = Field(
         default="template_relevance",
         description="backend for one-step retrosynthesis"
@@ -60,4 +60,6 @@ class RetroBackendOption(LowerCamelAliasModel):
             ]:
                 raise ValueError(
                     f"Unsupported retro_model_name {v} for graph2smiles")
+        elif values["retro_backend"] == "retrosim":
+            pass
         return v
