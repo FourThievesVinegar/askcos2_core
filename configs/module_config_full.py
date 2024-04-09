@@ -22,6 +22,7 @@ module_config = {
         "retro_retrosim": True,
         "scscore": True,
         "site_selectivity": True,
+        "qm_descriptors": True,
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
         "tree_search_retro_star": True,
@@ -396,6 +397,20 @@ module_config = {
             "use_gpu": False,
             "ports_to_expose": [9601],
             "default_prediction_url": "http://0.0.0.0:9601/site_selectivity",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_model_names": []
+        }
+    },
+
+    "qm_descriptors": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/qm_descriptors.git",
+        "description": "QM Descriptor",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9602],
+            "default_prediction_url": "http://0.0.0.0:9602/qm_descriptors",
             "custom_prediction_url": "",
             "timeout": 10,
             "available_model_names": []
