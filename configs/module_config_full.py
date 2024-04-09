@@ -364,6 +364,9 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9441/predictions",
             "custom_prediction_url": "",
             "timeout": 10,
+            "available_model_names": [
+                "USPTO_FULL"
+            ]
         }
     },
 
