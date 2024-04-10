@@ -18,7 +18,7 @@ class QMDescriptorsResult(BaseModel):
     npa_e_neg: list[float] = Field(alias="npa charge - (e)")
     npa_parr_func_e_pos: list[float] = Field(alias="npa parr function + (e)")
     npa_parr_func_e_neg: list[float] = Field(alias="npa parr function - (e)")
-    sheilding_constant_ppm : list[float] = Field(alias="shielding constant (ppm)")
+    sheilding_constant_ppm: list[float] = Field(alias="shielding constant (ppm)")
     valence_1s: list[float] = Field(alias="1s valence orbital occupancy (e)")
     valence_2s: list[float] = Field(alias="2s valence orbital occupancy (e)")
     valence_2p: list[float] = Field(alias="2p valence orbital occupancy (e)")

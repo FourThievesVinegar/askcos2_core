@@ -16,6 +16,7 @@ module_config = {
         "impurity_predictor": True,
         "pathway_ranker": True,
         "pmi_calculator": True,
+        "qm_descriptors": True,
         "reaction_classification": True,
         "retro_template_relevance": True,
         "retro_augmented_transformer": True,
@@ -25,7 +26,6 @@ module_config = {
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
         "tree_search_retro_star": True,
-        "legacy_descriptors": True,
         "legacy_solubility": True
     },
 
@@ -296,6 +296,20 @@ module_config = {
         }
     },
 
+    "qm_descriptors": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/qm_descriptors.git",
+        "description": "QM Descriptor",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9711],
+            "default_prediction_url": "http://0.0.0.0:9711/qm_descriptors",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_model_names": []
+        }
+    },
+
     "reaction_classification": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/reaction_classification.git",
         "description": "Reaction classifier trained with Pistachio dataset",
@@ -442,21 +456,6 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9321/get_buyable_paths",
             "custom_prediction_url": "",
             "timeout": 1200,
-            "available_model_names": []
-        }
-    },
-
-    "legacy_descriptors": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/legacy_descriptors.git",
-        "description": "Black-box quantum descriptor model from ASKCOSv1",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "image_policy": "pull",
-            "use_gpu": False,
-            "ports_to_expose": [9632],
-            "default_prediction_url": "http://0.0.0.0:9632/predictions/descriptors",
-            "custom_prediction_url": "",
-            "timeout": 10,
             "available_model_names": []
         }
     },
