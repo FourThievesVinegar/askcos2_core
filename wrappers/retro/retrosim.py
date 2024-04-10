@@ -18,11 +18,17 @@ class RetroRSimInput(LowerCamelAliasModel):
         description="return top k results",
         example=10
     )
+    reaction_set: Literal["USPTO_FULL", "bkms"] | None = Field(
+        default="USPTO_FULL",
+        description="reaction set to be queried against",
+    )
 
 
 class RetroRSimResult(BaseModel):
     reactants: list[str] = Field(alias="products")
     scores: list[float]
+    reaction_ids: list[str]
+    reaction_sets: list[str]
 
 
 class RetroRSimOutput(BaseModel):

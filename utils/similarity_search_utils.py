@@ -21,7 +21,7 @@ def sim_search(
     mol_collection,
     count_collection=None,
     threshold=DEFAULT_THRESHOLD,
-    reaction_set: str = "USPTO_full"
+    reaction_set: str = "USPTO_FULL"
 ) -> list:
     """
     Searches `mol_collection` for molecules with Tanimoto similarity to `mol`
@@ -92,7 +92,7 @@ def sim_search_aggregate(
     mol_collection,
     count_collection=None,
     threshold=DEFAULT_THRESHOLD,
-    reaction_set: str = "USPTO_full"
+    reaction_set: str = "USPTO_FULL"
 ) -> list:
     """
     Searches `mol_collection` for molecules with Tanimoto similarity to `mol`

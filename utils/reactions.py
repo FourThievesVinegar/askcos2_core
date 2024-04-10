@@ -65,7 +65,7 @@ class Reactions:
         self,
         smiles: str,
         sim_threshold: float,
-        reaction_set: str = "USPTO_full",
+        reaction_set: str = "USPTO_FULL",
         method: str = "accurate"
     ) -> list:
         """
@@ -115,7 +115,7 @@ class Reactions:
     def search_reaction_id(
         self,
         id: str,
-        reaction_set: str = "USPTO_full"
+        reaction_set: str = "USPTO_FULL"
     ) -> dict:
         """
         Lookup reaction collection using id.

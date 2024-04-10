@@ -28,6 +28,16 @@ class RetroBackendOption(LowerCamelAliasModel):
         description="template attribute filter to apply before template application",
         example=[]
     )
+    threshold: float = Field(
+        default=0.3,
+        description="threshold for similarity; "
+                    "used for retrosim only"
+    )
+    top_k: int = Field(
+        default=10,
+        description="filter for k results returned; "
+                    "used for retrosim only"
+    )
 
     @validator("retro_model_name")
     def check_retro_model_name(cls, v, values):
@@ -61,5 +71,10 @@ class RetroBackendOption(LowerCamelAliasModel):
                 raise ValueError(
                     f"Unsupported retro_model_name {v} for graph2smiles")
         elif values["retro_backend"] == "retrosim":
-            pass
+            if v not in [
+                "USPTO_FULL",
+                "bkms"
+            ]:
+                raise ValueError(
+                    f"Unsupported retro_model_name {v} for retrosim")
         return v

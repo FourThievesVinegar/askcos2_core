@@ -49,7 +49,7 @@ class RetroInput(LowerCamelAliasModel):
                     "used for template_relevance only",
         example=[]
     )
-    threshold: int = Field(
+    threshold: float = Field(
         default=0.3,
         description="threshold for similarity; "
                     "used for retrosim only"
@@ -70,6 +70,8 @@ class RetroResult(BaseModel):
     model_score: float
     normalized_model_score: float
     template: dict[str, Any] | None
+    reaction_id: str | None
+    reaction_set: str | None
 
 
 class RetroResponse(BaseResponse):
@@ -112,6 +114,10 @@ class RetroController(BaseWrapper):
             wrapper_input = self.convert_input(
                 input=input, backend=input.backend)
             wrapper_response = wrapper.call_sync(wrapper_input)
+            print(wrapper_input)
+            print(input.backend)
+            print(wrapper)
+            print(wrapper_response)
             response = self.convert_response(
                 wrapper_response=wrapper_response, backend=input.backend)
 
@@ -160,7 +166,8 @@ class RetroController(BaseWrapper):
             wrapper_input = RetroRSimInput(
                 smiles=input.smiles,
                 threshold=input.threshold,
-                top_k=input.top_k
+                top_k=input.top_k,
+                reaction_set=input.model_name
             )
         else:
             raise ValueError(f"Unsupported retro backend: {backend}!")
@@ -175,7 +182,7 @@ class RetroController(BaseWrapper):
     ) -> RetroResponse:
         status_code = wrapper_response.status_code
         message = wrapper_response.message
-        if backend in ["augmented_transformer", "graph2smiles", "retrosim"]:
+        if backend in ["augmented_transformer", "graph2smiles"]:
             # list[dict] -> list[list[dict]]
             result = []
             for result_per_smi in wrapper_response.result:
@@ -212,6 +219,35 @@ class RetroController(BaseWrapper):
                         result_per_smi.reactants,
                         result_per_smi.scores,
                         result_per_smi.templates
+                    )]
+                )
+        elif backend == "retrosim":
+            # list[dict] -> list[list[dict]]
+            result = []
+            for result_per_smi in wrapper_response.result:
+                if not result_per_smi.scores:
+                    result.append([])
+                    continue
+                normalized_scores = softmax(result_per_smi.scores)
+                result.append(
+                    [{
+                        "outcome": outcome,
+                        "model_score": score,
+                        "normalized_model_score": float(normalized_score),
+                        "reaction_id": reaction_id,
+                        "reaction_set": reaction_set
+                    } for (
+                        outcome,
+                        score,
+                        normalized_score,
+                        reaction_id,
+                        reaction_set
+                    ) in zip(
+                        result_per_smi.reactants,
+                        result_per_smi.scores,
+                        normalized_scores,
+                        result_per_smi.reaction_ids,
+                        result_per_smi.reaction_sets
                     )]
                 )
         else:
