@@ -5,6 +5,7 @@ deployment/
 data/
 *.sif
 *.out
+configs/module_config_w_optimizer.py
 
 .env
 

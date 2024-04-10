@@ -1,4 +1,3 @@
-import math
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from configs import db_config
@@ -33,6 +32,8 @@ class Reactions:
         self.client = MongoClient(serverSelectionTimeoutMS=1000, **db_config.MONGO)
         database = "askcos"
         collection = "reactions"
+        mol_collection = "products_in_reactions"
+        count_collection = "counts_in_reactions"
 
         try:
             self.client.server_info()
@@ -40,22 +41,31 @@ class Reactions:
             raise ValueError("Cannot connect to mongodb for reactions")
         else:
             self.db = self.client[database]
-            self.collection = self.client[database][collection]
+            self.collection = self.db[collection]
+            self.molecules = self.db[mol_collection]
+            self.counts = self.db[count_collection]
 
             col_present = set(self.db.list_collection_names())
-            col_needed = set(["molecules", "reactions", "counts"])
-            if set(col_needed) & set(col_present) != set(col_needed):
+            col_needed = {"reactions", "products_in_reactions", "counts_in_reactions"}
+
+            if util_config["force_recompute_mols"]:
+                self.db.drop_collection(mol_collection)
+                self.db.drop_collection(count_collection)
+
                 self.get_products_from_reactions()
                 self.precompute_mols()
-            
-            self.molecules = self.db["molecules"]
-            self.counts = self.db["counts"]
+            elif set(col_needed) & set(col_present) != set(col_needed):
+                self.db.drop_collection(mol_collection)
+                self.db.drop_collection(count_collection)
 
+                self.get_products_from_reactions()
+                self.precompute_mols()
 
     def lookup_similar_smiles(
         self,
         smiles: str,
         sim_threshold: float,
+        reaction_set: str = "USPTO_full",
         method: str = "accurate"
     ) -> list:
         """
@@ -79,17 +89,19 @@ class Reactions:
         query_mol = Chem.MolFromSmiles(smiles)
         if method == "accurate":
             results = sim_search_aggregate(
-                query_mol,
-                self.molecules,
-                self.counts,
-                sim_threshold,
+                mol=query_mol,
+                mol_collection=self.molecules,
+                count_collection=self.counts,
+                threshold=sim_threshold,
+                reaction_set=reaction_set
             )
         elif method == "naive":
             results = sim_search(
-                query_mol,
-                self.molecules,
-                self.counts,
-                sim_threshold,
+                mol=query_mol,
+                mol_collection=self.molecules,
+                count_collection=self.counts,
+                threshold=sim_threshold,
+                reaction_set=reaction_set
             )
         elif method == "fast":
             raise NotImplementedError
@@ -102,7 +114,8 @@ class Reactions:
 
     def search_reaction_id(
         self,
-        id: str
+        id: str,
+        reaction_set: str = "USPTO_full"
     ) -> dict:
         """
         Lookup reaction collection using id.
@@ -110,9 +123,7 @@ class Reactions:
         Returns:
             A dictionary containing document of reaction 
         """
-        return self.collection.find_one({'_id': id})
-        # return self.molecules.find_one()
-        # return self.counts.find_one()
+        return self.collection.find_one({'_id': id, "template_set": reaction_set})
 
     def post(self, data: ReactionsInput) -> ReactionsResponse:
         query = {"reaction_id": {"$in": data.ids}}
@@ -125,48 +136,63 @@ class Reactions:
 
         return resp
 
-    def get_products_from_reactions(self):
+    def get_products_from_reactions(self) -> None:
         """
         Extracts the products from each reaction in the reactions collection
         and stores them in the molecules collection to use for similarity search.
         Assumes that the database and the reactions collection have already been
         initialized.
         """
-        print("HELLO")
-        self.molecules = self.db["molecules"]
-
-        print("HELLO2")
+        print("Extracting products from reactions..")
         for rxn in self.collection.find():
-            if rxn.get("products") is None: continue
-            smiles = rxn["products"]
-            id = rxn["_id"]
-            self.molecules.insert_one({"_id": id, "smiles": smiles})
-        print("HELLO3")
+            if "products" in rxn:
+                product_smiles = rxn["products"]
+            elif "reaction_smiles" in rxn:
+                product_smiles = rxn["reaction_smiles"].split(">")[-1]
+            else:
+                continue
+
+            self.molecules.insert_one({
+                "_id": rxn["_id"],
+                "smiles": product_smiles,
+                "template_set": rxn["template_set"]
+            })
+        print("Extraction donn.")
 
     def precompute_mols(self) -> None:
-        self.counts = self.db["counts"]
-
         mfp_counts = {}
         for mol in self.molecules.find():
             smiles = mol["smiles"]
             rdmol = Chem.MolFromSmiles(smiles)
             mfp = list(AllChem.GetMorganFingerprintAsBitVect(rdmol, radius=2, nBits=2048).GetOnBits())
             pfp = list(Chem.rdmolops.PatternFingerprint(rdmol).GetOnBits())
-            smiles = Chem.MolToSmiles(rdmol)
+            # smiles = Chem.MolToSmiles(rdmol)
 
             for bit in mfp:
                 mfp_counts[bit] = mfp_counts.get(bit, 0) + 1
             
             # update the molecule document with the fingerprints and their counts
-            self.molecules.update_one({"_id": mol["_id"]}, 
-                                        {"$set": {"mfp": {"bits": mfp, "count": len(mfp)},
-                                                "pfp": {"bits": pfp, "count": len(pfp)}}})
+            self.molecules.update_one(
+                filter={
+                    "_id": mol["_id"],
+                    "template_set": mol["template_set"]
+                },
+                update={
+                    "$set": {
+                        "mfp": {"bits": mfp, "count": len(mfp)},
+                        "pfp": {"bits": pfp, "count": len(pfp)}
+                    }
+                }
+            )
 
         for k, v in mfp_counts.items():
-            self.counts.insert_one({"_id": k, "count": v})
+            self.counts.insert_one({
+                "_id": k,
+                "count": v,
+                "template_set": mol["template_set"]
+            })
         
         self.molecules.create_index("mfp.bits")
         self.molecules.create_index("mfp.count")
         self.molecules.create_index("pfp.bits")
         self.molecules.create_index("pfp.count")
-

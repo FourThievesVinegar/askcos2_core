@@ -16,8 +16,13 @@ DEFAULT_MORGAN_LEN = 2048
 DEFAULT_BIT_N = 2048
 
 
-def sim_search(mol, mol_collection, count_collection=None, threshold=DEFAULT_THRESHOLD
-               ) -> list:
+def sim_search(
+    mol,
+    mol_collection,
+    count_collection=None,
+    threshold=DEFAULT_THRESHOLD,
+    reaction_set: str = "USPTO_full"
+) -> list:
     """
     Searches `mol_collection` for molecules with Tanimoto similarity to `mol`
     greater than or equal to `threshold`.
@@ -28,6 +33,7 @@ def sim_search(mol, mol_collection, count_collection=None, threshold=DEFAULT_THR
         count_collection (pymongo Collection): popularity counts for Morgan
             fingerprint bits for all entries in `mol_collection`
         threshold: Tanimoto threshold for similarity
+        reaction_set (str): reaction set to be queried against
     Returns
         A list of MongoDB documents that fulfill `threshold`, including their
         tanimoto scores.
@@ -40,7 +46,7 @@ def sim_search(mol, mol_collection, count_collection=None, threshold=DEFAULT_THR
     )
 
     if threshold == 0:
-        for mol in mol_collection.find({}):
+        for mol in mol_collection.find({"template_set": reaction_set}):
             tanimoto = calc_tanimoto(qfp, mol["mfp"]["bits"])
             mol["tanimoto"] = tanimoto
             results.append(mol)
@@ -68,6 +74,7 @@ def sim_search(mol, mol_collection, count_collection=None, threshold=DEFAULT_THR
         req_common_bits = qfp[:req_common_count]
     for mol in mol_collection.find(
         {
+            "template_set": reaction_set,
             "mfp.count": {"$gte": fp_min, "$lte": fp_max},
             "mfp.bits": {"$in": req_common_bits},
         }
@@ -81,7 +88,11 @@ def sim_search(mol, mol_collection, count_collection=None, threshold=DEFAULT_THR
 
 
 def sim_search_aggregate(
-    mol, mol_collection, count_collection=None, threshold=DEFAULT_THRESHOLD
+    mol,
+    mol_collection,
+    count_collection=None,
+    threshold=DEFAULT_THRESHOLD,
+    reaction_set: str = "USPTO_full"
 ) -> list:
     """
     Searches `mol_collection` for molecules with Tanimoto similarity to `mol`
@@ -94,6 +105,7 @@ def sim_search_aggregate(
         count_collection (pymongo Collection): popularity counts for Morgan
             fingerprint bits for all entries in `mol_collection`
         threshold: Tanimoto threshold for similarity
+        reaction_set (str): reaction set to be queried against
     Returns
         A list of MongoDB documents that fulfill `threshold`, including their
         tanimoto scores.
@@ -105,7 +117,7 @@ def sim_search_aggregate(
         ).GetOnBits()
     )
     if threshold == 0:
-        for mol in mol_collection.find({}):
+        for mol in mol_collection.find({"template_set": reaction_set}):
             tanimoto = calc_tanimoto(qfp, mol["mfp"]["bits"])
             mol["tanimoto"] = tanimoto
             results.append(mol)
@@ -130,6 +142,7 @@ def sim_search_aggregate(
     aggregate = [
         {
             "$match": {
+                "template_set": reaction_set,
                 "mfp.count": {"$gte": fp_min, "$lte": fp_max},
                 "mfp.bits": {"$in": req_common_bits},
             }

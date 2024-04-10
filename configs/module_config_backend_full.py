@@ -508,6 +508,10 @@ module_config = {
         "precompute_mols": False
     },
 
+    "reactions": {
+        "force_recompute_mols": False
+    },
+
     "selectivity_refs": {
         "file": "utils/site_selectivity_refs.json"
     },
