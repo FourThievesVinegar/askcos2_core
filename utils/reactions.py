@@ -1,10 +1,10 @@
+import numpy as np
 import sys
 import time
 from configs import db_config
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
 from rdkit import Chem
-from rdkit.Chem import AllChem
 from schemas.base import LowerCamelAliasModel
 from typing import Any
 from utils import register_util
@@ -18,6 +18,14 @@ class ReactionsInput(LowerCamelAliasModel):
 
 class ReactionsResponse(BaseModel):
     reactions: list
+
+
+def _bits_to_array(bits: list[int], fp_size: int = 2048) -> np.ndarray:
+    bits_array = np.zeros(fp_size, dtype=np.bool_)
+    for bit in bits:
+        bits_array[bit] = True
+
+    return bits_array
 
 
 @register_util(name="reactions")
@@ -35,7 +43,6 @@ class Reactions:
         database = "askcos"
         collection = "reactions"
         mol_collection = "products_in_reactions"
-        count_collection = "counts_in_reactions"
 
         try:
             self.client.server_info()
@@ -44,24 +51,50 @@ class Reactions:
         else:
             self.db = self.client[database]
             self.collection = self.db[collection]
-            self.molecules = self.db[mol_collection]
-            self.counts = self.db[count_collection]
+            self.mol_collection = self.db[mol_collection]
 
-            col_present = set(self.db.list_collection_names())
-            col_needed = {"reactions", "products_in_reactions", "counts_in_reactions"}
+            self.mol_fps, self.mol_fp_counts, self.mol_fp_refs = (
+                self.load_mol_fps_and_counts())
 
-            if util_config["force_recompute_mols"]:
-                self.db.drop_collection(mol_collection)
-                self.db.drop_collection(count_collection)
+    def load_mol_fps_and_counts(self) -> tuple[
+        dict[str, np.ndarray],
+        dict[str, np.ndarray],
+        dict[str, dict[int, str]]
+    ]:
+        template_sets = []
+        mol_fps = {}
+        mol_fp_counts = {}
+        mol_fp_refs = {}
 
-                self.get_products_from_reactions()
-                self.precompute_mols()
-            elif set(col_needed) & set(col_present) != set(col_needed):
-                self.db.drop_collection(mol_collection)
-                self.db.drop_collection(count_collection)
+        start = time.time()
+        for i, doc in enumerate(self.mol_collection.find()):
+            if i % 100000 == 0:
+                print(f"Processed {i} reactions in {time.time() - start: .2f} seconds")
+                sys.stdout.flush()
 
-                self.get_products_from_reactions()
-                self.precompute_mols()
+            template_set = doc["template_set"]
+            if template_set not in template_sets:
+                template_sets.append(template_set)
+                mol_fps[template_set] = []
+                mol_fp_counts[template_set] = []
+                mol_fp_refs[template_set] = {}
+
+            current_index_in_set = len(mol_fps[template_set])
+            mol_fps[template_set].append(_bits_to_array(doc["mfp_bits"]))
+            mol_fp_counts[template_set].append(doc["mfp_count"])
+            mol_fp_refs[template_set][current_index_in_set] = doc["_id"]
+
+        for template_set in template_sets:
+            mol_fps[template_set] = np.stack(
+                mol_fps[template_set],
+                dtype=np.bool_
+            )
+            mol_fp_counts[template_set] = np.array(
+                mol_fp_counts[template_set],
+                dtype=int
+            )
+
+        return mol_fps, mol_fp_counts, mol_fp_refs
 
     def lookup_similar_smiles(
         self,
@@ -90,23 +123,25 @@ class Reactions:
         """
         query_mol = Chem.MolFromSmiles(smiles)
         if method == "accurate":
-            results = sim_search_aggregate(
-                mol=query_mol,
-                mol_collection=self.molecules,
-                count_collection=self.counts,
-                threshold=sim_threshold,
-                reaction_set=reaction_set
-            )
-        elif method == "naive":
-            results = sim_search(
-                mol=query_mol,
-                mol_collection=self.molecules,
-                count_collection=self.counts,
-                threshold=sim_threshold,
-                reaction_set=reaction_set
-            )
-        elif method == "fast":
-            raise NotImplementedError
+            pass
+        # if method == "accurate":
+        #     results = sim_search_aggregate(
+        #         mol=query_mol,
+        #         mol_collection=self.molecules,
+        #         count_collection=self.counts,
+        #         threshold=sim_threshold,
+        #         reaction_set=reaction_set
+        #     )
+        # elif method == "naive":
+        #     results = sim_search(
+        #         mol=query_mol,
+        #         mol_collection=self.molecules,
+        #         count_collection=self.counts,
+        #         threshold=sim_threshold,
+        #         reaction_set=reaction_set
+        #     )
+        # elif method == "fast":
+        #     raise NotImplementedError
         else:
             raise ValueError(f"Similarity search method '{method}' not implemented")
 
@@ -137,81 +172,3 @@ class Reactions:
         resp = ReactionsResponse(reactions=reactions_by_ids)
 
         return resp
-
-    def get_products_from_reactions(self) -> None:
-        """
-        Extracts the products from each reaction in the reactions collection
-        and stores them in the molecules collection to use for similarity search.
-        Assumes that the database and the reactions collection have already been
-        initialized.
-        """
-        print("Extracting products from reactions..")
-        sys.stdout.flush()
-        start = time.time()
-
-        for i, rxn in enumerate(self.collection.find()):
-            if i % 100000 == 0:
-                print(f"Processed {i} reactions in {time.time() - start: .2f} seconds")
-                sys.stdout.flush()
-
-            if "products" in rxn:
-                product_smiles = rxn["products"]
-            elif "reaction_smiles" in rxn:
-                product_smiles = rxn["reaction_smiles"].split(">")[-1]
-            else:
-                continue
-
-            if Chem.MolFromSmiles(product_smiles) is None:
-                continue
-
-            self.molecules.insert_one({
-                "_id": rxn["_id"],
-                "smiles": product_smiles,
-                "template_set": rxn["template_set"]
-            })
-        print("Extraction done.")
-        sys.stdout.flush()
-
-    def precompute_mols(self) -> None:
-        start = time.time()
-
-        mfp_counts = {}
-        for i, mol in enumerate(self.molecules.find()):
-            if i % 100000 == 0:
-                print(f"Processed {i} reactions in {time.time() - start: .2f} seconds")
-                sys.stdout.flush()
-
-            smiles = mol["smiles"]
-            rdmol = Chem.MolFromSmiles(smiles)
-            mfp = list(AllChem.GetMorganFingerprintAsBitVect(rdmol, radius=2, nBits=2048).GetOnBits())
-            pfp = list(Chem.rdmolops.PatternFingerprint(rdmol).GetOnBits())
-            # smiles = Chem.MolToSmiles(rdmol)
-
-            for bit in mfp:
-                mfp_counts[bit] = mfp_counts.get(bit, 0) + 1
-            
-            # update the molecule document with the fingerprints and their counts
-            self.molecules.update_one(
-                filter={
-                    "_id": mol["_id"],
-                    "template_set": mol["template_set"]
-                },
-                update={
-                    "$set": {
-                        "mfp": {"bits": mfp, "count": len(mfp)},
-                        "pfp": {"bits": pfp, "count": len(pfp)}
-                    }
-                }
-            )
-
-        for k, v in mfp_counts.items():
-            self.counts.insert_one({
-                "_id": k,
-                "count": v,
-                "template_set": mol["template_set"]
-            })
-        
-        self.molecules.create_index("mfp.bits")
-        self.molecules.create_index("mfp.count")
-        self.molecules.create_index("pfp.bits")
-        self.molecules.create_index("pfp.count")
