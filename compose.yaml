@@ -26,6 +26,16 @@ services:
     depends_on:
       - mongo
 
+  precompute:
+    image: ${ASKCOS_REGISTRY}/precompute:2.0
+    hostname: precompute
+    restart: always
+    env_file:
+      - .env
+    network_mode: host
+    depends_on:
+      - mongo
+
   mongo:
     image: mongo:6.0.9-jammy
     hostname: mongo

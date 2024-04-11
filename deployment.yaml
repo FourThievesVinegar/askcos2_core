@@ -7,6 +7,10 @@ docker:
     image: ${ASKCOS_REGISTRY}/celery:2.0
     build: docker build -f Dockerfile_celery -t ${ASKCOS_REGISTRY}/celery:2.0 .
     start: docker compose -f compose.yaml up -d celery_workers
+  precompute:
+    image: ${ASKCOS_REGISTRY}/precompute:2.0
+    build: docker build -f Dockerfile_precompute -t ${ASKCOS_REGISTRY}/precompute:2.0 .
+    start: docker compose -f compose.yaml up -d precompute
 
 singularity:
   cpu:

@@ -181,46 +181,32 @@ def main():
         ]
         cmds_stop_services.extend(cmds)
 
-    # extend with commands for app and celery
+    # extend with commands for app, celery and precompute
     with open("deployment.yaml", "r") as f:
         core_deployment_config = yaml.safe_load(f)
 
     if image_policy == "build_all":
-        cmd = str(core_deployment_config[runtime]["app"]["build"])
-        cmds = [
-            f"echo Building image for askcos2_core, runtime: {runtime}\n",
-            f"{cmd}\n",
-            "\n"
-        ]
-        cmds_get_images.extend(cmds)
-
-        cmd = str(core_deployment_config[runtime]["celery"]["build"])
-        cmds = [
-            f"echo Building image for askcos2_core, runtime: {runtime}\n",
-            f"{cmd}\n",
-            "\n"
-        ]
-        cmds_get_images.extend(cmds)
+        for core_service in ["app", "celery", "precompute"]:
+            cmd = str(core_deployment_config[runtime][core_service]["build"])
+            cmds = [
+                f"echo Building image for askcos2_core "
+                f"{core_service}, runtime: {runtime}\n",
+                f"{cmd}\n",
+                "\n"
+            ]
+            cmds_get_images.extend(cmds)
     else:
         raise NotImplementedError
 
-    cmd = str(core_deployment_config[runtime]["app"]["start"])
-    cmds = [
-        f"echo Starting services for askcos2_core app, "
-        f"runtime: {runtime}\n",
-        f"{cmd}\n",
-        "\n"
-    ]
-    cmds_start_services.extend(cmds)
-
-    cmd = str(core_deployment_config[runtime]["celery"]["start"])
-    cmds = [
-        f"echo Starting services for celery_workers, "
-        f"runtime: {runtime}\n",
-        f"{cmd}\n",
-        "\n"
-    ]
-    cmds_start_services.extend(cmds)
+    for core_service in ["app", "celery"]:
+        cmd = str(core_deployment_config[runtime][core_service]["start"])
+        cmds = [
+            f"echo Starting services for askcos2_core "
+            f"{core_service}, runtime: {runtime}\n",
+            f"{cmd}\n",
+            "\n"
+        ]
+        cmds_start_services.extend(cmds)
 
     cmd = str(core_deployment_config["commands"][f"stop-{runtime}"])
     cmds = [
