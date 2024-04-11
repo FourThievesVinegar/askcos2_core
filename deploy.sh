@@ -252,7 +252,7 @@ index-db() {
 count-mongo-docs() {
   echo "Buyables collection:          $(run-mongo-js "db.buyables.estimatedDocumentCount({})" | tr -d '\r') / 509953 expected (default)"
   echo "Chemicals collection:         $(run-mongo-js "db.chemicals.estimatedDocumentCount({})" | tr -d '\r') / 19188359 expected (default)"
-  echo "Reactions collection:         $(run-mongo-js "db.reactions.estimatedDocumentCount({})" | tr -d '\r') / 1243379 expected (default, 5263537 including cas)"
+  echo "Reactions collection:         $(run-mongo-js "db.reactions.estimatedDocumentCount({})" | tr -d '\r') / 3052316 expected (default, 7072474 including cas)"
   echo "Retro template collection:    $(run-mongo-js "db.retro_templates.estimatedDocumentCount({})" | tr -d '\r') / 432538 expected (default, 612013 including cas*)"
   echo "Forward template collection:  $(run-mongo-js "db.forward_templates.estimatedDocumentCount({})" | tr -d '\r') / 17089 expected (default)"
   echo "Sites ref collection:         $(run-mongo-js "db.sites_refs.estimatedDocumentCount({})" | tr -d '\r') / 123 expected (default)"
@@ -279,14 +279,16 @@ seed-db() {
     echo "Loading default buyables data..."
     buyables_file="${DATA_DIR}/buyables/mcule_buyables_fd2.json.gz"
     mongoimport buyables "$buyables_file"
+
     buyables_file="${DATA_DIR}/buyables/chembridge_buyables.json.gz"
     DB_DROP="" mongoimport buyables "$buyables_file"
+
     buyables_file="${DATA_DIR}/buyables/buyables.json.gz"
     DB_DROP="" mongoimport buyables "$buyables_file"
   elif [ -f "$BUYABLES" ]; then
     echo "Loading buyables data from $BUYABLES..."
     buyables_file="${DATA_DIR}/buyables/$(basename "$BUYABLES")"
-    docker cp "$BUYABLES" "${COMPOSE_PROJECT_NAME}"_mongo_1:"$buyables_file"
+    docker cp "$BUYABLES" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$buyables_file"
     mongoimport buyables "$buyables_file"
   fi
 
@@ -294,8 +296,10 @@ seed-db() {
     echo "Loading default chemicals data..."
     chemicals_file="${DATA_DIR}/historian/chemicals.json.gz"
     mongoimport chemicals "$chemicals_file"
+
     chemicals_file="${DATA_DIR}/historian/historian.pistachio.json.gz"
     DB_DROP="" mongoimport chemicals "$chemicals_file"
+
     chemicals_file="${DATA_DIR}/historian/historian.bkms_metabolic.json.gz"
     DB_DROP="" mongoimport chemicals "$chemicals_file"
   elif [ "$CHEMICALS" = "pistachio" ]; then
@@ -309,7 +313,7 @@ seed-db() {
   elif [ -f "$CHEMICALS" ]; then
     echo "Loading chemicals data from $CHEMICALS..."
     chemicals_file="${DATA_DIR}/historian/$(basename "$CHEMICALS")"
-    docker cp "$CHEMICALS" "${COMPOSE_PROJECT_NAME}"_mongo_1:"$chemicals_file"
+    docker cp "$CHEMICALS" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$chemicals_file"
     mongoimport chemicals "$chemicals_file"
   fi
 
@@ -317,8 +321,13 @@ seed-db() {
     echo "Loading default reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
     mongoimport reactions "$reactions_file"
+
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
     DB_DROP="" mongoimport reactions "$reactions_file"
+
+    reactions_file="${DATA_DIR}/historian/reactions.USPTO_FULL.json.gz"
+    DB_DROP="" mongoimport reactions "$reactions_file"
+
     reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
     if [ -f "$reactions_file" ]; then
       DB_DROP="" mongoimport reactions "$reactions_file"
@@ -335,10 +344,14 @@ seed-db() {
     echo "Loading bkms reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
     mongoimport reactions "$reactions_file"
+  elif [ "$REACTIONS" = "USPTO_FULL" ]; then
+    echo "Loading USPTO_FULL reactions data..."
+    reactions_file="${DATA_DIR}/historian/reactions.USPTO_FULL.json.gz"
+    mongoimport reactions "$reactions_file"
   elif [ -f "$REACTIONS" ]; then
     echo "Loading reactions data from $REACTIONS..."
     reactions_file="${DATA_DIR}/historian/$(basename "$REACTIONS")"
-    docker cp "$REACTIONS" "${COMPOSE_PROJECT_NAME}"_mongo_1:"$reactions_file"
+    docker cp "$REACTIONS" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$reactions_file"
     mongoimport reactions "$reactions_file"
   fi
 
@@ -346,14 +359,19 @@ seed-db() {
     echo "Loading default retrosynthetic templates..."
     retro_file="${DATA_DIR}/templates/retro.templates.reaxys.json.gz"
     mongoimport retro_templates "$retro_file"
+
     retro_file="${DATA_DIR}/templates/retro.templates.pistachio.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
+
     retro_file="${DATA_DIR}/templates/retro.templates.bkms_metabolic.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
+
     retro_file="${DATA_DIR}/templates/retro.templates.pistachio_ringbreaker.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
+
     retro_file="${DATA_DIR}/templates/retro.templates.reaxys_biocatalysis.json.gz"
     DB_DROP="" mongoimport retro_templates "$retro_file"
+
     retro_file="${DATA_DIR}/templates/retro.templates.cas.json.gz"
     if [ -f "retro_file" ]; then
       DB_DROP="" mongoimport retro_templates "$retro_file"
@@ -377,7 +395,7 @@ seed-db() {
   elif [ -f "$RETRO_TEMPLATES" ]; then
     echo "Loading retrosynthetic templates from $RETRO_TEMPLATES ..."
     retro_file="${DATA_DIR}/templates/$(basename "$RETRO_TEMPLATES")"
-    docker cp "$RETRO_TEMPLATES" "${COMPOSE_PROJECT_NAME}"_mongo_1:"$retro_file"
+    docker cp "$RETRO_TEMPLATES" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$retro_file"
     mongoimport retro_templates "$retro_file"
   fi
 
@@ -388,7 +406,7 @@ seed-db() {
   elif [ -f "$FORWARD_TEMPLATES" ]; then
     echo "Loading forward templates from $FORWARD_TEMPLATES ..."
     forward_file="${DATA_DIR}/templates/$(basename "$FORWARD_TEMPLATES")"
-    docker cp "$FORWARD_TEMPLATES" "${COMPOSE_PROJECT_NAME}"_mongo_1:"$forward_file"
+    docker cp "$FORWARD_TEMPLATES" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$forward_file"
     mongoimport forward_templates "$forward_file"
   fi
 
