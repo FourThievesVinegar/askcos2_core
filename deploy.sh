@@ -230,6 +230,12 @@ mongoexport() {
     bash -c 'mongoexport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray | gzip > '$2
 }
 
+precompute() {
+  # arg 1 is collection name, i.e., mode for precomputation
+  docker compose -f compose.yaml exec -T precompute \
+    bash -c 'python scripts/precompute.py --mode='$1''
+}
+
 index-db() {
   if [ "$DROP_INDEXES" = "true" ]; then
     echo "Dropping existing indexes in mongo database..."
@@ -269,7 +275,7 @@ seed-db() {
   fi
 
   echo "Starting the mongo container for seeding db"
-  docker compose -f compose.yaml up -d mongo
+  docker compose -f compose.yaml up -d mongo precompute
   sleep 3
 
   echo "Seeding mongo database..."
@@ -332,6 +338,8 @@ seed-db() {
     if [ -f "$reactions_file" ]; then
       DB_DROP="" mongoimport reactions "$reactions_file"
     fi
+
+    precompute reactions
   elif [ "$REACTIONS" = "pistachio" ]; then
     echo "Loading pistachio reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
@@ -344,15 +352,21 @@ seed-db() {
     echo "Loading bkms reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
     mongoimport reactions "$reactions_file"
+
+    precompute reactions
   elif [ "$REACTIONS" = "USPTO_FULL" ]; then
     echo "Loading USPTO_FULL reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.USPTO_FULL.json.gz"
     mongoimport reactions "$reactions_file"
+
+    precompute reactions
   elif [ -f "$REACTIONS" ]; then
     echo "Loading reactions data from $REACTIONS..."
     reactions_file="${DATA_DIR}/historian/$(basename "$REACTIONS")"
     docker cp "$REACTIONS" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$reactions_file"
     mongoimport reactions "$reactions_file"
+
+    precompute reactions
   fi
 
   if [ "$RETRO_TEMPLATES" = "default" ]; then
@@ -419,7 +433,7 @@ seed-db() {
   index-db
   echo "Seeding db completed."
   count-mongo-docs
-  docker compose -f compose.yaml rm -sf mongo
+  docker compose -f compose.yaml rm -sf mongo precompute
   echo
 }
 
