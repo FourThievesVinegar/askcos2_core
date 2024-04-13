@@ -28,6 +28,7 @@ services:
 
   precompute:
     image: ${ASKCOS_REGISTRY}/precompute:2.0
+    tty: true
     hostname: precompute
     restart: always
     env_file:

@@ -233,7 +233,7 @@ mongoexport() {
 precompute() {
   # arg 1 is collection name, i.e., mode for precomputation
   docker compose -f compose.yaml exec -T precompute \
-    bash -c 'python scripts/precompute.py --mode='$1''
+    /opt/conda/bin/python -m scripts.pre_compute --mode='$1'
 }
 
 index-db() {

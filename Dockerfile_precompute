@@ -37,5 +37,3 @@ RUN pip install python-keycloak==3.7.0 rdchiral==1.1.0
 
 COPY . /ASKCOSv2/askcos2_core
 WORKDIR /ASKCOSv2/askcos2_core
-
-CMD ["bash"]
