@@ -222,12 +222,26 @@ mongoimport() {
     bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 '${DB_DROP}
 }
 
+mongoimport_upsert() {
+  # arg 1 is collection name
+  # arg 2 is file path
+  # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
+  docker compose -f compose.yaml exec -T $3 mongo \
+    bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 --mode upsert'${DB_DROP}
+}
+
 mongoexport() {
   # arg 1 is collection name
   # arg 2 is file path
   # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
   docker compose -f compose.yaml exec -T $3 mongo \
     bash -c 'mongoexport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray | gzip > '$2
+}
+
+precompute() {
+  # arg 1 is collection name, i.e., mode for precomputation
+  docker compose -f compose.yaml exec -T precompute \
+    /opt/conda/bin/python -m scripts.pre_compute --mode="$1"
 }
 
 index-db() {
@@ -269,7 +283,7 @@ seed-db() {
   fi
 
   echo "Starting the mongo container for seeding db"
-  docker compose -f compose.yaml up -d mongo
+  docker compose -f compose.yaml up -d mongo precompute
   sleep 3
 
   echo "Seeding mongo database..."
@@ -320,39 +334,47 @@ seed-db() {
   if [ "$REACTIONS" = "default" ]; then
     echo "Loading default reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
 
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
-    DB_DROP="" mongoimport reactions "$reactions_file"
+    DB_DROP="" mongoimport_upsert reactions "$reactions_file"
 
     reactions_file="${DATA_DIR}/historian/reactions.USPTO_FULL.json.gz"
-    DB_DROP="" mongoimport reactions "$reactions_file"
+    DB_DROP="" mongoimport_upsert reactions "$reactions_file"
 
     reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
     if [ -f "$reactions_file" ]; then
-      DB_DROP="" mongoimport reactions "$reactions_file"
+      DB_DROP="" mongoimport_upsert reactions "$reactions_file"
     fi
+
+    precompute reactions
   elif [ "$REACTIONS" = "pistachio" ]; then
     echo "Loading pistachio reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.pistachio.json.gz"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
   elif [ "$REACTIONS" = "cas" ]; then
     echo "Loading cas reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.cas.min.json.gz"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
   elif [ "$REACTIONS" = "bkms" ]; then
     echo "Loading bkms reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.bkms_metabolic.json.gz"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
+
+    precompute reactions
   elif [ "$REACTIONS" = "USPTO_FULL" ]; then
     echo "Loading USPTO_FULL reactions data..."
     reactions_file="${DATA_DIR}/historian/reactions.USPTO_FULL.json.gz"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
+
+    precompute reactions
   elif [ -f "$REACTIONS" ]; then
     echo "Loading reactions data from $REACTIONS..."
     reactions_file="${DATA_DIR}/historian/$(basename "$REACTIONS")"
     docker cp "$REACTIONS" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$reactions_file"
-    mongoimport reactions "$reactions_file"
+    mongoimport_upsert reactions "$reactions_file"
+
+    precompute reactions
   fi
 
   if [ "$RETRO_TEMPLATES" = "default" ]; then
@@ -419,7 +441,7 @@ seed-db() {
   index-db
   echo "Seeding db completed."
   count-mongo-docs
-  docker compose -f compose.yaml rm -sf mongo
+  docker compose -f compose.yaml rm -sf mongo precompute
   echo
 }
 

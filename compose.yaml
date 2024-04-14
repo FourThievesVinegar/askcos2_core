@@ -22,7 +22,21 @@ services:
       - .env
     network_mode: host
     volumes:
+      - "askcosv2_precompute:/ASKCOSv2/askcos2_core/data/precompute"
       - "./data/db:/usr/local/askcos-data/db"
+    depends_on:
+      - mongo
+
+  precompute:
+    image: ${ASKCOS_REGISTRY}/precompute:2.0
+    tty: true
+    hostname: precompute
+    restart: always
+    env_file:
+      - .env
+    network_mode: host
+    volumes:
+      - "askcosv2_precompute:/ASKCOSv2/askcos2_core/data/precompute"
     depends_on:
       - mongo
 
@@ -66,6 +80,8 @@ services:
     env_file:
       - .env
     network_mode: host
+    volumes:
+      - "askcosv2_precompute:/ASKCOSv2/askcos2_core/data/precompute"
     depends_on:
       - rabbitmq
       - redis
@@ -73,3 +89,4 @@ services:
 volumes:
   askcosv2_redisdata:
   askcosv2_mongo_data:
+  askcosv2_precompute:

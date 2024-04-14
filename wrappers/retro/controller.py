@@ -114,10 +114,10 @@ class RetroController(BaseWrapper):
             wrapper_input = self.convert_input(
                 input=input, backend=input.backend)
             wrapper_response = wrapper.call_sync(wrapper_input)
-            print(wrapper_input)
-            print(input.backend)
-            print(wrapper)
-            print(wrapper_response)
+            # print(wrapper_input)
+            # print(input.backend)
+            # print(wrapper)
+            # print(wrapper_response)
             response = self.convert_response(
                 wrapper_response=wrapper_response, backend=input.backend)
 
