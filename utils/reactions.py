@@ -5,10 +5,14 @@ from configs import db_config
 from pydantic import BaseModel
 from pymongo import errors, MongoClient
 from rdkit import Chem
+from rdkit.Chem import AllChem
 from schemas.base import LowerCamelAliasModel
 from typing import Any
 from utils import register_util
 from utils.similarity_search_utils import sim_search, sim_search_aggregate
+
+DEFAULT_MORGAN_RADIUS = 2
+DEFAULT_MORGAN_LEN = 2048
 
 
 class ReactionsInput(LowerCamelAliasModel):
@@ -42,7 +46,9 @@ class Reactions:
         self.client = MongoClient(serverSelectionTimeoutMS=1000, **db_config.MONGO)
         database = "askcos"
         collection = "reactions"
+        # only products with valid reaction_smarts are kept in mol_collection
         mol_collection = "products_in_reactions"
+        count_collection = "fp_counts_in_reactions"
 
         try:
             self.client.server_info()
@@ -52,9 +58,11 @@ class Reactions:
             self.db = self.client[database]
             self.collection = self.db[collection]
             self.mol_collection = self.db[mol_collection]
+            self.count_collection = self.db[count_collection]
 
-            self.mol_fps, self.mol_fp_counts, self.mol_fp_refs = (
-                self.load_mol_fps_and_counts())
+            # FIXME: loading fingerprints is very expensive
+            # self.mol_fps, self.mol_fp_counts, self.mol_fp_refs = (
+            #     self.load_mol_fps_and_counts())
 
     def load_mol_fps_and_counts(self) -> tuple[
         dict[str, np.ndarray],
@@ -85,10 +93,9 @@ class Reactions:
             mol_fp_refs[template_set][current_index_in_set] = doc["_id"]
 
         for template_set in template_sets:
-            mol_fps[template_set] = np.stack(
-                mol_fps[template_set],
-                dtype=np.bool_
-            )
+            mol_fps[template_set] = np.stack(mol_fps[template_set])
+            print(f"mol_fps shape for template_set {template_set}: "
+                  f"{mol_fps[template_set].shape}")
             mol_fp_counts[template_set] = np.array(
                 mol_fp_counts[template_set],
                 dtype=int
@@ -99,7 +106,7 @@ class Reactions:
     def lookup_similar_smiles(
         self,
         smiles: str,
-        sim_threshold: float,
+        sim_threshold: float = 0.3,
         reaction_set: str = "USPTO_FULL",
         method: str = "accurate"
     ) -> list:
@@ -122,30 +129,31 @@ class Reactions:
             similarity thresholds).
         """
         query_mol = Chem.MolFromSmiles(smiles)
+        if not query_mol:
+            return []
+
         if method == "accurate":
-            pass
-        # if method == "accurate":
-        #     results = sim_search_aggregate(
-        #         mol=query_mol,
-        #         mol_collection=self.molecules,
-        #         count_collection=self.counts,
-        #         threshold=sim_threshold,
-        #         reaction_set=reaction_set
-        #     )
-        # elif method == "naive":
-        #     results = sim_search(
-        #         mol=query_mol,
-        #         mol_collection=self.molecules,
-        #         count_collection=self.counts,
-        #         threshold=sim_threshold,
-        #         reaction_set=reaction_set
-        #     )
-        # elif method == "fast":
-        #     raise NotImplementedError
+            results = sim_search_aggregate(
+                mol=query_mol,
+                mol_collection=self.mol_collection,
+                count_collection=self.count_collection,
+                threshold=sim_threshold,
+                reaction_set=reaction_set
+            )
+        elif method == "naive":
+            results = sim_search(
+                mol=query_mol,
+                mol_collection=self.mol_collection,
+                count_collection=self.count_collection,
+                threshold=sim_threshold,
+                reaction_set=reaction_set
+            )
+        elif method == "fast":
+            raise NotImplementedError
         else:
             raise ValueError(f"Similarity search method '{method}' not implemented")
 
-        output = [{'smiles': i['smiles'], 'tanimoto': i['tanimoto'], 'id': i['_id']} for i in results]
+        output = [{'smiles': i['product_smiles'], 'tanimoto': i['tanimoto'], 'id': i['_id']} for i in results]
 
         return output
 
