@@ -1,18 +1,21 @@
 import argparse
 import multiprocessing
+import numpy as np
 import sys
 import time
 from configs import db_config
 from pymongo import errors, MongoClient
-from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit import Chem, RDLogger
+from rdkit.Chem import AllChem, DataStructs
 from typing import Any
 
+RDLogger.DisableLog("rdApp.warning")
 
 client = MongoClient(serverSelectionTimeoutMS=1000, **db_config.MONGO)
 database = "askcos"
 collection = "reactions"
 mol_collection = "products_in_reactions"
+index_collection = "index_for_reactions"
 count_collection = "fp_counts_in_reactions"
 
 try:
@@ -26,6 +29,7 @@ else:
 
     collection = db[collection]
     mol_collection = db[mol_collection]
+    index_collection = db[index_collection]
     count_collection = db[count_collection]
 
 
@@ -39,6 +43,8 @@ def parse_args():
 
 
 def _get_products_and_fps(rxn: dict) -> dict[str, Any] | None:
+    fp_size = 2048
+
     reaction_smiles = rxn["reaction_smiles"].split()[0]
     reactant_smiles, _, product_smiles = reaction_smiles.split(">")
     product_mol = Chem.MolFromSmiles(product_smiles)
@@ -48,10 +54,21 @@ def _get_products_and_fps(rxn: dict) -> dict[str, Any] | None:
     if reactant_mol is None:
         return None
 
+    product_mol = AllChem.RemoveHs(product_mol)
+
     mfp_bits = list(AllChem.GetMorganFingerprintAsBitVect(
-        product_mol, radius=2, nBits=2048).GetOnBits())
+        product_mol, radius=2, nBits=fp_size).GetOnBits())
     pfp_bits = list(Chem.rdmolops.PatternFingerprint(
         product_mol).GetOnBits())
+
+    # mfp_bits = np.empty((1, fp_size), dtype=dtype)
+    # pfp_bits = np.empty((1, fp_size), dtype=dtype)
+    #
+    # DataStructs.ConvertToNumpyArray(mfp_bits_vc, mfp_bits)
+    # DataStructs.ConvertToNumpyArray(pfp_bits_vc, pfp_bits)
+    #
+    # mfp_bits = mfp_bits.astype(dtype=np.bool_)
+    # pfp_bits = pfp_bits.astype(dtype=np.bool_)
 
     mol = {
         "_id": rxn["_id"],
@@ -76,6 +93,7 @@ def _get_products_and_fps(rxn: dict) -> dict[str, Any] | None:
 def precompute_reactions() -> None:
     start = time.time()
     mfp_counts = {}
+    # all_mfp_bits = []
     success_count = 0
 
     p = multiprocessing.Pool()
@@ -83,6 +101,9 @@ def precompute_reactions() -> None:
         "reaction_smiles": {"$exists": True},
         "reaction_smarts": {"$nin": [None, ""]}
     }
+
+    print("Precomputing fingerprints for reactions")
+    sys.stdout.flush()
 
     cursor = collection.find(query)
     for i, result in enumerate(p.imap_unordered(_get_products_and_fps, cursor)):
@@ -97,6 +118,7 @@ def precompute_reactions() -> None:
 
         template_set = result["template_set"]
         mfp_bits = result["mfp_bits"]
+        # all_mfp_bits.append(mfp_bits)
 
         if template_set not in mfp_counts:
             mfp_counts[template_set] = {}
@@ -111,6 +133,14 @@ def precompute_reactions() -> None:
     p.close()
     p.join()
 
+    # print("Stacking all mfp_bits..")
+    # all_mfp_bits = np.stack(all_mfp_bits)
+    # print(f"Done stacking, shape: {all_mfp_bits.shape}, dtype: {all_mfp_bits.dtype}."
+    #       f"Saving")
+    #
+    # ofn = "data/precompute/all_mfp_bits.npy"
+    # np.save(ofn, all_mfp_bits)
+
     for template_set, mfp_counts_by_template in mfp_counts.items():
         for k, v in mfp_counts_by_template.items():
             count_collection.insert_one({
@@ -119,6 +149,7 @@ def precompute_reactions() -> None:
                 "template_set": template_set
             })
 
+    # Indexing.. Also taking too long
     # mol_collection.create_index("mfp_bits")
     # mol_collection.create_index("mfp_count")
     # mol_collection.create_index("pfp_bits")
