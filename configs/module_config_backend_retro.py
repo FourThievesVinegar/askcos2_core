@@ -377,7 +377,7 @@ module_config = {
             "ports_to_expose": [9441],
             "default_prediction_url": "http://0.0.0.0:9441/predictions",
             "custom_prediction_url": "",
-            "timeout": 10,
+            "timeout": 30,
             "available_model_names": [
                 "USPTO_FULL",
                 "bkms"
