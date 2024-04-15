@@ -102,14 +102,14 @@ def precompute_reactions() -> None:
         "reaction_smarts": {"$nin": [None, ""]}
     }
 
-    print("Precomputing fingerprints for reactions")
+    print("Precomputing fingerprints for all reactions (including newly added ones)")
     sys.stdout.flush()
 
     cursor = collection.find(query)
     for i, result in enumerate(p.imap_unordered(_get_products_and_fps, cursor)):
         if i > 0 and i % 100000 == 0:
             print(f"Processed {i} reactions with 'reaction_smiles' and 'reaction_smarts' "
-                  f"in {time.time() - start: .2f} seconds. "
+                  f"in {time.time() - start:.2f} seconds. "
                   f"Success count: {success_count}")
             sys.stdout.flush()
 
@@ -144,7 +144,7 @@ def precompute_reactions() -> None:
     for template_set, mfp_counts_by_template in mfp_counts.items():
         for k, v in mfp_counts_by_template.items():
             count_collection.insert_one({
-                "_id": k,
+                "bit_index": k,
                 "count": v,
                 "template_set": template_set
             })

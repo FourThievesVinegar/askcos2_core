@@ -64,8 +64,11 @@ def sim_search(
     req_common_count = qfp_count - fp_min + 1
     if count_collection is not None:
         req_common_bits = [
-            count["_id"]
-            for count in count_collection.find({"_id": {"$in": qfp}})
+            count["bit_index"]
+            for count in count_collection.find({
+                "bit_index": {"$in": qfp},
+                "template_set": reaction_set
+            })
             .sort("count", 1)
             .limit(req_common_count)
         ]
@@ -128,8 +131,11 @@ def sim_search_aggregate_experimental(
         req_common_count = qfp_count - fp_min + 1
         if count_collection is not None:
             req_common_bits = [
-                count["_id"]
-                for count in count_collection.find({"_id": {"$in": qfp}})
+                count["bit_index"]
+                for count in count_collection.find({
+                    "bit_index": {"$in": qfp},
+                    "template_set": reaction_set
+                })
                 .sort("count", 1)
                 .limit(req_common_count)
             ]
@@ -207,8 +213,11 @@ def sim_search_aggregate(
     req_common_count = qfp_count - fp_min + 1
     if count_collection is not None:
         req_common_bits = [
-            count["_id"]
-            for count in count_collection.find({"_id": {"$in": qfp}})
+            count["bit_index"]
+            for count in count_collection.find({
+                "bit_index": {"$in": qfp},
+                "template_set": reaction_set
+            })
             .sort("count", 1)
             .limit(req_common_count)
         ]
