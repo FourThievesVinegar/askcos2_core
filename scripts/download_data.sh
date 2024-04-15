@@ -49,8 +49,8 @@ fi
 if [ ! -f ./data/db/historian/reactions.bkms_metabolic.json.gz ]; then
     echo "./data/db/historian/reactions.bkms_metabolic.json.gz not found. Downloading.."
     wget -q --show-progress -O data/db/historian/reactions.bkms_metabolic.json.gz \
-      "https://www.dropbox.com/scl/fi/4v9m21yrshm226kurq39p/reactions.bkms_metabolic.json.gz?rlkey=wrw0fpcoben19xeh5jbz693ky&dl=1"
-    echo "historian.reactions.json.gz Downloaded."
+      "https://www.dropbox.com/scl/fi/67tc0zicbe5hpay9cisi1/reactions.bkms_metabolic.json.gz?rlkey=kx5577t58enil05nqembqpa96&dl=1"
+    echo "reactions.bkms_metabolic.json.gz Downloaded."
 fi
 
 if [ ! -f ./data/db/historian/reactions.cas.min.json.gz ]; then
@@ -69,6 +69,13 @@ if [ ! -f ./data/db/historian/reactions.pistachio.json.gz ]; then
     wget -q --show-progress -O data/db/historian/reactions.pistachio.json.gz \
       "https://www.dropbox.com/scl/fi/1tzblq7b92ld8q5cy7w19/reactions.pistachio.min.json.gz?rlkey=p2ug9qvj78q1efdx3xmfabv3h&dl=1"
     echo "reactions.pistachio.json.gz Downloaded."
+fi
+
+if [ ! -f ./data/db/historian/reactions.USPTO_FULL.json.gz ]; then
+    echo "./data/db/historian/reactions.USPTO_FULL.json.gz not found. Downloading.."
+    wget -q --show-progress -O data/db/historian/reactions.USPTO_FULL.json.gz \
+      "https://www.dropbox.com/scl/fi/19h8ip139l2o1dyu95uog/reactions.USPTO_FULL.json.gz?rlkey=6lyepgx5oiei0gct6i5miuyuy&dl=1"
+    echo "reactions.USPTO_FULL.json.gz Downloaded."
 fi
 
 mkdir -p ./data/db/references
