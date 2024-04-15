@@ -12,7 +12,7 @@ from utils.registry import get_util_registry
 
 class BuyableProperty(BaseModel):
     name: str
-    value: float
+    value: float | str
 
 
 class Buyable(BaseModel):

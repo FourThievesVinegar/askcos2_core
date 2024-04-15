@@ -241,6 +241,19 @@ class Pricer:
             search_result = list(map(key_switch, search_result))
             # print(search_result)
 
+        for res in search_result:
+            properties= res["properties"]
+            new_properties = []
+            for prop in properties:
+                key, value = list(prop.items()).pop()
+                new_properties.append(
+                    {"name": key,
+                     "value": value}
+                )
+            res["properties"] = new_properties
+        
+        print("search_result", search_result)
+
         return search_result
 
     def list_sources(self) -> list[str]:
