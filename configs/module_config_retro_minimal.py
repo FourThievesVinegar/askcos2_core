@@ -18,9 +18,10 @@ module_config = {
         "pmi_calculator": True,
         "qm_descriptors": False,
         "reaction_classification": True,
-        "retro_template_relevance": True,
         "retro_augmented_transformer": False,
+        "retro_graph2smiles": False,
         "retro_retrosim": False,
+        "retro_template_relevance": True,
         "scscore": True,
         "site_selectivity": False,
         "tree_search_expand_one": True,
@@ -328,27 +329,6 @@ module_config = {
         ]
     },
 
-    "retro_template_relevance": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/template_relevance.git",
-        "description":
-            "One-step retrosynthesis model with an FFN-based template classifier",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "use_gpu": False,
-            "ports_to_expose": [9410, 9411, 9412],
-            "default_prediction_url": "http://0.0.0.0:9410/predictions",
-            "custom_prediction_url": "",
-            "timeout": 10,
-            "available_model_names": [
-                "bkms_metabolic",
-                "pistachio",
-                "pistachio_ringbreaker",
-                "reaxys",
-                "reaxys_biocatalysis"
-            ]
-        }
-    },
-
     "retro_augmented_transformer": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/augmented_transformer.git",
         "description":
@@ -367,10 +347,28 @@ module_config = {
         }
     },
 
+    "retro_graph2smiles": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/graph2smiles.git",
+        "description":
+            "One-step retrosynthesis model using the Graph2SMILES model",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9430, 9431, 9432],
+            "default_prediction_url": "http://0.0.0.0:9430/predictions",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_model_names": [
+                "pistachio_23Q3",
+                "USPTO_FULL"
+            ]
+        }
+    },
+
     "retro_retrosim": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/retrosim.git",
         "description":
-            "One-step retrosynthesis model using the retrosim model",
+            "One-step retrosynthesis model using the RetroSim model",
         "deployment": {
             "deployment_config": "deployment.yaml",
             "use_gpu": False,
@@ -381,6 +379,27 @@ module_config = {
             "available_model_names": [
                 "USPTO_FULL",
                 "bkms"
+            ]
+        }
+    },
+
+    "retro_template_relevance": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/template_relevance.git",
+        "description":
+            "One-step retrosynthesis model with an FFN-based template classifier",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "use_gpu": False,
+            "ports_to_expose": [9410, 9411, 9412],
+            "default_prediction_url": "http://0.0.0.0:9410/predictions",
+            "custom_prediction_url": "",
+            "timeout": 10,
+            "available_model_names": [
+                "bkms_metabolic",
+                "pistachio",
+                "pistachio_ringbreaker",
+                "reaxys",
+                "reaxys_biocatalysis"
             ]
         }
     },
