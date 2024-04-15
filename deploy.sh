@@ -219,7 +219,7 @@ mongoimport() {
   # arg 2 is file path
   # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
   docker compose -f compose.yaml exec -T $3 mongo \
-    bash -c 'gunzip -c '$2' | mongoimport --mode=upsert --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 '${DB_DROP}
+    bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 '${DB_DROP}
 }
 
 mongoimport_upsert() {
@@ -292,18 +292,18 @@ seed-db() {
   if [ "$BUYABLES" = "default" ]; then
     echo "Loading default buyables data..."
     buyables_file="${DATA_DIR}/buyables/mcule_buyables_fd2.json.gz"
-    mongoimport buyables "$buyables_file" 
+    mongoimport_upsert buyables "$buyables_file"
 
     buyables_file="${DATA_DIR}/buyables/chembridge_buyables.json.gz"
-    DB_DROP="" mongoimport buyables "$buyables_file" 
+    DB_DROP="" mongoimport_upsert buyables "$buyables_file"
 
     buyables_file="${DATA_DIR}/buyables/buyables.json.gz"
-    DB_DROP="" mongoimport buyables "$buyables_file" 
+    DB_DROP="" mongoimport_upsert buyables "$buyables_file"
   elif [ -f "$BUYABLES" ]; then
     echo "Loading buyables data from $BUYABLES..."
     buyables_file="${DATA_DIR}/buyables/$(basename "$BUYABLES")"
     docker cp "$BUYABLES" "${COMPOSE_PROJECT_NAME}"-mongo-1:"$buyables_file"
-    mongoimport buyables "$buyables_file"
+    mongoimport_upsert buyables "$buyables_file"
   fi
 
   if [ "$CHEMICALS" = "default" ]; then
