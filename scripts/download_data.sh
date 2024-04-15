@@ -6,21 +6,21 @@ mkdir -p ./data/db/buyables
 if [ ! -f ./data/db/buyables/buyables.json.gz ]; then
     echo "./data/db/buyables/buyables.json.gz not found. Downloading.."
     wget -q --show-progress -O data/db/buyables/buyables.json.gz \
-      "https://www.dropbox.com/scl/fi/yxw0fwa0l3twe3tmq2ted/buyables.json.gz?rlkey=sl32q3ijaqx2t7r44ahrzx8a8&dl=1"
+      "https://www.dropbox.com/scl/fi/jaqo5r8jji7n19ijrohj1/buyables_ori_prop_new2.json.gz?rlkey=lnbcj7t1ygrjgqi3g7a7vshz2&dl=1"
     echo "buyables.json.gz Downloaded."
 fi
 
 if [ ! -f ./data/db/buyables/chembridge_buyables.json.gz ]; then
     echo "./data/db/buyables/chembridge_buyables.json.gz not found. Downloading.."
     wget -q --show-progress -O data/db/buyables/chembridge_buyables.json.gz \
-      "https://www.dropbox.com/scl/fi/gd4sxio01q9nnmgvg1qzk/chembridge_buyables.json.gz?rlkey=8kg181gyckgorlip41w79k31l&dl=1"
+      "https://www.dropbox.com/scl/fi/v5jayotulkdueiebck39g/chembridge_buyables_prop_new.json.gz?rlkey=zj3ncebc29ohzmhenj8fmeeo2&dl=1"
     echo "chembridge_buyables.json.gz Downloaded."
 fi
 
 if [ ! -f ./data/db/buyables/mcule_buyables_fd2.json.gz ]; then
     echo "./data/db/buyables/mcule_buyables_fd2.json.gz not found. Downloading.."
     wget -q --show-progress -O data/db/buyables/mcule_buyables_fd2.json.gz \
-      "https://www.dropbox.com/scl/fi/3hinak5xhxxbnd7p8uha4/mcule_buyables_fd2.json.gz?rlkey=fuupri57oophxkn9widmmc1od&dl=1"
+      "https://www.dropbox.com/scl/fi/1ikitf6n1lylyq3eroqxp/mcule_buyables_fd2_prop_new.json.gz?rlkey=2rjslc4n7gvvplsznx05vom4i&dl=1"
     echo "mcule_buyables_fd2.json.gz Downloaded."
 fi
 
