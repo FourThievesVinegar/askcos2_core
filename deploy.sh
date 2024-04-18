@@ -540,7 +540,7 @@ else
     case "$arg" in
       clean-data | start-db-services | save-db | seed-db | copy-nginx-conf | pull-images | generate-deployment-scripts | \
       start-web-services | start-ml-servers | start-celery-workers | set-db-defaults | count-mongo-docs | \
-      backup | restore | index-db | diff-env | post-update-message | old-messages | get-images)
+      backup | restore | index-db | diff-env | post-update-message | old-messages | get-images | download-db-data)
         # This is a defined function, so execute it
         $arg
         ;;
