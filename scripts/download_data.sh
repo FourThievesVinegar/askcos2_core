@@ -6,7 +6,7 @@ mkdir -p ./data/db/buyables
 if [ ! -f ./data/db/buyables/buyables.json.gz ]; then
     echo "./data/db/buyables/buyables.json.gz not found. Downloading.."
     wget -q --show-progress -O data/db/buyables/buyables.json.gz \
-      "https://www.dropbox.com/scl/fi/jaqo5r8jji7n19ijrohj1/buyables_ori_prop_new2.json.gz?rlkey=lnbcj7t1ygrjgqi3g7a7vshz2&dl=1"
+      "https://www.dropbox.com/scl/fi/jaqo5r8jji7n19ijrohj1/buyables_ori_prop_new2.json.gz?rlkey=lnbcj7t1ygrjgqi3g7a7vshz2&st=krp61fnf&dl=0"
     echo "buyables.json.gz Downloaded."
 fi
 
