@@ -9,7 +9,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from typing import Annotated, Any
 from utils import register_util
-from utils.similarity_search_utils import sim_search, sim_search_aggregate
+from utils.similarity_search_utils import sim_search_aggregate_buyables, sim_search_buyables
 
 
 @register_util(name="pricer")
@@ -251,9 +251,9 @@ class Pricer:
                      "value": value}
                 )
             res["properties"] = new_properties
+            if res.get("similarity") is None:
+                res["similarity"] = str(sim_threshold)
         
-        print("search_result", search_result)
-
         return search_result
 
     def list_sources(self) -> list[str]:
@@ -697,14 +697,14 @@ class MongoPricer:
 
         query_mol = Chem.MolFromSmiles(smiles)
         if method == "accurate":
-            results = sim_search_aggregate(
+            results = sim_search_aggregate_buyables(
                 query_mol,
                 self.collection,
                 None,
                 sim_threshold,
             )
         elif method == "naive":
-            results = sim_search(
+            results = sim_search_buyables(
                 query_mol,
                 self.collection,
                 None,
