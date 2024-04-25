@@ -9,6 +9,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from typing import Annotated, Any
 from utils import register_util
+import hashlib
 from utils.similarity_search_utils import sim_search_aggregate_buyables, sim_search_buyables
 
 
@@ -243,7 +244,8 @@ class Pricer:
 
         for res in search_result:
             properties= res["properties"]
-            new_properties = []
+            if not properties: properties = []
+            new_properties = []            
             for prop in properties:
                 key, value = list(prop.items()).pop()
                 new_properties.append(
@@ -299,7 +301,8 @@ class Pricer:
         assert isinstance(self._pricer, MongoPricer), \
             f"get() is only implemented for MongoPricer"
 
-        result = self.collection.find_one({"_id": ObjectId(_id)})
+        # result = self.collection.find_one({"_id": ObjectId(_id)})
+        result = self.collection.find_one({"_id": _id})
         if result and result.get("_id"):
             result["_id"] = str(result["_id"])
 
@@ -329,7 +332,8 @@ class Pricer:
         assert isinstance(self._pricer, MongoPricer), \
             f"delete() is only implemented for MongoPricer"
 
-        delete_result = self.collection.delete_one({"_id": ObjectId(_id)})
+        delete_result = self.collection.delete_one({"_id": _id})
+        # delete_result = self.collection.delete_one({"_id": ObjectId(_id)})
 
         return delete_result.deleted_count > 0
 
@@ -341,6 +345,10 @@ class Pricer:
         assert isinstance(self._pricer, MongoPricer), \
             f"add() is only implemented for MongoPricer"
 
+        smi, source = new_doc["smiles"], new_doc["source"]
+        smi_vendor = f"{smi}{source}"
+        hash_id = hashlib.sha256(smi_vendor.encode('utf-8')).hexdigest()
+        new_doc["_id"] = hash_id
         result = {"doc": None, "updated": False, "error": None}
         query = {
             "smiles": new_doc["smiles"],
