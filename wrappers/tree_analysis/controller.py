@@ -124,7 +124,7 @@ class TreeAnalysisController(BaseWrapper):
         try:
             tb_result = result["result"]
             new_revision = result.get("revision", 0) + 1
-            if tb_result.get("version") != 2:
+            if tb_result.get("version") != 2 or tb_result.get("version") == "retro_star_0":
                 output["success"] = False
                 output["error"] = \
                     "Unable to perform analysis tasks on legacy format " \

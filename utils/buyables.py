@@ -372,19 +372,19 @@ class Buyables:
 
             return Response(
                 content=json.dumps(resp),
-                status_code=500,
+                status_code=400,
                 media_type="application/json"
             )
 
         if file_format == "json":
             try:
                 upload_json = json.loads(content.decode("utf-8"))
-            except json.JSONDecodeError:
+            except Exception as e:
                 resp["error"] = "Cannot parse json!"
 
                 return Response(
                     content=json.dumps(resp),
-                    status_code=500,
+                    status_code=400,
                     media_type="application/json"
                 )
         elif file_format == "csv":
@@ -396,7 +396,19 @@ class Buyables:
 
                 return Response(
                     content=json.dumps(resp),
-                    status_code=500,
+                    status_code=400,
+                    media_type="application/json"
+                )
+            try:
+                assert "smiles" in df.columns, "'smiles' not in column"
+                assert "ppg" in  df.columns, "'ppg' not in column"
+                assert "source" in df.columns, "'source' not in column"
+            except Exception as e:
+                resp["error"] = f"{e}"
+
+                return Response(
+                    content=json.dumps(resp),
+                    status_code=400,
                     media_type="application/json"
                 )
         else:
@@ -404,7 +416,7 @@ class Buyables:
 
             return Response(
                 content=json.dumps(resp),
-                status_code=500,
+                status_code=400,
                 media_type="application/json"
             )
 
@@ -417,7 +429,7 @@ class Buyables:
 
             return Response(
                 content=json.dumps(resp),
-                status_code=500,
+                status_code=400,
                 media_type="application/json"
             )
 
