@@ -243,8 +243,8 @@ class Pricer:
             # print(search_result)
 
         for res in search_result:
-            properties= res["properties"]
-            if not properties: properties = []
+            properties= res.get("properties")
+            if properties is None: properties = []
             new_properties = []            
             for prop in properties:
                 key, value = list(prop.items()).pop()
@@ -345,6 +345,7 @@ class Pricer:
         assert isinstance(self._pricer, MongoPricer), \
             f"add() is only implemented for MongoPricer"
 
+        new_doc["smiles"] = self.canonicalize(new_doc["smiles"])
         smi, source = new_doc["smiles"], new_doc["source"]
         smi_vendor = f"{smi}{source}"
         hash_id = hashlib.sha256(smi_vendor.encode('utf-8')).hexdigest()
