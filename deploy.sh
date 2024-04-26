@@ -227,7 +227,7 @@ mongoimport_upsert() {
   # arg 2 is file path
   # arg 3 is a flag to pass to docker compose exec, e.g. -d to detach
   docker compose -f compose.yaml exec -T $3 mongo \
-    bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 --mode upsert'${DB_DROP}
+    bash -c 'gunzip -c '$2' | mongoimport --host ${MONGO_HOST} --username ${MONGO_USER} --password ${MONGO_PW} --authenticationDatabase admin --db askcos --collection '$1' --type json --jsonArray --numInsertionWorkers 8 --mode upsert '${DB_DROP}
 }
 
 mongoexport() {
