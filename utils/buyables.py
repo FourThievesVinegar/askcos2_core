@@ -14,6 +14,12 @@ class BuyableProperty(BaseModel):
     name: str
     value: float | str
 
+class BuyableInput(BaseModel):
+    smiles: str
+    ppg: float
+    lead_time: str
+    source: str
+    properties: list[dict]
 
 class Buyable(BaseModel):
     id: str = Field(default=None, alias="_id")
@@ -381,6 +387,18 @@ class Buyables:
                 upload_json = json.loads(content.decode("utf-8"))
             except Exception as e:
                 resp["error"] = "Cannot parse json!"
+
+                return Response(
+                    content=json.dumps(resp),
+                    status_code=400,
+                    media_type="application/json"
+                )
+            
+            try:
+                for doc in upload_json:
+                    BuyableInput(**doc)
+            except Exception as e:
+                resp["error"] = f"Some json fields are wrong; \n {e}"
 
                 return Response(
                     content=json.dumps(resp),
