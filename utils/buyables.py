@@ -17,9 +17,9 @@ class BuyableProperty(BaseModel):
 class BuyableInput(BaseModel):
     smiles: str
     ppg: float
-    lead_time: str
+    lead_time: str = ""
     source: str
-    properties: list[dict]
+    properties: list[dict] = []
 
 class Buyable(BaseModel):
     id: str = Field(default=None, alias="_id")
@@ -393,18 +393,7 @@ class Buyables:
                     status_code=400,
                     media_type="application/json"
                 )
-            
-            try:
-                for doc in upload_json:
-                    BuyableInput(**doc)
-            except Exception as e:
-                resp["error"] = f"Some json fields are wrong; \n {e}"
-
-                return Response(
-                    content=json.dumps(resp),
-                    status_code=400,
-                    media_type="application/json"
-                )
+        
         elif file_format == "csv":
             try:
                 df = pd.read_csv(io.StringIO(content.decode("utf-8")))
@@ -417,20 +406,20 @@ class Buyables:
                     status_code=400,
                     media_type="application/json"
                 )
-            try:
-                assert "smiles" in df.columns, "'smiles' not in column"
-                assert "ppg" in  df.columns, "'ppg' not in column"
-                assert "source" in df.columns, "'source' not in column"
-            except Exception as e:
-                resp["error"] = f"{e}"
-
-                return Response(
-                    content=json.dumps(resp),
-                    status_code=400,
-                    media_type="application/json"
-                )
         else:
             resp["error"] = "File format not supported!"
+
+            return Response(
+                content=json.dumps(resp),
+                status_code=400,
+                media_type="application/json"
+            )
+
+        try:
+            for doc in upload_json:
+                BuyableInput(**doc)
+        except Exception as e:
+            resp["error"] = f"Some json fields are wrong; \n {e}"
 
             return Response(
                 content=json.dumps(resp),
