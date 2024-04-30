@@ -292,7 +292,7 @@ module_config = {
             "ports_to_expose": [9701],
             "default_prediction_url": "http://0.0.0.0:9701/pmi_calculator",
             "custom_prediction_url": "",
-            "timeout": 120,
+            "timeout": 600,
             "available_model_names": []
         }
     },
