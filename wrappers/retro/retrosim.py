@@ -29,6 +29,7 @@ class RetroRSimResult(BaseModel):
     scores: list[float]
     reaction_ids: list[str]
     reaction_sets: list[str]
+    reaction_data: list[dict]
 
 
 class RetroRSimOutput(BaseModel):
