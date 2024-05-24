@@ -75,6 +75,7 @@ class RetroResult(BaseModel):
     model_score: float
     normalized_model_score: float
     template: dict[str, Any] | None
+    reaction_data: dict[str, Any] | None
 
     # extended from postprocessing in expand_one_controller
     retro_backend: str

@@ -72,6 +72,7 @@ class RetroResult(BaseModel):
     template: dict[str, Any] | None
     reaction_id: str | None
     reaction_set: str | None
+    reaction_data: dict[str, Any] | None
 
 
 class RetroResponse(BaseResponse):
@@ -235,19 +236,22 @@ class RetroController(BaseWrapper):
                         "model_score": score,
                         "normalized_model_score": float(normalized_score),
                         "reaction_id": reaction_id,
-                        "reaction_set": reaction_set
+                        "reaction_set": reaction_set,
+                        "reaction_data": reaction_data
                     } for (
                         outcome,
                         score,
                         normalized_score,
                         reaction_id,
-                        reaction_set
+                        reaction_set, 
+                        reaction_data
                     ) in zip(
                         result_per_smi.reactants,
                         result_per_smi.scores,
                         normalized_scores,
                         result_per_smi.reaction_ids,
-                        result_per_smi.reaction_sets
+                        result_per_smi.reaction_sets,
+                        result_per_smi.reaction_data
                     )]
                 )
         else:
