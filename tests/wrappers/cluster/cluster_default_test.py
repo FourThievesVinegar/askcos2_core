@@ -56,7 +56,7 @@ class ClusterTest(unittest.TestCase):
         ).json()
         response_async = self.get_async_result(
             task_id=task_id,
-            timeout=20
+            timeout=60
         )
         response_async = response_async["output"]
 

@@ -4,7 +4,7 @@ import requests
 import time
 import unittest
 
-V2_HOST = os.environ.get("V2_HOST", "0.0.0.0")
+V2_HOST = os.environ.get("V2_HOST", "http://0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 

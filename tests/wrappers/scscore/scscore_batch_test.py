@@ -8,15 +8,15 @@ V2_HOST = os.environ.get("V2_HOST", "http://0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class ContextV2GraphTest(unittest.TestCase):
-    """Test class for Context Predict Graph wrapper"""
+class SCScoreBatchTest(unittest.TestCase):
+    """Test class for SCScore Batch wrapper"""
 
     @classmethod
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
         cls.base_url = f"{V2_HOST}:{V2_PORT}/api"
-        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/context-recommender/v2/predict/GRAPH"
+        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/scscore/batch"
 
     def get_async_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -41,7 +41,7 @@ class ContextV2GraphTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/context/context_v2_graph/default_test_case_1.json"
+        case_file = "tests/wrappers/scscore/batch_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
@@ -62,4 +62,4 @@ class ContextV2GraphTest(unittest.TestCase):
 
         for response in [response_sync, response_async]:
             self.assertEqual(response["status_code"], 200)
-            self.assertIsInstance(response["result"], list)
+            self.assertIsInstance(response["result"], dict)
