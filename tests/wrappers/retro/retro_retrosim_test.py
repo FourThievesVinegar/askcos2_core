@@ -8,15 +8,15 @@ V2_HOST = os.environ.get("V2_HOST", "http://0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class GeneralSelectivityTest(unittest.TestCase):
-    """Test class for General Selectivity wrapper"""
+class ForwardWLDN5Test(unittest.TestCase):
+    """Test class for Forward WLDN5 wrapper"""
 
     @classmethod
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
         cls.base_url = f"{V2_HOST}:{V2_PORT}/api"
-        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/general-selectivity"
+        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/retro/retrosim"
 
     def get_async_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -41,7 +41,7 @@ class GeneralSelectivityTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/general_selectivity/general_selectivity_controller_test_case_1.json"
+        case_file = "tests/wrappers/retro/retro_retrosim_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
@@ -64,6 +64,11 @@ class GeneralSelectivityTest(unittest.TestCase):
             self.assertEqual(response["status_code"], 200)
             self.assertIsInstance(response["result"], list)
             self.assertIsInstance(response["result"][0], dict)
-            self.assertIsInstance(response["result"][0]["smiles"], str)
-            self.assertIsInstance(response["result"][0]["prob"], float)
-            self.assertIsInstance(response["result"][0]["rank"], int)
+            self.assertIsInstance(response["result"][0]["reactants"], list)
+            self.assertIsInstance(response["result"][0]["reactants"][0], str)
+            self.assertIsInstance(response["result"][0]["scores"], list)
+            self.assertIsInstance(response["result"][0]["scores"][0], float)
+            self.assertIsInstance(response["result"][0]["reaction_ids"], list)
+            self.assertIsInstance(response["result"][0]["reaction_ids"][0], str)
+            self.assertIsInstance(response["result"][0]["reaction_sets"], list)
+            self.assertIsInstance(response["result"][0]["reaction_sets"][0], str)

@@ -41,7 +41,7 @@ class ContextV2FPTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/context/predict_fp_test_case_1.json"
+        case_file = "tests/wrappers/context/context_predict_fp_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 

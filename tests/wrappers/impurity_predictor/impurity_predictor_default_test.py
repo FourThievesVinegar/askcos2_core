@@ -45,7 +45,7 @@ class ImpurityPredictorTest(unittest.TestCase):
                "as it takes a very long time (at least a few minutes)"
     )
     def test_1(self):
-        case_file = "tests/wrappers/impurity_predictor/default_test_case_1.json"
+        case_file = "tests/wrappers/impurity_predictor/impurity_predictor_default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 

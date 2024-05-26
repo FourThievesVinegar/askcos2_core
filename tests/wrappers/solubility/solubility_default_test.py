@@ -45,7 +45,7 @@ class SolubilityTest(unittest.TestCase):
                "as the backend is undergoing rework"
     )
     def test_1(self):
-        case_file = "tests/wrappers/solubility/default_test_case_1.json"
+        case_file = "tests/wrappers/solubility/solubility_default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 

@@ -41,7 +41,7 @@ class SCScoreTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/scscore/default_test_case_1.json"
+        case_file = "tests/wrappers/scscore/scscore_default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 

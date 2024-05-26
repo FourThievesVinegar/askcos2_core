@@ -41,7 +41,7 @@ class SiteSelectivityTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/site_selectivity/default_test_case_1.json"
+        case_file = "tests/wrappers/site_selectivity/site_selectivity_default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 

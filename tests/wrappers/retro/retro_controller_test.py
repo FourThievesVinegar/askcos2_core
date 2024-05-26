@@ -8,15 +8,15 @@ V2_HOST = os.environ.get("V2_HOST", "http://0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class GeneralSelectivityTest(unittest.TestCase):
-    """Test class for General Selectivity wrapper"""
+class RetroControllerTest(unittest.TestCase):
+    """Test class for Retro Controller wrapper"""
 
     @classmethod
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
         cls.base_url = f"{V2_HOST}:{V2_PORT}/api"
-        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/general-selectivity"
+        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/retro"
 
     def get_async_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -41,7 +41,7 @@ class GeneralSelectivityTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/general_selectivity/general_selectivity_controller_test_case_1.json"
+        case_file = "tests/wrappers/retro/retro_controller_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
@@ -63,7 +63,9 @@ class GeneralSelectivityTest(unittest.TestCase):
         for response in [response_sync, response_async]:
             self.assertEqual(response["status_code"], 200)
             self.assertIsInstance(response["result"], list)
-            self.assertIsInstance(response["result"][0], dict)
-            self.assertIsInstance(response["result"][0]["smiles"], str)
-            self.assertIsInstance(response["result"][0]["prob"], float)
-            self.assertIsInstance(response["result"][0]["rank"], int)
+            self.assertIsInstance(response["result"][0], list)
+            self.assertIsInstance(response["result"][0][0], dict)
+            self.assertIsInstance(response["result"][0][0]["outcome"], str)
+            self.assertIsInstance(response["result"][0][0]["model_score"], float)
+            self.assertIsInstance(response["result"][0][0]["normalized_model_score"], float)
+            self.assertIsInstance(response["result"][0][0]["template"], dict)

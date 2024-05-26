@@ -41,7 +41,7 @@ class ReactionClassificationTest(unittest.TestCase):
             return response
 
     def test_1(self):
-        case_file = "tests/wrappers/reaction_classification/default_test_case_1.json"
+        case_file = "tests/wrappers/reaction_classification/reaction_classification_default_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
