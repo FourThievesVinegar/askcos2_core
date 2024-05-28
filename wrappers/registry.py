@@ -70,6 +70,10 @@ class WrapperRegistry:
         controller_class = WRAPPER_CLASSES["tree_analysis_controller"]
         self._wrappers["tree_analysis_controller"] = controller_class()
 
+        # multi-target add-on, treating as a "controller" for now
+        wrapper_class = WRAPPER_CLASSES["tree_search_multi_target"]
+        self._wrappers["tree_search_multi_target"] = wrapper_class()
+
     def get_backend_status(self) -> BackendStatusResponse:
         """Endpoint for getting the status of backend services"""
         status_list = []
