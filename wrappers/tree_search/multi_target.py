@@ -53,7 +53,7 @@ class MultiTargetOutput(BaseModel):
 
 
 class MultiTargetResponse(BaseResponse):
-    result: dict[str, list[dict[str, Any]] | None] | None
+    result: dict[str, dict[str, Any] | None] | None
 
 
 @register_wrapper(
@@ -90,7 +90,7 @@ class MultiTargetWrapper(BaseWrapper):
             )
 
             paths = self.get_paths_from_response(wrapper_response)
-            all_paths["target"] = paths
+            all_paths[target] = paths
 
         best_paths = get_best_paths(all_paths)
         response = self.convert_output_to_response(best_paths)
@@ -126,7 +126,7 @@ class MultiTargetWrapper(BaseWrapper):
         return paths
 
     @staticmethod
-    def convert_output_to_response(best_paths: dict[str, list[dict[str, Any]] | None]
+    def convert_output_to_response(best_paths: dict[str, dict[str, Any] | None]
                                    ) -> MultiTargetResponse:
         status_code = 200
         message = "multi_target.call_sync_without_token() successfully executed."

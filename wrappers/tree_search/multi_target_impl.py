@@ -6,11 +6,12 @@ from typing import Any
 
 def get_best_paths(
     all_paths: dict[str, list[dict[str, Any]] | None]
-) -> dict[str, list[dict[str, Any]] | None]:
+) -> dict[str, dict[str, Any] | None]:
     best_buyables_size = 10
 
     # compute leaves (the buyables) for all paths
     for target, paths in all_paths.items():
+        # print(target)
         if not paths:
             continue
 
@@ -19,6 +20,7 @@ def get_best_paths(
                 node["smiles"] for node in path["nodes"]
                 if node["type"] == "chemical" and node["terminal"]
             ]
+            # print(path["leaves"])
 
     # compute the best sets of buyables
     running_best_buyables = []
@@ -36,6 +38,7 @@ def get_best_paths(
                 running_best_buyables=running_best_buyables,
                 new_best_buyables=new_best_buyables
             )
+        # print(f"running_best_buyables: {running_best_buyables}")
 
     # compute the best paths (containing buyables most similar to best buyables)
     best_paths = {}
@@ -55,6 +58,7 @@ def get_best_paths(
             if path_similarity > highest_path_similarity:
                 highest_path_similarity = path_similarity
                 best_path = path
+        # print(best_path)
 
         best_paths[target] = best_path
 
