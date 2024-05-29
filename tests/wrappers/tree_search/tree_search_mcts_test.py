@@ -8,15 +8,15 @@ V2_HOST = os.environ.get("V2_HOST", "http://0.0.0.0")
 V2_PORT = os.environ.get("V2_PORT", "9100")
 
 
-class SolubilityTest(unittest.TestCase):
-    """Test class for Solubility wrapper"""
+class RetroATTest(unittest.TestCase):
+    """Test class for Retro Augmented Transformer wrapper"""
 
     @classmethod
     def setUpClass(cls) -> None:
         """This method is run once before all tests in this class."""
         cls.session = requests.Session()
         cls.base_url = f"{V2_HOST}:{V2_PORT}/api"
-        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/legacy/solubility/batch"
+        cls.module_url = f"{V2_HOST}:{V2_PORT}/api/tree-search/mcts"
 
     def get_async_result(self, task_id: str, timeout: int = 20):
         """Retrieve celery task output"""
@@ -40,26 +40,21 @@ class SolubilityTest(unittest.TestCase):
 
             return response
 
-    @unittest.skip(
-        reason="Test turned off for v2 solubility "
-               "as the backend is undergoing rework"
-    )
     def test_1(self):
-        case_file = "tests/wrappers/solubility/solubility_default_test_case_1.json"
+        case_file = "tests/wrappers/tree_search/tree_search_mcts_test_case_1.json"
         with open(case_file, "r") as f:
             data = json.load(f)
 
         # get sync response
         response_sync = self.session.post(
-            f"{self.module_url}/call-sync", json=data
+            f"{self.module_url}/call-sync-without-token", json=data
         ).json()
 
-        # get async response
-        task_id = self.session.post(
-            f"{self.module_url}/call-async", json=data
-        ).json()
-        response_async = self.get_async_result(
-            task_id=task_id,
-            timeout=60
-        )
-        response_async = response_async["output"]
+        # only check sync, as async endpoint typically requires authentication
+        for response in [response_sync]:
+            self.assertEqual(response["status_code"], 200)
+            self.assertIsInstance(response["result"], dict)
+            self.assertIsInstance(response["result"]["stats"], dict)
+            self.assertIsInstance(response["result"]["paths"], list)
+            self.assertIsInstance(response["result"]["graph"], dict)
+            self.assertEqual(response["result"]["version"], 2)

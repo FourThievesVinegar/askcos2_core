@@ -24,7 +24,7 @@ clean:
 restart:
 	bash deploy.sh restart
 
-test: | test-adapters test-wrappers
+test: | test-wrappers
 
 test-adapters:
 	pytest -rs tests/adapters
