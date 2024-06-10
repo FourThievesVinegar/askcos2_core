@@ -69,7 +69,7 @@ class V1SolubilityAdapter:
     methods = ["POST"]
 
     def call_sync(self, input: V1SolubilityInput) -> V1SolubilityResult:
-        wrapper = get_wrapper_registry().get_wrapper(module="legacy_solubility")
+        wrapper = get_wrapper_registry().get_wrapper(module="solubility")
         wrapper_input = self.convert_input(input=input)
         print(wrapper_input)
         wrapper_response = wrapper.call_sync(wrapper_input)
