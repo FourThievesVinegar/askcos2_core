@@ -1,27 +1,53 @@
 from adapters import register_adapter
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 from wrappers.registry import get_wrapper_registry
-from wrappers.legacy_solubility.default import (
-    LegacySolubilityInput,
-    LegacySolubilityResult,
-    LegacySolubilityOutput,
-    LegacySolubilityResponse
+from wrappers.solubility.default import (
+    SolubilityInput,
+    SolubilityResult,
+    SolubilityOutput,
+    SolubilityResponse
 )
 
+
 class V1SolubilityInput(BaseModel):
-    solvent: str #(str): solvent SMILES
-    solute: str #(str): solute SMILES
-    temp: float #(float): temperature for solubility prediction (K)
-    ref_solvent: Optional[str] = None #(str, optional): reference solvent SMILES
-    ref_solubility: Optional[float] = None #(float, optional): solute solubility in reference solvent as logS (log10(mol/L))
-    ref_temp: Optional[float] = None #(float, optional): temperature for reference solubility (K)
-    hsub298: Optional[float] = None #(float, optional): sublimation enthalpy of solute at 298 K (kcal/mol)
-    cp_gas_298: Optional[float] = None #(float, optional): gas phase heat capacity of solute at 298 K (cal/K/mol)
-    cp_solid_298: Optional[float] = None #(float, optional): solid phase heat capacity of solute at 298 K (cal/K/mol)
+    solvent: str = Field(
+        description="solvent SMILES"
+    )
+    solute: str = Field(
+        description="solute SMILES"
+    )
+    temp: float = Field(
+        description="temperature for solubility prediction (K)"
+    )
+    ref_solvent: str | None = Field(
+        default=None,
+        description="reference solvent SMILES"
+    )
+    ref_solubility: float | None = Field(
+        default=None,
+        description="solute solubility in reference solvent as logS (log10(mol/L))"
+    )
+    ref_temp: float | None = Field(
+        default=None,
+        description="temperature for reference solubility (K)"
+    )
+    hsub298: float | None = Field(
+        default=None,
+        description="sublimation enthalpy of solute at 298 K (kcal/mol)"
+    )
+    cp_gas_298: float | None = Field(
+        default=None,
+        description="gas phase heat capacity of solute at 298 K (cal/K/mol)"
+    )
+    cp_solid_298: float | None = Field(
+        default=None,
+        description="solid phase heat capacity of solute at 298 K (cal/K/mol)"
+    )
+
 
 class V1SolubilityLegacyInput(BaseModel):
     task_list: list[V1SolubilityInput]
+
 
 class V1SolubilityAsyncReturn(BaseModel):
     request: V1SolubilityInput
@@ -29,7 +55,7 @@ class V1SolubilityAsyncReturn(BaseModel):
 
 
 class V1SolubilityResult(BaseModel):
-    __root__: list[LegacySolubilityResult]
+    __root__: list[SolubilityResult]
 
 
 @register_adapter(
@@ -66,14 +92,13 @@ class V1SolubilityAdapter:
 
         return async_return
 
-
     @staticmethod
-    def convert_input(input: V1SolubilityInput) -> LegacySolubilityInput:
-        wrapper_input = LegacySolubilityInput(task_list=[input])
+    def convert_input(input: V1SolubilityInput) -> SolubilityInput:
+        wrapper_input = SolubilityInput(task_list=[input])
         return wrapper_input
 
     @staticmethod
-    def convert_response(wrapper_response: LegacySolubilityResponse
+    def convert_response(wrapper_response: SolubilityResponse
                          ) -> V1SolubilityResult:
         result = wrapper_response
 
