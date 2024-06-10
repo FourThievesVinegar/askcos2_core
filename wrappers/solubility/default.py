@@ -2,10 +2,10 @@ from pydantic import BaseModel, confloat, Field
 from schemas.base import LowerCamelAliasModel
 from wrappers import register_wrapper
 from wrappers.base import BaseWrapper
-from wrappers.legacy_solubility.utils import postprocess_solubility_results
+from wrappers.solubility.utils import postprocess_solubility_results
 
 
-class LegacySolubilityTask(LowerCamelAliasModel):
+class SolubilityTask(LowerCamelAliasModel):
     solvent: str = Field(
         description="solvent SMILES"
     )
@@ -42,8 +42,8 @@ class LegacySolubilityTask(LowerCamelAliasModel):
     )
 
 
-class LegacySolubilityInput(LowerCamelAliasModel):
-    task_list: list[LegacySolubilityTask]
+class SolubilityInput(LowerCamelAliasModel):
+    task_list: list[SolubilityTask]
 
     class Config:
         schema_extra = {
@@ -64,7 +64,7 @@ class LegacySolubilityInput(LowerCamelAliasModel):
         }
 
 
-class LegacySolubilityOutput(BaseModel):
+class SolubilityOutput(BaseModel):
     Solvent: list[str]
     Solute: list[str]
     Temp: list[float]
@@ -101,7 +101,7 @@ class LegacySolubilityOutput(BaseModel):
     V: list[str | float | None]
 
 
-class LegacySolubilityResult(BaseModel):
+class SolubilityResult(BaseModel):
     Solvent: str
     Solute: str
     Temp: float
@@ -142,23 +142,23 @@ class LegacySolubilityResult(BaseModel):
     s_298: str | float | None = Field(alias="S298 [mg/mL]")
 
 
-class LegacySolubilityResponse(BaseModel):
-    __root__: list[LegacySolubilityResult]
+class SolubilityResponse(BaseModel):
+    __root__: list[SolubilityResult]
 
 
 @register_wrapper(
-    name="legacy_solubility",
-    input_class=LegacySolubilityInput,
-    output_class=LegacySolubilityOutput,
-    response_class=LegacySolubilityResponse
+    name="solubility",
+    input_class=SolubilityInput,
+    output_class=SolubilityOutput,
+    response_class=SolubilityResponse
 )
-class LegacySolubilityWrapper(BaseWrapper):
+class SolubilityWrapper(BaseWrapper):
     """Wrapper class for Legacy Solubility"""
-    prefixes = ["legacy/solubility/batch"]
+    prefixes = ["solubility/batch", "legacy/solubility/batch"]
 
-    def call_raw(self, input: LegacySolubilityInput) -> LegacySolubilityOutput:
+    def call_raw(self, input: SolubilityInput) -> SolubilityOutput:
         input_dict = {}
-        for k in LegacySolubilityTask.__fields__.keys():
+        for k in SolubilityTask.__fields__.keys():
             input_dict[f"{k}_list"] = [getattr(task, k) for task in input.task_list
                                        if task.solvent]
 
@@ -168,11 +168,11 @@ class LegacySolubilityWrapper(BaseWrapper):
             timeout=self.config["deployment"]["timeout"]
         )
         output = response.json()
-        output = LegacySolubilityOutput(**output)
+        output = SolubilityOutput(**output)
 
         return output
 
-    def call_sync(self, input: LegacySolubilityInput) -> LegacySolubilityResponse:
+    def call_sync(self, input: SolubilityInput) -> SolubilityResponse:
         """
         Endpoint for synchronous call to solubility prediction backend
         """
@@ -181,21 +181,21 @@ class LegacySolubilityWrapper(BaseWrapper):
 
         return response
 
-    async def call_async(self, input: LegacySolubilityInput, priority: int = 0) -> str:
+    async def call_async(self, input: SolubilityInput, priority: int = 0) -> str:
         """
         Endpoint for asynchronous call to solubility prediction backend
         """
         return await super().call_async(input=input, priority=priority)
 
-    async def retrieve(self, task_id: str) -> LegacySolubilityResponse | None:
+    async def retrieve(self, task_id: str) -> SolubilityResponse | None:
         return await super().retrieve(task_id=task_id)
 
     @staticmethod
-    def convert_output_to_response(output: LegacySolubilityOutput
-                                   ) -> LegacySolubilityResponse:
+    def convert_output_to_response(output: SolubilityOutput
+                                   ) -> SolubilityResponse:
         keys, value_lists = zip(*output.dict(by_alias=True).items())
         results = [dict(zip(keys, values)) for values in zip(*value_lists)]
         results = postprocess_solubility_results(results)
-        response = LegacySolubilityResponse(__root__=results)
+        response = SolubilityResponse(__root__=results)
 
         return response
