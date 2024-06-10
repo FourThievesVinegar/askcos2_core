@@ -24,10 +24,10 @@ module_config = {
         "retro_template_relevance": True,
         "scscore": True,
         "site_selectivity": True,
+        "solubility": True,
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
-        "tree_search_retro_star": True,
-        "legacy_solubility": True
+        "tree_search_retro_star": True
     },
 
     "global": {
