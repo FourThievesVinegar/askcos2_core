@@ -44,10 +44,15 @@ class SolubilityTask(LowerCamelAliasModel):
 
 class SolubilityInput(LowerCamelAliasModel):
     task_list: list[SolubilityTask]
+    query_batch_size: int | None = Field(
+        default=None,
+        description="query batch size for solubility prediction"
+    )
 
     class Config:
         schema_extra = {
             "example": {
+                "query_batch_size": 10,
                 "task_list": [
                     {
                         "solvent": "CC(=O)O",
@@ -176,8 +181,26 @@ class SolubilityWrapper(BaseWrapper):
         """
         Endpoint for synchronous call to solubility prediction backend
         """
-        output = self.call_raw(input=input)
-        response = self.convert_output_to_response(output)
+        # output = self.call_raw(input=input)
+        # response = self.convert_output_to_response(output)
+
+        # mini-batching
+        # the logic is implemented here (vs. in call_raw()) for clean modularization
+        query_batch_size = input.query_batch_size
+        if query_batch_size is None:
+            query_batch_size = self.config["deployment"]["default_query_batch_size"]
+
+        results = []
+        for i in range(0, len(input.task_list), query_batch_size):
+            batch_task_list = input.task_list[i:i+query_batch_size]
+            batch_input = SolubilityInput(task_list=batch_task_list)
+            batch_output = self.call_raw(batch_input)
+            batch_response = self.convert_output_to_response(batch_output)
+            batch_results = batch_response.__root__
+
+            results.extend(batch_results)
+
+        response = SolubilityResponse(__root__=results)
 
         return response
 

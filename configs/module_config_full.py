@@ -447,7 +447,7 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
             "custom_prediction_url": "",
             "timeout": 60,
-            "query_batch_size": 10,
+            "default_query_batch_size": 10,
             "available_model_names": []
         }
     },
