@@ -24,10 +24,10 @@ module_config = {
         "retro_template_relevance": True,
         "scscore": True,
         "site_selectivity": False,
+        "solubility": False,
         "tree_search_expand_one": True,
         "tree_search_mcts": True,
-        "tree_search_retro_star": True,
-        "legacy_solubility": False
+        "tree_search_retro_star": True
     },
 
     "global": {
@@ -436,6 +436,22 @@ module_config = {
         }
     },
 
+    "solubility": {
+        "repo": "git@gitlab.com:mlpds_mit/askcosv2/solubility.git",
+        "description": "Solubility predictor",
+        "deployment": {
+            "deployment_config": "deployment.yaml",
+            "image_policy": "pull",
+            "use_gpu": False,
+            "ports_to_expose": [9732],
+            "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
+            "custom_prediction_url": "",
+            "timeout": 60,
+            "default_query_batch_size": 10,
+            "available_model_names": []
+        }
+    },
+
     "tree_search_expand_one": {
         "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/expand_one.git",
         "description": "The controller for one-step expansion in IPP and tree builder",
@@ -476,21 +492,6 @@ module_config = {
             "default_prediction_url": "http://0.0.0.0:9321/get_buyable_paths",
             "custom_prediction_url": "",
             "timeout": 1200,
-            "available_model_names": []
-        }
-    },
-
-    "legacy_solubility": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/legacy_solubility.git",
-        "description": "Black-box solubility model from ASKCOSv1",
-        "deployment": {
-            "deployment_config": "deployment.yaml",
-            "image_policy": "pull",
-            "use_gpu": False,
-            "ports_to_expose": [9732],
-            "default_prediction_url": "http://0.0.0.0:9732/predictions/solprop",
-            "custom_prediction_url": "",
-            "timeout": 60,
             "available_model_names": []
         }
     },
