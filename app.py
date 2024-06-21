@@ -167,7 +167,7 @@ for util in util_registry:
                 path = f"/{method_name_with_hyphen}"
 
             tag = prefix_with_hyphen.split("/")[0]
-            if tag in ["user", "api-logging", "status"]:
+            if tag in ["user", "api-logging", "status", "frontend-config"]:
                 tag = "admin"
             else:
                 tag = f"utils/{tag}"
