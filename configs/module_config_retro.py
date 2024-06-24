@@ -544,5 +544,11 @@ module_config = {
         "engine": "db",
         "database": "askcos",
         "collection": "users"
+    },
+
+    "frontend_config_controller": {
+        "engine": "db",
+        "database": "askcos",
+        "collection": "configs"
     }
 }
