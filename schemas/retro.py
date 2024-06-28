@@ -1,3 +1,5 @@
+import importlib
+import os
 from pydantic import Field, validator
 from schemas.base import LowerCamelAliasModel
 from typing import Any, Literal
@@ -43,38 +45,17 @@ class RetroBackendOption(LowerCamelAliasModel):
     def check_retro_model_name(cls, v, values):
         if "retro_backend" not in values:
             raise ValueError("retro_backend not supplied!")
-        if values["retro_backend"] == "template_relevance":
-            if v not in [
-                "bkms_metabolic",
-                "cas",
-                "pistachio",
-                "pistachio_ringbreaker",
-                "reaxys",
-                "reaxys_biocatalysis"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for template_relevance")
-        elif values["retro_backend"] == "augmented_transformer":
-            if v not in [
-                "cas",
-                "pistachio_23Q3",
-                "USPTO_FULL"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for augmented_transformer")
-        elif values["retro_backend"] == "graph2smiles":
-            if v not in [
-                "cas",
-                "pistachio_23Q3",
-                "USPTO_FULL"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for graph2smiles")
-        elif values["retro_backend"] == "retrosim":
-            if v not in [
-                "USPTO_FULL",
-                "bkms"
-            ]:
-                raise ValueError(
-                    f"Unsupported retro_model_name {v} for retrosim")
+
+        default_path = "configs.module_config_full"
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
+        module_config = importlib.import_module(config_path).module_config
+
+        retro_backend = values["retro_backend"]
+        available_model_names = module_config[
+            f"retro_{retro_backend}"]["deployment"]["available_model_names"]
+        if v not in available_model_names:
+            raise ValueError(f"Unsupported retro_model_name {v} for {retro_backend}")
+
         return v

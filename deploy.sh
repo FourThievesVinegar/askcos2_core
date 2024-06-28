@@ -278,6 +278,10 @@ seed-db() {
     echo "Example usages:"
     echo "    bash deploy.sh seed-db -r default                  seed only the default retro templates"
     echo "    bash deploy.sh seed-db -r templates.json.gz        seed retro templates from local file templates.json.gz"
+    echo "    bash deploy.sh seed-db -x default                  seed only the default reactions"
+    echo "    bash deploy.sh seed-db -x reactions.json.gz        seed reactions from local file reactions.json.gz"
+    echo "    bash deploy.sh seed-db -c default                  seed only the default chemical (i.e., historian)"
+    echo "    bash deploy.sh seed-db -c historian.json.gz        seed chemicals from local file historian.json.gz"
     echo "    bash deploy.sh set-db-defaults seed-db             seed all default collections"
     return
   fi
