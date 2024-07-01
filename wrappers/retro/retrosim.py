@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+import importlib
+import os
+from pydantic import BaseModel, Field, validator
 from schemas.base import LowerCamelAliasModel
-from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
@@ -18,10 +19,25 @@ class RetroRSimInput(LowerCamelAliasModel):
         description="return top k results",
         example=10
     )
-    reaction_set: Literal["USPTO_FULL", "bkms"] | None = Field(
+    reaction_set: str | None = Field(
         default="USPTO_FULL",
         description="reaction set to be queried against",
     )
+
+    @validator("reaction_set")
+    def check_reaction_set(cls, v, values):
+        default_path = "configs.module_config_full"
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
+        module_config = importlib.import_module(config_path).module_config
+
+        available_model_names = module_config[
+            "retro_retrosim"]["deployment"]["available_model_names"]
+        if v is not None and v not in available_model_names:
+            raise ValueError(f"Unsupported reaction_set {v} for retrosim")
+
+        return v
 
 
 class RetroRSimResult(BaseModel):

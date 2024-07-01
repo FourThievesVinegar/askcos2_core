@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+import importlib
+import os
+from pydantic import BaseModel, Field, validator
 from schemas.base import LowerCamelAliasModel
 from typing import Any, Literal
 from wrappers import register_wrapper
@@ -12,14 +14,7 @@ class AttributeFilter(BaseModel):
 
 
 class RetroTemplRelInput(LowerCamelAliasModel):
-    model_name: Literal[
-        "bkms_metabolic",
-        "cas",
-        "pistachio",
-        "pistachio_ringbreaker",
-        "reaxys",
-        "reaxys_biocatalysis"
-    ] = Field(
+    model_name: str = Field(
         default="reaxys",
         description="model name for torchserve backend"
     )
@@ -40,6 +35,21 @@ class RetroTemplRelInput(LowerCamelAliasModel):
         description="template attribute filter to apply before template application",
         example=[]
     )
+
+    @validator("model_name")
+    def check_model_name(cls, v, values):
+        default_path = "configs.module_config_full"
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
+        module_config = importlib.import_module(config_path).module_config
+
+        available_model_names = module_config[
+            "retro_template_relevance"]["deployment"]["available_model_names"]
+        if v not in available_model_names:
+            raise ValueError(f"Unsupported model_name {v} for template_relevance")
+
+        return v
 
 
 class RetroTemplRelResult(BaseModel):

@@ -1,12 +1,13 @@
-from pydantic import BaseModel, Field
+import importlib
+import os
+from pydantic import BaseModel, Field, validator
 from schemas.base import LowerCamelAliasModel
-from typing import Literal
 from wrappers import register_wrapper
 from wrappers.base import BaseResponse, BaseWrapper
 
 
 class RetroATInput(LowerCamelAliasModel):
-    model_name: Literal["pistachio_23Q3", "USPTO_FULL", "cas"] = Field(
+    model_name: str = Field(
         default="pistachio_23Q3",
         description="model name for torchserve backend"
     )
@@ -14,6 +15,21 @@ class RetroATInput(LowerCamelAliasModel):
         description="list of target SMILES",
         example=["CS(=N)(=O)Cc1cccc(Br)c1", "CN(C)CCOC(c1ccccc1)c1ccccc1"]
     )
+
+    @validator("model_name")
+    def check_model_name(cls, v, values):
+        default_path = "configs.module_config_full"
+        config_path = os.environ.get(
+            "MODULE_CONFIG_PATH", default_path
+        ).replace("/", ".").rstrip(".py")
+        module_config = importlib.import_module(config_path).module_config
+
+        available_model_names = module_config[
+            "retro_augmented_transformer"]["deployment"]["available_model_names"]
+        if v not in available_model_names:
+            raise ValueError(f"Unsupported model_name {v} for augmented_transformer")
+
+        return v
 
 
 class RetroATResult(BaseModel):
