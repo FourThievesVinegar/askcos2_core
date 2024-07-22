@@ -4,9 +4,13 @@ import os
 import sys
 import time
 from pebble import ProcessPool
-from rdchiral.template_extractor import extract_from_reaction
+# from rdchiral.template_extractor import extract_from_reaction
+from rdkit import RDLogger
+from scripts.convert_reaction_helper import extract_from_reaction_general
 from tqdm import tqdm
 from typing import Tuple
+
+RDLogger.DisableLog("rdApp.*")
 
 
 class BlockPrint:
@@ -27,7 +31,7 @@ def _get_tpl_from_entry(task: Tuple[int, dict]) -> Tuple[int, str]:
     reaction = {'_id': None, 'reactants': r_smi, 'products': p_smi}
     try:
         with BlockPrint():
-            template = extract_from_reaction(reaction)
+            template = extract_from_reaction_general(reaction, super_general=True)
         reaction_smarts = template["reaction_smarts"]
     except:
         reaction_smarts = ""
