@@ -219,7 +219,7 @@ def main():
 
     # clone the frontend repo, if not existing
     if require_frontend:
-        repo = "git@gitlab.com:mlpds_mit/askcosv2/askcos-vue-nginx.git"
+        repo = "https://github.com/FourThievesVinegar/askcos-vue-nginx.git"
         output_dir = repo.split("askcosv2/")[-1][:-4]
         output_dir = f"../{output_dir}"
 

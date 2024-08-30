@@ -38,7 +38,7 @@ module_config = {
     },
 
     "atom_map_indigo": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/indigo.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/atom_map/indigo.git",
         "description": "Atom mapper from the indigo package",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -52,7 +52,7 @@ module_config = {
     },
 
     "atom_map_rxnmapper": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/rxnmapper.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/atom_map/rxnmapper.git",
         "description": "Wrapper around IBM RXNMapper",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -66,7 +66,7 @@ module_config = {
     },
 
     "atom_map_wln": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/atom_map/wln.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/atom_map/wln.git",
         "description": "Atom mapper based on the WLN model",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -80,7 +80,7 @@ module_config = {
     },
 
     "cluster": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/cluster.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/cluster.git",
         "description":
             "Clusterer using kmeans, hdbscan, or based on reaction classification",
         "deployment": {
@@ -95,7 +95,7 @@ module_config = {
     },
 
     "context_recommender": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/context_recommender.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/context_recommender.git",
         "description": "Context recommender trained using fingerprint or GNN",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -117,7 +117,7 @@ module_config = {
     },
 
     "count_analogs": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/count_analogs.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/count_analogs.git",
         "description": "Analog counting via graph enumeration",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -131,7 +131,7 @@ module_config = {
     },
 
     "descriptors": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/descriptors.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/descriptors.git",
         "description": "Predictor for quantum descriptors",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -145,7 +145,7 @@ module_config = {
     },
 
     "evaluate_reactions": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/evaluate_reactions.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/evaluate_reactions.git",
         "description": "Reaction evaluator for reactions with different contexts",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -163,7 +163,7 @@ module_config = {
     },
 
     "fast_filter": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/fast_filter.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/fast_filter.git",
         "description":
             "Fast binary classification model for filtering out unlikely reaction",
         "deployment": {
@@ -183,7 +183,7 @@ module_config = {
     },
 
     "forward_augmented_transformer": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/forward_predictor/augmented_transformer.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/forward_predictor/augmented_transformer.git",
         "description": "Forward predictor based on the Augmented Transformer model",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -200,7 +200,7 @@ module_config = {
     },
 
     "forward_graph2smiles": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/forward_predictor/graph2smiles.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/forward_predictor/graph2smiles.git",
         "description": "Forward predictor based on the Graph2SMILES model",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -217,7 +217,7 @@ module_config = {
     },
 
     "forward_wldn5": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/forward_predictor/wldn5.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/forward_predictor/wldn5.git",
         "description": "Forward predictor based on the WLDN5 model",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -234,7 +234,7 @@ module_config = {
     },
 
     "general_selectivity": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/general_selectivity.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/general_selectivity.git",
         "description":
             "General selectivity predictor based on GNN, optionally with QM features",
         "deployment": {
@@ -254,7 +254,7 @@ module_config = {
     },
 
     "impurity_predictor": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/impurity_predictor.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/impurity_predictor.git",
         "description":
             "Impurity predictor based on forward predictor(s), "
             "e.g., by exploring over-reaction",
@@ -270,7 +270,7 @@ module_config = {
     },
 
     "pathway_ranker": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/pathway_ranker.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/pathway_ranker.git",
         "description": "Reaction pathway ranking model (with Tree-LSTM)",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -284,7 +284,7 @@ module_config = {
     },
 
     "pmi_calculator": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/pmi_calculator.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/pmi_calculator.git",
         "description": "Calculator for Process Mass Intensity",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -298,7 +298,7 @@ module_config = {
     },
 
     "qm_descriptors": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/qm_descriptors.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/qm_descriptors.git",
         "description": "QM Descriptor",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -312,7 +312,7 @@ module_config = {
     },
 
     "reaction_classification": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/reaction_classification.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/reaction_classification.git",
         "description": "Reaction classifier trained with Pistachio dataset",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -330,7 +330,7 @@ module_config = {
     },
 
     "retro_augmented_transformer": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/augmented_transformer.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/retro/augmented_transformer.git",
         "description":
             "One-step retrosynthesis model using the Augmented Transformer model",
         "deployment": {
@@ -348,7 +348,7 @@ module_config = {
     },
 
     "retro_graph2smiles": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/graph2smiles.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/retro/graph2smiles.git",
         "description":
             "One-step retrosynthesis model using the Graph2SMILES model",
         "deployment": {
@@ -366,7 +366,7 @@ module_config = {
     },
 
     "retro_retrosim": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/retrosim.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/retro/retrosim.git",
         "description":
             "One-step retrosynthesis model using the RetroSim model",
         "deployment": {
@@ -384,7 +384,7 @@ module_config = {
     },
 
     "retro_template_relevance": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/retro/template_relevance.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/retro/template_relevance.git",
         "description":
             "One-step retrosynthesis model with an FFN-based template classifier",
         "deployment": {
@@ -405,7 +405,7 @@ module_config = {
     },
 
     "scscore": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/scscore.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/scscore.git",
         "description": "SCScorer for calculating synthetic complexity",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -423,7 +423,7 @@ module_config = {
     },
 
     "site_selectivity": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/site_selectivity.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/site_selectivity.git",
         "description": "Site selectivity predictor",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -437,7 +437,7 @@ module_config = {
     },
 
     "solubility": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/solubility.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/solubility.git",
         "description": "Solubility predictor",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -453,7 +453,7 @@ module_config = {
     },
 
     "tree_search_expand_one": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/expand_one.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/tree_search/expand_one.git",
         "description": "The controller for one-step expansion in IPP and tree builder",
         "deployment": {
             "deployment_config": "deployment.yaml",
@@ -467,7 +467,7 @@ module_config = {
     },
 
     "tree_search_mcts": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/mcts.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/tree_search/mcts.git",
         "description":
             "The controller for Monte Carlo Tree Search (i.e., the Tree Builder)",
         "deployment": {
@@ -482,7 +482,7 @@ module_config = {
     },
 
     "tree_search_retro_star": {
-        "repo": "git@gitlab.com:mlpds_mit/askcosv2/tree_search/retro_star.git",
+        "repo": "https://gitlab.com/mlpds_mit/askcosv2/tree_search/retro_star.git",
         "description":
             "The controller for the Retro* planner",
         "deployment": {

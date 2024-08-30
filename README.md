@@ -17,7 +17,6 @@ The core FastAPI app (a.k.a. the API gateway) for ASKCOSv2. The functional modul
 - **CUDA** (only required for model retraining): \>= 11.3.
 - **python**: >= 3.6 with `pyyaml` and `requests` (both pip installable)
 - **git** and **make**.
-- **ssh access** set up for gitlab.com. See [Add an SSH key to Gitlab](https://docs.gitlab.com/ee/user/ssh.html#add-an-ssh-key-to-your-gitlab-account).
 
 Please note that \>= 32 GB of RAM is highly recommended for the full deployment of ASKCOS. If memory size is a constraint, please check out **04-Deployment** for customizing a local deployment (e.g., backend only, or minimalist deployment to use only the retrosynthesis functionality).
 
@@ -26,7 +25,7 @@ Please note that \>= 32 GB of RAM is highly recommended for the full deployment 
 ```shell
 $ mkdir ASKCOSv2
 $ cd ASKCOSv2
-$ git clone git@gitlab.com:mlpds_mit/askcosv2/askcos2_core.git
+$ git clone https://github.com/FourThievesVinegar/askcos2_core.git
 $ cd askcos2_core
 $ make deploy
 ```
